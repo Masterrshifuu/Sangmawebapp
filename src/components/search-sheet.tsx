@@ -78,7 +78,7 @@ export default function SearchSheet({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         side="bottom"
-        className="h-[86vh] flex flex-col p-0 rounded-t-2xl"
+        className="h-[86vh] flex flex-col p-0 rounded-t-2xl bg-card"
         showCloseButton={false}
       >
         <div className="flex justify-center py-3">
