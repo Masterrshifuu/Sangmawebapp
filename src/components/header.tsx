@@ -78,14 +78,14 @@ export default function Header() {
           )}
         >
           <div className="overflow-hidden">
-            <div className="flex justify-between items-center mb-4">
-              <div className="flex items-center gap-4">
+            <div className="flex justify-between items-start mb-4">
+              <div>
                 <Link href="/">
                   <Logo />
                 </Link>
                 <Sheet open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <SheetTrigger asChild>
-                    <button className="flex items-center max-w-[250px] h-8 bg-transparent p-0">
+                    <button className="flex items-center mt-1 max-w-[250px] h-8 bg-transparent p-0">
                       <MapPin className="ml-0 w-4 h-4 text-muted-foreground pointer-events-none flex-shrink-0" />
                       <span className="bg-transparent border-none focus:ring-0 w-full text-sm text-muted-foreground truncate px-2 outline-none text-left">
                         {location}
