@@ -127,21 +127,26 @@ export default function SearchSheet({
           )}
 
           {!isLoading && recommendations.length > 0 && (
-            <>
-              {searchSource === "ai" && (
-                <div className="flex justify-center my-4">
-                  <Badge variant="secondary" className="text-sm">
+            <div className="p-4">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold font-headline">
+                  {searchSource === "direct"
+                    ? "Search Results"
+                    : "Recommended Products"}
+                </h3>
+                {searchSource === "ai" && (
+                  <Badge variant="secondary">
                     <Bot className="w-4 h-4 mr-2" />
-                    AI-powered results
+                    AI-powered
                   </Badge>
-                </div>
-              )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
+                )}
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
                 {recommendations.map((product) => (
-                  <ProductCard key={product.id} product={product} size="small"/>
+                  <ProductCard key={product.id} product={product} size="small" />
                 ))}
               </div>
-            </>
+            </div>
           )}
 
           {!isLoading && recommendations.length === 0 && query && (
