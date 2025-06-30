@@ -96,6 +96,7 @@ export default function SearchSheet({
               placeholder="e.g., 'fresh vegetables' or 'milk'"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              className="bg-muted"
             />
             <Button type="submit" disabled={isLoading}>
               {isLoading ? (
