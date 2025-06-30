@@ -36,12 +36,13 @@ const prompt = ai.definePrompt({
   name: 'itemRecommendationPrompt',
   input: {schema: ItemRecommendationInputSchema},
   output: {schema: ItemRecommendationOutputSchema},
-  prompt: `You are an AI shopping assistant. Recommend products based on the user's search input.
+  prompt: `You are an AI shopping assistant for 'Sangma Megha Mart'. Your goal is to help users find products even if their search query doesn't have an exact match.
+Recommend a list of relevant products based on the user's search input.
+If the search input is very specific and no direct match is likely, recommend the closest available alternatives or related product categories. For example, if a user searches for a specific brand you don't carry, suggest similar products from other brands. If they search for something abstract like 'party snacks', suggest items like chips, nuts, and drinks.
 
 Search Input: {{{searchInput}}}
 
-Return a list of recommended products with their name, description, price, and image URL.
-`,
+Return a list of recommended products with their name, description, price, and image URL. If you cannot find any relevant products, return an empty list.`,
 });
 
 const itemRecommendationFlow = ai.defineFlow(
@@ -52,6 +53,6 @@ const itemRecommendationFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    return output || { recommendedProducts: [] };
   }
 );
