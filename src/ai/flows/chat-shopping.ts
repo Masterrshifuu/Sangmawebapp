@@ -100,8 +100,32 @@ const chatShoppingFlow = ai.defineFlow(
     inputSchema: ChatShoppingInputSchema,
     outputSchema: ChatShoppingOutputSchema,
   },
-  async input => {
-    const {output} = await prompt(input);
-    return output!;
+  async (input) => {
+    const result = await prompt(input);
+    const modelOutput = result.output;
+
+    if (!modelOutput) {
+      return { response: "I'm sorry, I couldn't process that. Please try again.", recommendedProducts: [] };
+    }
+    
+    // Extract the actual product list from the tool call history to prevent hallucinations.
+    let realProducts: Product[] = [];
+    const toolResponseMessage = result.history.find(
+      (m) => m.role === 'tool' && m.content.some(p => p.toolResponse?.name === 'productSearch')
+    );
+
+    if (toolResponseMessage) {
+      const toolResponsePart = toolResponseMessage.content.find(p => p.toolResponse?.name === 'productSearch');
+      const toolOutput = toolResponsePart?.toolResponse?.output;
+      if (toolOutput && Array.isArray(toolOutput)) {
+        realProducts = toolOutput as Product[];
+      }
+    }
+    
+    // Always return the text response from the model, but use the verified product list from the tool.
+    return {
+      response: modelOutput.response,
+      recommendedProducts: realProducts,
+    };
   }
 );
