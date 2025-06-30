@@ -81,7 +81,7 @@ export default function SearchSheet({
       <SheetTrigger asChild>{trigger}</SheetTrigger>
       <SheetContent
         side="bottom"
-        className="h-3/4 flex flex-col p-0 rounded-t-2xl"
+        className="h-[86vh] flex flex-col p-0 rounded-t-2xl"
         showCloseButton={false}
       >
         <div className="flex justify-center py-3">
@@ -136,9 +136,9 @@ export default function SearchSheet({
                   </Badge>
                 </div>
               )}
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 p-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
                 {recommendations.map((product) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product} size="small"/>
                 ))}
               </div>
             </>
