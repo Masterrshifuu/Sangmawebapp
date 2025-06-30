@@ -69,7 +69,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-card/80 backdrop-blur-sm border-b text-foreground transition-all duration-300">
+    <header className="sticky top-0 z-50 w-full bg-primary/80 backdrop-blur-sm border-b text-primary-foreground transition-all duration-300">
       <div className="container mx-auto px-4 py-3">
         <div
           className={cn(
