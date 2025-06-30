@@ -13,12 +13,17 @@ type ProductCardProps = {
 export default function ProductCard({ product, size = 'default' }: ProductCardProps) {
   const isSmall = size === 'small';
 
+  // The AI can sometimes return invalid image URLs. This prevents the app from crashing.
+  const imageUrl = product.imageUrl?.startsWith('http')
+    ? product.imageUrl
+    : 'https://placehold.co/300x300.png';
+
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
       <CardHeader className="p-0 relative">
         <div className="aspect-square w-full relative">
           <Image
-            src={product.imageUrl}
+            src={imageUrl}
             alt={product.name}
             fill
             className="object-cover"
