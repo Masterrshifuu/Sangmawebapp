@@ -42,7 +42,7 @@ const prompt = ai.definePrompt({
   name: 'itemRecommendationPrompt',
   input: {schema: ItemRecommendationPromptInputSchema},
   output: {schema: ItemRecommendationOutputSchema},
-  prompt: `You are an AI shopping assistant for 'Sangma Megha Mart'. Your goal is to recommend products from a given list based on a user's search query.
+  prompt: `You are an AI shopping assistant for 'Sangma Megha Mart'. Your goal is to recommend products from a given list based on a user's search query. The user's search query might contain spelling mistakes or be a natural language phrase (e.g., 'something for my hair'); interpret it to find the most relevant products from the list.
 
 You MUST only recommend products that are present in the 'Available Products' list provided below. Do not invent products or details.
 Your recommendations should be relevant to the user's search input. Please recommend between 10 and 15 products. If the search input is generic (e.g., 'featured products', 'popular items'), recommend a variety of popular products. If there are no relevant products in the list, return an empty list of recommendations.

@@ -7,7 +7,6 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2, Bot } from "lucide-react";
 import { itemRecommendation } from "@/ai/flows/item-recommendation";
@@ -25,10 +24,9 @@ export default function SearchSheet({
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
+  const [initialRecommendations, setInitialRecommendations] = useState<Product[]>([]);
   const [query, setQuery] = useState("");
-  const [searchSource, setSearchSource] = useState<"direct" | "ai" | null>(
-    null
-  );
+  const [searchSource, setSearchSource] = useState<"direct" | "ai" | null>(null);
   const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
 
   useEffect(() => {
@@ -46,6 +44,7 @@ export default function SearchSheet({
               bestseller: false,
             })
           );
+          setInitialRecommendations(mappedProducts);
           setRecommendations(mappedProducts);
           if (mappedProducts.length > 0) {
             setSearchSource("ai");
@@ -62,47 +61,57 @@ export default function SearchSheet({
     }
   }, [open, hasFetchedInitial]);
 
-  const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!query.trim()) return;
+  useEffect(() => {
+    if (!hasFetchedInitial) return;
 
-    setIsLoading(true);
-    setRecommendations([]);
-    setSearchSource(null);
-    try {
-      const directSearchResults = await searchProducts(query);
-
-      if (directSearchResults.length > 0) {
-        setRecommendations(directSearchResults);
-        setSearchSource("direct");
-      } else {
-        const result = await itemRecommendation({ searchInput: query });
-        const mappedProducts: Product[] = result.recommendedProducts.map(
-          (p, index) => ({
-            id: `${p.name}-${index}`,
-            ...p,
-            category: "Recommended",
-            bestseller: false,
-          })
-        );
-        setRecommendations(mappedProducts);
-        if (mappedProducts.length > 0) {
-          setSearchSource("ai");
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch recommendations:", error);
-    } finally {
-      setIsLoading(false);
+    if (query.trim() === "") {
+      setRecommendations(initialRecommendations);
+      setSearchSource(initialRecommendations.length > 0 ? "ai" : null);
+      return;
     }
-  };
+
+    const debounceSearch = setTimeout(async () => {
+      setIsLoading(true);
+      setRecommendations([]);
+      setSearchSource(null);
+      try {
+        const directSearchResults = await searchProducts(query);
+
+        if (directSearchResults.length > 0) {
+          setRecommendations(directSearchResults);
+          setSearchSource("direct");
+        } else {
+          const result = await itemRecommendation({ searchInput: query });
+          const mappedProducts: Product[] = result.recommendedProducts.map(
+            (p, index) => ({
+              id: `${p.name}-${index}`,
+              ...p,
+              category: "Recommended",
+              bestseller: false,
+            })
+          );
+          setRecommendations(mappedProducts);
+          if (mappedProducts.length > 0) {
+            setSearchSource("ai");
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch recommendations:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300); // 300ms debounce delay
+
+    return () => clearTimeout(debounceSearch);
+  }, [query, hasFetchedInitial, initialRecommendations]);
+
 
   const trigger =
     children ?? (
-      <Button variant="ghost" size="icon">
+      <button>
         <Search className="w-5 h-5" />
         <span className="sr-only">Search</span>
-      </Button>
+      </button>
     );
 
   return (
@@ -119,30 +128,27 @@ export default function SearchSheet({
           </SheetClose>
         </div>
         <div className="px-4 pb-4 border-b">
-          <form
-            onSubmit={handleSearch}
+          <div
             className="flex w-full max-w-lg mx-auto items-center space-x-2 pt-4"
           >
-            <Input
-              type="text"
-              placeholder="e.g., 'fresh vegetables' or 'milk'"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="bg-muted"
-            />
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="mr-2 h-4 w-4" />
+            <div className="relative w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="text"
+                placeholder="e.g., 'fresh vegetables' or 'milk'"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="bg-muted pl-10"
+              />
+               {isLoading && (
+                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
               )}
-              Search
-            </Button>
-          </form>
+            </div>
+          </div>
         </div>
 
         <ScrollArea className="flex-1">
-          {isLoading && (
+          {isLoading && recommendations.length === 0 && (
             <div className="flex justify-center items-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
