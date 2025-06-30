@@ -81,13 +81,6 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 )}
               >
-                {message.role === 'assistant' && (
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback>
-                      <Bot className="w-5 h-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
                 <div
                   className={cn(
                     'max-w-xs md:max-w-md rounded-lg p-3 text-sm',
@@ -109,12 +102,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
               </div>
             ))}
              {isLoading && (
-              <div className="flex items-start gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback>
-                    <Bot className="w-5 h-5" />
-                  </AvatarFallback>
-                </Avatar>
+              <div className="flex items-start gap-3 justify-start">
                 <div className="bg-muted rounded-lg p-3">
                   <Loader2 className="h-5 w-5 animate-spin" />
                 </div>
