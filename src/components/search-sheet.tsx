@@ -138,9 +138,6 @@ export default function SearchSheet({
                 onChange={(e) => setQuery(e.target.value)}
                 className="bg-muted pl-10"
               />
-               {isLoading && (
-                <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 animate-spin text-muted-foreground" />
-              )}
             </div>
           </div>
         </div>
