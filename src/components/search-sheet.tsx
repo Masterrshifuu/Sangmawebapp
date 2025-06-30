@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -9,13 +9,10 @@ import {
 } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2, Bot } from "lucide-react";
-import { itemRecommendation } from "@/ai/flows/item-recommendation";
-import { searchProducts } from "@/lib/search";
-import { getProducts } from "@/lib/data";
 import ProductCard from "./product-card";
-import type { Product } from "@/lib/types";
 import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
+import { useSearch } from "@/hooks/use-search";
 
 export default function SearchSheet({
   children,
@@ -23,86 +20,7 @@ export default function SearchSheet({
   children?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [results, setResults] = useState<Product[]>([]);
-  const [initialProducts, setInitialProducts] = useState<Product[]>([]);
-  const [query, setQuery] = useState("");
-  const [searchSource, setSearchSource] = useState<"direct" | "ai" | null>(null);
-  const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
-
-  useEffect(() => {
-    if (open && !hasFetchedInitial) {
-      const fetchInitialProducts = async () => {
-        setIsLoading(true);
-        setSearchSource(null);
-        try {
-          const allProducts = await getProducts();
-          const bestsellers = allProducts.filter(p => p.bestseller).slice(0, 15);
-          const initialDisplay = bestsellers.length > 0 ? bestsellers : allProducts.slice(0, 15);
-          
-          setInitialProducts(initialDisplay);
-          setResults(initialDisplay);
-          if (initialDisplay.length > 0) {
-            setSearchSource("direct");
-          }
-        } catch (error) {
-          console.error("Failed to fetch initial products:", error);
-          setInitialProducts([]);
-          setResults([]);
-        } finally {
-          setIsLoading(false);
-          setHasFetchedInitial(true);
-        }
-      };
-
-      fetchInitialProducts();
-    }
-  }, [open, hasFetchedInitial]);
-
-  useEffect(() => {
-    if (!hasFetchedInitial) return;
-
-    if (query.trim() === "") {
-      setResults(initialProducts);
-      setSearchSource(initialProducts.length > 0 ? "direct" : null);
-      return;
-    }
-
-    const debounceSearch = setTimeout(async () => {
-      setIsLoading(true);
-      setResults([]);
-      setSearchSource(null);
-      try {
-        const directSearchResults = await searchProducts(query);
-
-        if (directSearchResults.length > 0) {
-          setResults(directSearchResults);
-          setSearchSource("direct");
-        } else {
-          const result = await itemRecommendation({ searchInput: query });
-          const mappedProducts: Product[] = result.recommendedProducts.map(
-            (p, index) => ({
-              id: `${p.name}-${index}`,
-              ...p,
-              category: "Recommended",
-              bestseller: false,
-            })
-          );
-          setResults(mappedProducts);
-          if (mappedProducts.length > 0) {
-            setSearchSource("ai");
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch search results:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 300); // 300ms debounce delay
-
-    return () => clearTimeout(debounceSearch);
-  }, [query, hasFetchedInitial, initialProducts]);
-
+  const { query, setQuery, results, isLoading, searchSource, hasFetchedInitial } = useSearch(open);
 
   const trigger =
     children ?? (
@@ -162,7 +80,7 @@ export default function SearchSheet({
                   </Badge>
                 )}
               </div>
-              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-2">
+              <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-7 xl:grid-cols-8 gap-3">
                 {results.map((product) => (
                   <ProductCard key={product.id} product={product} size="small" />
                 ))}
