@@ -8,6 +8,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,11 @@ import type { Product } from "@/lib/types";
 import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
 
-export default function SearchSheet({ children }: { children?: React.ReactNode }) {
+export default function SearchSheet({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
@@ -74,36 +79,47 @@ export default function SearchSheet({ children }: { children?: React.ReactNode }
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>{trigger}</SheetTrigger>
-      <SheetContent side="top" className="h-full md:h-auto md:max-h-[80vh]">
-        <SheetHeader className="text-center mb-6">
-          <SheetTitle className="font-headline text-2xl">
-            Search for Products
-          </SheetTitle>
-          <SheetDescription>
-            Use our AI assistant to find what you need.
-          </SheetDescription>
-        </SheetHeader>
-        <form
-          onSubmit={handleSearch}
-          className="flex w-full max-w-lg mx-auto items-center space-x-2 mb-8"
-        >
-          <Input
-            type="text"
-            placeholder="e.g., 'fresh vegetables' or 'milk'"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <Search className="mr-2 h-4 w-4" />
-            )}
-            Search
-          </Button>
-        </form>
+      <SheetContent
+        side="bottom"
+        className="h-3/4 flex flex-col p-0 rounded-t-2xl"
+        showCloseButton={false}
+      >
+        <div className="flex justify-center py-3">
+          <SheetClose>
+            <div className="w-12 h-1.5 rounded-full bg-muted" />
+          </SheetClose>
+        </div>
+        <div className="px-4 pb-4 border-b">
+          <SheetHeader className="text-center mb-4">
+            <SheetTitle className="font-headline text-xl">
+              Search for Products
+            </SheetTitle>
+            <SheetDescription>
+              Use our AI assistant to find what you need.
+            </SheetDescription>
+          </SheetHeader>
+          <form
+            onSubmit={handleSearch}
+            className="flex w-full max-w-lg mx-auto items-center space-x-2"
+          >
+            <Input
+              type="text"
+              placeholder="e.g., 'fresh vegetables' or 'milk'"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Search className="mr-2 h-4 w-4" />
+              )}
+              Search
+            </Button>
+          </form>
+        </div>
 
-        <ScrollArea className="h-[calc(100%-160px)] md:h-auto">
+        <ScrollArea className="flex-1">
           {isLoading && (
             <div className="flex justify-center items-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -113,7 +129,7 @@ export default function SearchSheet({ children }: { children?: React.ReactNode }
           {!isLoading && recommendations.length > 0 && (
             <>
               {searchSource === "ai" && (
-                <div className="flex justify-center mb-4">
+                <div className="flex justify-center my-4">
                   <Badge variant="secondary" className="text-sm">
                     <Bot className="w-4 h-4 mr-2" />
                     AI-powered results
