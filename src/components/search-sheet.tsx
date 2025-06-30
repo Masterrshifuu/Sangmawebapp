@@ -17,7 +17,7 @@ import ProductCard from "./product-card";
 import type { Product } from "@/lib/data";
 import { ScrollArea } from "./ui/scroll-area";
 
-export default function SearchSheet() {
+export default function SearchSheet({ children }: { children?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<Product[]>([]);
@@ -48,13 +48,17 @@ export default function SearchSheet() {
     }
   };
 
+  const trigger = children ?? (
+    <Button variant="ghost" size="icon">
+      <Search className="w-5 h-5" />
+      <span className="sr-only">Search</span>
+    </Button>
+  )
+
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <Search className="w-5 h-5" />
-          <span className="sr-only">Search</span>
-        </Button>
+        {trigger}
       </SheetTrigger>
       <SheetContent side="top" className="h-full md:h-auto md:max-h-[80vh]">
         <SheetHeader className="text-center mb-6">
