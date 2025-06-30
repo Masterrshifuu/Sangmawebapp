@@ -1,13 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, Search, PlusSquare, ShoppingCart, User } from 'lucide-react';
+import { Home, Search, Bot, ShoppingCart, User } from 'lucide-react';
 import SearchSheet from './search-sheet';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { CartSheet } from './cart-sheet';
+import AiChatSheet from './ai-chat-sheet';
 
 const BottomNavbar = () => {
   const pathname = usePathname();
@@ -26,9 +27,11 @@ const BottomNavbar = () => {
             </Button>
         </SearchSheet>
 
-        <Button variant="ghost" className="p-0 h-auto text-current hover:bg-transparent" aria-label="Create">
-            <PlusSquare className='h-7 w-7' />
-        </Button>
+        <AiChatSheet>
+          <Button variant="ghost" className="p-0 h-auto text-current hover:bg-transparent" aria-label="AI Chat">
+              <Bot className='h-7 w-7' />
+          </Button>
+        </AiChatSheet>
 
         <CartSheet>
           <Button variant="ghost" className="p-0 h-auto text-current hover:bg-transparent" aria-label="Cart">
