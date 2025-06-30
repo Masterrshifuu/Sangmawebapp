@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2, Bot } from "lucide-react";
 import { itemRecommendation } from "@/ai/flows/item-recommendation";
 import { searchProducts } from "@/lib/search";
+import { getProducts } from "@/lib/data";
 import ProductCard from "./product-card";
 import type { Product } from "@/lib/types";
 import { ScrollArea } from "./ui/scroll-area";
@@ -23,41 +24,38 @@ export default function SearchSheet({
 }) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [recommendations, setRecommendations] = useState<Product[]>([]);
-  const [initialRecommendations, setInitialRecommendations] = useState<Product[]>([]);
+  const [results, setResults] = useState<Product[]>([]);
+  const [initialProducts, setInitialProducts] = useState<Product[]>([]);
   const [query, setQuery] = useState("");
   const [searchSource, setSearchSource] = useState<"direct" | "ai" | null>(null);
   const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
 
   useEffect(() => {
     if (open && !hasFetchedInitial) {
-      const fetchInitialRecommendations = async () => {
+      const fetchInitialProducts = async () => {
         setIsLoading(true);
         setSearchSource(null);
         try {
-          const result = await itemRecommendation({ searchInput: "featured products" });
-          const mappedProducts: Product[] = result.recommendedProducts.map(
-            (p, index) => ({
-              id: `${p.name}-${index}`,
-              ...p,
-              category: "Recommended",
-              bestseller: false,
-            })
-          );
-          setInitialRecommendations(mappedProducts);
-          setRecommendations(mappedProducts);
-          if (mappedProducts.length > 0) {
-            setSearchSource("ai");
+          const allProducts = await getProducts();
+          const bestsellers = allProducts.filter(p => p.bestseller).slice(0, 15);
+          const initialDisplay = bestsellers.length > 0 ? bestsellers : allProducts.slice(0, 15);
+          
+          setInitialProducts(initialDisplay);
+          setResults(initialDisplay);
+          if (initialDisplay.length > 0) {
+            setSearchSource("direct");
           }
         } catch (error) {
-          console.error("Failed to fetch initial recommendations:", error);
+          console.error("Failed to fetch initial products:", error);
+          setInitialProducts([]);
+          setResults([]);
         } finally {
           setIsLoading(false);
           setHasFetchedInitial(true);
         }
       };
 
-      fetchInitialRecommendations();
+      fetchInitialProducts();
     }
   }, [open, hasFetchedInitial]);
 
@@ -65,20 +63,20 @@ export default function SearchSheet({
     if (!hasFetchedInitial) return;
 
     if (query.trim() === "") {
-      setRecommendations(initialRecommendations);
-      setSearchSource(initialRecommendations.length > 0 ? "ai" : null);
+      setResults(initialProducts);
+      setSearchSource(initialProducts.length > 0 ? "direct" : null);
       return;
     }
 
     const debounceSearch = setTimeout(async () => {
       setIsLoading(true);
-      setRecommendations([]);
+      setResults([]);
       setSearchSource(null);
       try {
         const directSearchResults = await searchProducts(query);
 
         if (directSearchResults.length > 0) {
-          setRecommendations(directSearchResults);
+          setResults(directSearchResults);
           setSearchSource("direct");
         } else {
           const result = await itemRecommendation({ searchInput: query });
@@ -90,20 +88,20 @@ export default function SearchSheet({
               bestseller: false,
             })
           );
-          setRecommendations(mappedProducts);
+          setResults(mappedProducts);
           if (mappedProducts.length > 0) {
             setSearchSource("ai");
           }
         }
       } catch (error) {
-        console.error("Failed to fetch recommendations:", error);
+        console.error("Failed to fetch search results:", error);
       } finally {
         setIsLoading(false);
       }
     }, 300); // 300ms debounce delay
 
     return () => clearTimeout(debounceSearch);
-  }, [query, hasFetchedInitial, initialRecommendations]);
+  }, [query, hasFetchedInitial, initialProducts]);
 
 
   const trigger =
@@ -148,13 +146,13 @@ export default function SearchSheet({
         </div>
 
         <ScrollArea className="flex-1">
-          {isLoading && recommendations.length === 0 && (
+          {isLoading && results.length === 0 && (
             <div className="flex justify-center items-center py-10">
               <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           )}
 
-          {!isLoading && recommendations.length > 0 && (
+          {!isLoading && results.length > 0 && (
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold font-headline">
@@ -168,14 +166,14 @@ export default function SearchSheet({
                 )}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-                {recommendations.map((product) => (
+                {results.map((product) => (
                   <ProductCard key={product.id} product={product} size="small" />
                 ))}
               </div>
             </div>
           )}
           
-          {!isLoading && recommendations.length === 0 && (query || hasFetchedInitial) && (
+          {!isLoading && results.length === 0 && (query || hasFetchedInitial) && (
             <div className="text-center py-10 text-muted-foreground">
               <p>No products found for &quot;{query}&quot;.</p>
               <p className="text-sm">Try searching for something else.</p>
