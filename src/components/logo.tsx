@@ -7,11 +7,11 @@ const Logo = ({ className }: { className?: string }) => {
       <Image
         src="/logo.png"
         alt="Sangma Megha Mart Logo"
-        width={32}
-        height={32}
+        width={40}
+        height={40}
         priority
       />
-      <span className="font-headline text-xl font-bold">
+      <span className="font-roboto text-lg font-bold">
         Sangma Megha Mart
       </span>
     </div>
