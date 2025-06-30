@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -29,6 +29,38 @@ export default function SearchSheet({
   const [searchSource, setSearchSource] = useState<"direct" | "ai" | null>(
     null
   );
+  const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
+
+  useEffect(() => {
+    if (open && !hasFetchedInitial) {
+      const fetchInitialRecommendations = async () => {
+        setIsLoading(true);
+        setSearchSource(null);
+        try {
+          const result = await itemRecommendation({ searchInput: "featured products" });
+          const mappedProducts: Product[] = result.recommendedProducts.map(
+            (p, index) => ({
+              id: `${p.name}-${index}`,
+              ...p,
+              category: "Recommended",
+              bestseller: false,
+            })
+          );
+          setRecommendations(mappedProducts);
+          if (mappedProducts.length > 0) {
+            setSearchSource("ai");
+          }
+        } catch (error) {
+          console.error("Failed to fetch initial recommendations:", error);
+        } finally {
+          setIsLoading(false);
+          setHasFetchedInitial(true);
+        }
+      };
+
+      fetchInitialRecommendations();
+    }
+  }, [open, hasFetchedInitial]);
 
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -120,9 +152,7 @@ export default function SearchSheet({
             <div className="p-4">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold font-headline">
-                  {searchSource === "direct"
-                    ? "Search Results"
-                    : "Recommended Products"}
+                  {query.trim() ? "Search Results" : "Featured Products"}
                 </h3>
                 {searchSource === "ai" && (
                   <Badge variant="secondary">
@@ -138,8 +168,8 @@ export default function SearchSheet({
               </div>
             </div>
           )}
-
-          {!isLoading && recommendations.length === 0 && query && (
+          
+          {!isLoading && recommendations.length === 0 && (query || hasFetchedInitial) && (
             <div className="text-center py-10 text-muted-foreground">
               <p>No products found for &quot;{query}&quot;.</p>
               <p className="text-sm">Try searching for something else.</p>
