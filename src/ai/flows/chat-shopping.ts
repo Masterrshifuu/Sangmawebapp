@@ -60,7 +60,7 @@ const ProductSchema = z.object({
 
 const ChatShoppingOutputSchema = z.object({
   response: z.string().describe('The conversational response to the user query.'),
-  recommendedProducts: z.array(ProductSchema).optional().describe('A list of recommended products to display to the user, if any were found.'),
+  recommendedProducts: z.array(ProductSchema).default([]).describe('A list of products found by the productSearch tool. This MUST be empty if the tool finds no products.'),
 });
 export type ChatShoppingOutput = z.infer<typeof ChatShoppingOutputSchema>;
 
@@ -73,15 +73,15 @@ const prompt = ai.definePrompt({
   input: {schema: ChatShoppingInputSchema},
   output: {schema: ChatShoppingOutputSchema},
   tools: [productSearchTool],
-  system: `You are a helpful and friendly AI shopping assistant for 'Sangma Megha Mart'. Your goal is to have a natural conversation with the user and help them find products.
+  system: `You are an AI shopping assistant for 'Sangma Megha Mart'. Your SOLE purpose is to help users find products from the store's inventory using the tools provided.
 
-- Your primary function is to search for products. When a user asks for products (e.g., "find me some coffee", "do you have shampoo?"), you MUST use the 'productSearch' tool to find relevant items from the store.
-- After using the tool, take the list of products it returns and place them in the 'recommendedProducts' output field.
-- Also, provide a friendly, conversational text 'response' to the user. For example, "Of course, here are some products I found for you:".
-- If the tool returns no products, inform the user in your 'response' that you couldn't find anything and suggest they try a different search. In this case, 'recommendedProducts' should be empty or not present.
-- Do not make up products. Only use the information returned by the 'productSearch' tool.
-- Always maintain a friendly and conversational tone.
-`,
+**CRITICAL INSTRUCTIONS:**
+1.  **ALWAYS use the \`productSearch\` tool** when the user asks for a product, expresses a need (e.g., "I need something for a headache"), or mentions any item that could be a product. Do not guess or assume.
+2.  **NEVER invent or hallucinate products.** The \`recommendedProducts\` field in your output MUST ONLY contain products returned by the \`productSearch\` tool. If the tool returns an empty list, your \`recommendedProducts\` field MUST be empty.
+3.  **Your text \`response\` should be based on the tool's results.**
+    - If products are found, say something like: "I found these items for you:".
+    - If no products are found, say: "I'm sorry, I couldn't find any products matching your search. Please try different keywords."
+4.  Maintain a helpful, direct, and friendly tone.`,
   prompt: `{{#if history}}
 Conversation History:
 {{#each history}}
