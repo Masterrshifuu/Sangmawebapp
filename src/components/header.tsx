@@ -1,13 +1,14 @@
 'use client';
 
-import { Search } from 'lucide-react';
+import { Search, ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import SearchSheet from './search-sheet';
 import LocationSheet from './location-sheet';
 import { cn } from '@/lib/utils';
 import Logo from './logo';
 import Link from 'next/link';
-import CartSheet from './cart-sheet';
+import { CartSheet } from './cart-sheet';
+import { Button } from './ui/button';
 
 export default function Header() {
   const [location, setLocation] = useState('Chandmari, South Tura');
@@ -55,7 +56,12 @@ export default function Header() {
               </div>
 
               <div className="flex items-center gap-2">
-                <CartSheet />
+                <CartSheet>
+                  <Button variant="ghost" size="icon">
+                    <ShoppingCart className="w-5 h-5" />
+                    <span className="sr-only">Shopping Cart</span>
+                  </Button>
+                </CartSheet>
               </div>
             </div>
           </div>

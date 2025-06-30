@@ -1,44 +1,42 @@
-"use client";
+'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import { Button } from "@/components/ui/button";
-import { ShoppingCart } from "lucide-react";
+  SheetFooter,
+  SheetClose,
+} from '@/components/ui/sheet';
+import { ShoppingCart } from 'lucide-react';
 
-export default function CartSheet() {
-  // In a real app, you'd get this from a state management solution
-  const itemCount = 3; 
-
+export function CartSheet({ children }: { children: React.ReactNode }) {
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <ShoppingCart className="w-5 h-5" />
-          {itemCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
-              {itemCount}
-            </span>
-          )}
-          <span className="sr-only">Shopping Cart</span>
-        </Button>
+        {children}
       </SheetTrigger>
-      <SheetContent>
-        <SheetHeader>
-          <SheetTitle>Shopping Cart</SheetTitle>
-          <SheetDescription>
-            You have {itemCount} item(s) in your cart.
-          </SheetDescription>
-        </SheetHeader>
-        <div className="py-4 text-center text-muted-foreground">
-          <p>Your cart is currently empty.</p>
-          <p className="text-sm">Add items to see them here.</p>
+      <SheetContent side="bottom" className="h-3/4 flex flex-col p-0 rounded-t-2xl" showCloseButton={false}>
+        <div className="flex justify-center py-3">
+          <SheetClose>
+            <div className="w-12 h-1.5 rounded-full bg-muted" />
+          </SheetClose>
         </div>
+        <SheetHeader className="p-4 pt-0 border-b">
+          <SheetTitle className="text-center">Your Cart</SheetTitle>
+        </SheetHeader>
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
+            <ShoppingCart className="w-16 h-16 mb-4" />
+            <h3 className="text-lg font-semibold text-foreground">Your cart is empty</h3>
+            <p className="text-sm">Add items from the store to see them here.</p>
+        </div>
+        <SheetFooter className="p-4 border-t bg-background mt-auto">
+            <SheetClose asChild>
+                <Button className="w-full">Continue Shopping</Button>
+            </SheetClose>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
