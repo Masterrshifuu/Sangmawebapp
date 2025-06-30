@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { getProducts } from '@/lib/data';
 
 const ItemRecommendationInputSchema = z.object({
   searchInput: z.string().describe('The user input for searching products.'),
@@ -32,17 +33,26 @@ export async function itemRecommendation(input: ItemRecommendationInput): Promis
   return itemRecommendationFlow(input);
 }
 
+const ItemRecommendationPromptInputSchema = z.object({
+    searchInput: z.string(),
+    productList: z.string(),
+});
+
 const prompt = ai.definePrompt({
   name: 'itemRecommendationPrompt',
-  input: {schema: ItemRecommendationInputSchema},
+  input: {schema: ItemRecommendationPromptInputSchema},
   output: {schema: ItemRecommendationOutputSchema},
-  prompt: `You are an AI shopping assistant for 'Sangma Megha Mart'. Your goal is to help users find products even if their search query doesn't have an exact match.
-Recommend a list of relevant products based on the user's search input.
-If the search input is very specific and no direct match is likely, recommend the closest available alternatives or related product categories. For example, if a user searches for a specific brand you don't carry, suggest similar products from other brands. If they search for something abstract like 'party snacks', suggest items like chips, nuts, and drinks.
+  prompt: `You are an AI shopping assistant for 'Sangma Megha Mart'. Your goal is to recommend products from a given list based on a user's search query.
+
+You MUST only recommend products that are present in the 'Available Products' list provided below. Do not invent products or details.
+Your recommendations should be relevant to the user's search input. If there are no relevant products in the list, return an empty list of recommendations.
 
 Search Input: {{{searchInput}}}
 
-Return a list of recommended products with their name, description, and price. For the imageUrl, always use the placeholder 'https://placehold.co/300x300.png'. If you cannot find any relevant products, return an empty list.`,
+Available Products (JSON format):
+{{{productList}}}
+
+For each recommended product, provide its name, a short description, price, and use 'https://placehold.co/300x300.png' for the imageUrl.`,
 });
 
 const itemRecommendationFlow = ai.defineFlow(
@@ -52,7 +62,18 @@ const itemRecommendationFlow = ai.defineFlow(
     outputSchema: ItemRecommendationOutputSchema,
   },
   async input => {
-    const {output} = await prompt(input);
+    const allProducts = await getProducts();
+    const productListJson = JSON.stringify(allProducts.map(p => ({
+        name: p.name,
+        description: p.description,
+        price: p.price
+    })));
+
+    const {output} = await prompt({
+        searchInput: input.searchInput,
+        productList: productListJson
+    });
+    
     return output || { recommendedProducts: [] };
   }
 );
