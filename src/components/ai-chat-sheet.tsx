@@ -81,16 +81,15 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                   message.role === 'user' ? 'justify-end' : 'justify-start'
                 )}
               >
-                <div
-                  className={cn(
-                    'max-w-xs md:max-w-md rounded-lg p-3 text-sm',
-                    message.role === 'user'
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted'
-                  )}
-                >
-                  <p>{message.content}</p>
-                </div>
+                {message.role === 'user' ? (
+                  <div className="max-w-xs md:max-w-md rounded-lg p-3 text-sm bg-primary text-primary-foreground">
+                    <p>{message.content}</p>
+                  </div>
+                ) : (
+                  <p className="text-sm text-foreground max-w-full whitespace-pre-wrap">
+                    {message.content}
+                  </p>
+                )}
                  {message.role === 'user' && (
                   <Avatar className="w-8 h-8">
                      <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
