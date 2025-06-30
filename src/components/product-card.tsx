@@ -13,10 +13,10 @@ type ProductCardProps = {
 export default function ProductCard({ product, size = 'default' }: ProductCardProps) {
   const isSmall = size === 'small';
 
-  // The AI can sometimes return invalid image URLs. This prevents the app from crashing.
-  const imageUrl = product.imageUrl?.startsWith('http')
-    ? product.imageUrl
-    : 'https://placehold.co/300x300.png';
+  // The AI can sometimes return invalid image URLs or URLs from non-whitelisted domains.
+  // This ensures we only use valid, whitelisted URLs, preventing app crashes.
+  const isAllowedUrl = product.imageUrl && product.imageUrl.startsWith('https://placehold.co');
+  const imageUrl = isAllowedUrl ? product.imageUrl : 'https://placehold.co/300x300.png';
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
