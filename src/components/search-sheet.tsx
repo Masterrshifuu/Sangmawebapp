@@ -4,9 +4,6 @@ import { useState } from "react";
 import {
   Sheet,
   SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
@@ -90,17 +87,9 @@ export default function SearchSheet({
           </SheetClose>
         </div>
         <div className="px-4 pb-4 border-b">
-          <SheetHeader className="text-center mb-4">
-            <SheetTitle className="font-headline text-xl">
-              Search for Products
-            </SheetTitle>
-            <SheetDescription>
-              Use our AI assistant to find what you need.
-            </SheetDescription>
-          </SheetHeader>
           <form
             onSubmit={handleSearch}
-            className="flex w-full max-w-lg mx-auto items-center space-x-2"
+            className="flex w-full max-w-lg mx-auto items-center space-x-2 pt-4"
           >
             <Input
               type="text"
