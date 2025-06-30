@@ -16,10 +16,13 @@ import { ScrollArea } from './ui/scroll-area';
 import { chatShopping } from '@/ai/flows/chat-shopping';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { cn } from '@/lib/utils';
+import type { Product } from '@/lib/types';
+import ProductCard from './product-card';
 
 type Message = {
   role: 'user' | 'assistant';
   content: string;
+  products?: Product[];
 };
 
 export default function AiChatSheet({ children }: { children: React.ReactNode }) {
@@ -37,8 +40,15 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
     setIsLoading(true);
 
     try {
-      const result = await chatShopping({ query: input });
-      const aiMessage: Message = { role: 'assistant', content: result.response };
+      const historyForApi = messages.map(({ role, content }) => ({ role, content }));
+      const result = await chatShopping({ query: input, history: historyForApi });
+      
+      const aiMessage: Message = { 
+        role: 'assistant', 
+        content: result.response, 
+        products: result.recommendedProducts as Product[] | undefined
+      };
+
       setMessages((prev) => [...prev, aiMessage]);
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -78,7 +88,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                 key={index}
                 className={cn(
                   'flex items-start gap-3',
-                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                  message.role === 'user' ? 'justify-end' : ''
                 )}
               >
                 {message.role === 'user' ? (
@@ -86,9 +96,20 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                     <p>{message.content}</p>
                   </div>
                 ) : (
-                  <p className="text-sm text-foreground max-w-full whitespace-pre-wrap">
-                    {message.content}
-                  </p>
+                  <div className="w-full">
+                    <p className="text-sm text-foreground max-w-full whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                    {message.products && message.products.length > 0 && (
+                      <div className="mt-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                          {message.products.map((product) => (
+                            <ProductCard key={product.id} product={product} size="small" />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
                  {message.role === 'user' && (
                   <Avatar className="w-8 h-8">
