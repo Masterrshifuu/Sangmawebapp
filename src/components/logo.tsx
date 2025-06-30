@@ -3,14 +3,17 @@ import Image from "next/image";
 
 const Logo = ({ className }: { className?: string }) => {
   return (
-    <div className={cn("flex items-center", className)}>
+    <div className={cn("flex items-center gap-3", className)}>
       <Image
-        src="/smmlogo.png"
+        src="/logo.png"
         alt="Sangma Megha Mart Logo"
-        width={140}
-        height={30}
+        width={32}
+        height={32}
         priority
       />
+      <span className="font-headline text-xl font-bold">
+        Sangma Megha Mart
+      </span>
     </div>
   );
 };
