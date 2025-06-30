@@ -22,7 +22,7 @@ const ItemRecommendationOutputSchema = z.object({
       name: z.string().describe('The name of the product.'),
       description: z.string().describe('A short description of the product.'),
       price: z.number().describe('The price of the product.'),
-      imageUrl: z.string().describe('URL of the product image.'),
+      imageUrl: z.string().describe("URL of the product image. This should always be 'https://placehold.co/300x300.png'."),
     })
   ).describe('A list of recommended products based on the search input.'),
 });
@@ -42,7 +42,7 @@ If the search input is very specific and no direct match is likely, recommend th
 
 Search Input: {{{searchInput}}}
 
-Return a list of recommended products with their name, description, price, and image URL. If you cannot find any relevant products, return an empty list.`,
+Return a list of recommended products with their name, description, and price. For the imageUrl, always use the placeholder 'https://placehold.co/300x300.png'. If you cannot find any relevant products, return an empty list.`,
 });
 
 const itemRecommendationFlow = ai.defineFlow(
