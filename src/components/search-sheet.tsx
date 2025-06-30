@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Loader2 } from "lucide-react";
 import { itemRecommendation } from "@/ai/flows/item-recommendation";
 import ProductCard from "./product-card";
-import type { Product } from "@/lib/data";
+import type { Product } from "@/lib/types";
 import { ScrollArea } from "./ui/scroll-area";
 
 export default function SearchSheet({ children }: { children?: React.ReactNode }) {

@@ -2,7 +2,7 @@ import Image from "next/image";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./ui/card";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { type Product } from "@/lib/data";
+import { type Product } from "@/lib/types";
 
 type ProductCardProps = {
   product: Product;
