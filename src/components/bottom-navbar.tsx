@@ -1,12 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, Search, PlusSquare, Clapperboard, User } from 'lucide-react';
+import { Home, Search, PlusSquare, ShoppingCart, User } from 'lucide-react';
 import SearchSheet from './search-sheet';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { CartSheet } from './cart-sheet';
 
 const BottomNavbar = () => {
   const pathname = usePathname();
@@ -29,9 +30,12 @@ const BottomNavbar = () => {
             <PlusSquare className='h-7 w-7' />
         </Button>
 
-        <Button variant="ghost" className="p-0 h-auto text-current hover:bg-transparent" aria-label="Reels">
-            <Clapperboard className='h-7 w-7' />
-        </Button>
+        <CartSheet>
+          <Button variant="ghost" className="p-0 h-auto text-current hover:bg-transparent" aria-label="Cart">
+              <ShoppingCart className='h-7 w-7' />
+              <span className="sr-only">Cart</span>
+          </Button>
+        </CartSheet>
         
         <Link href="/profile" aria-label="Profile">
             <Avatar className={cn('h-8 w-8 transition-transform', pathname === '/profile' && 'ring-2 ring-offset-background ring-offset-2 ring-black dark:ring-white')}>

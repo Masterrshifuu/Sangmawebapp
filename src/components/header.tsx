@@ -55,7 +55,7 @@ export default function Header() {
                 <LocationSheet location={location} onSave={handleSaveLocation} />
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="hidden md:flex items-center gap-2">
                 <CartSheet>
                   <Button variant="ghost" size="icon">
                     <ShoppingCart className="w-5 h-5" />
