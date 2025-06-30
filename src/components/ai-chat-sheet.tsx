@@ -102,9 +102,9 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
             ))}
              {isLoading && (
               <div className="flex items-start gap-3 justify-start">
-                <div className="bg-muted rounded-lg p-3">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                </div>
+                <p className="text-sm text-muted-foreground animate-pulse">
+                  Ai Chanchienga ...
+                </p>
               </div>
             )}
             {messages.length === 0 && !isLoading && (
