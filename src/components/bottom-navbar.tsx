@@ -13,10 +13,12 @@ import { ProfileSheet } from './profile-sheet';
 import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
+import { useCart } from '@/context/cart-context';
 
 const BottomNavbar = () => {
   const pathname = usePathname();
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(setUser);
@@ -71,10 +73,15 @@ const BottomNavbar = () => {
         <CartSheet>
           <Button
             variant="ghost"
-            className="p-0 h-auto text-current hover:bg-transparent"
+            className="p-0 h-auto text-current hover:bg-transparent relative"
             aria-label="Cart"
           >
             <ShoppingCart className="h-7 w-7" />
+            {cartCount > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
             <span className="sr-only">Cart</span>
           </Button>
         </CartSheet>

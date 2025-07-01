@@ -4,6 +4,8 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { type Product } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/context/cart-context";
+import { QuantitySelector } from "./quantity-selector";
 
 type ProductCardProps = {
   product: Product;
@@ -11,11 +13,10 @@ type ProductCardProps = {
 };
 
 export default function ProductCard({ product, size = 'default' }: ProductCardProps) {
+  const { addToCart, removeFromCart, getItemQuantity } = useCart();
+  const quantity = getItemQuantity(product.id);
   const isSmall = size === 'small';
-
-  // Use the imageUrl from the product directly, or a fallback if it's missing.
-  // This ensures that whatever URL is in your database is what the app tries to load.
-  const imageUrl = product.imageUrl || 'https://placehold.co/300x300.png';
+  const imageUrl = product.imageUrl;
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
@@ -38,8 +39,17 @@ export default function ProductCard({ product, size = 'default' }: ProductCardPr
         <CardDescription className="text-xs text-muted-foreground line-clamp-2">{product.description}</CardDescription>
       </CardContent>
       <CardFooter className={cn("flex justify-between items-center pt-0", isSmall ? "p-2" : "p-4")}>
-        <p className={cn("font-bold", isSmall ? "text-base" : "text-lg")}>{product.price.toFixed(2)}</p>
-        <Button size="sm">Add</Button>
+        <p className={cn("font-bold", isSmall ? "text-base" : "text-lg")}>₹{product.price.toFixed(2)}</p>
+        {quantity > 0 ? (
+          <QuantitySelector
+            quantity={quantity}
+            onIncrease={() => addToCart(product)}
+            onDecrease={() => removeFromCart(product.id)}
+            size={isSmall ? 'small' : 'default'}
+          />
+        ) : (
+          <Button size="sm" onClick={() => addToCart(product)}>Add</Button>
+        )}
       </CardFooter>
     </Card>
   );

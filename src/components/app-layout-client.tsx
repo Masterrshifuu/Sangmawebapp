@@ -5,13 +5,14 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import BottomNavbar from '@/components/bottom-navbar';
 import { Toaster } from '@/components/ui/toaster';
+import { CartProvider } from '@/context/cart-context';
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
 
   return (
-    <>
+    <CartProvider>
       {isLoginPage ? (
         <main>{children}</main>
       ) : (
@@ -25,6 +26,6 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
         </>
       )}
       <Toaster />
-    </>
+    </CartProvider>
   );
 }

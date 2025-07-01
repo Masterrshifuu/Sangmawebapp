@@ -9,10 +9,12 @@ import Logo from './logo';
 import Link from 'next/link';
 import { CartSheet } from './cart-sheet';
 import { Button } from './ui/button';
+import { useCart } from '@/context/cart-context';
 
 export default function Header() {
   const [location, setLocation] = useState('Chandmari, South Tura');
   const [isScrolled, setIsScrolled] = useState(false);
+  const { cartCount } = useCart();
 
   useEffect(() => {
     const savedLocation = localStorage.getItem('userLocation');
@@ -57,8 +59,13 @@ export default function Header() {
 
               <div className="hidden md:flex items-center gap-2">
                 <CartSheet>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="relative">
                     <ShoppingCart className="w-5 h-5" />
+                    {cartCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-background text-primary text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        {cartCount}
+                      </span>
+                    )}
                     <span className="sr-only">Shopping Cart</span>
                   </Button>
                 </CartSheet>

@@ -8,6 +8,10 @@ export type Product = {
   bestseller: boolean;
 };
 
+export type CartItem = Product & {
+  quantity: number;
+};
+
 export type Category = {
   id: string;
   name: string;
