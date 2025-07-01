@@ -76,12 +76,13 @@ const prompt = ai.definePrompt({
   system: `You are an AI shopping assistant for 'Sangma Megha Mart'. Your SOLE purpose is to help users find products from the store's inventory using the tools provided.
 
 **CRITICAL INSTRUCTIONS:**
-1.  **ALWAYS use the \`productSearch\` tool** when the user asks for a product, expresses a need (e.g., "I need something for a headache"), or mentions any item that could be a product. Do not guess or assume.
-2.  **NEVER invent or hallucinate products.** The \`recommendedProducts\` field in your output MUST ONLY contain products returned by the \`productSearch\` tool. If the tool returns an empty list, your \`recommendedProducts\` field MUST be empty.
-3.  **Your text \`response\` should be based on the tool's results.**
-    - If products are found, say something like: "I found these items for you:".
-    - If no products are found, say: "I'm sorry, I couldn't find any products matching your search. Please try different keywords."
-4.  Maintain a helpful, direct, and friendly tone.`,
+1.  **ALWAYS use the \`productSearch\` tool** when the user asks for a product, expresses a need (e.g., "I need something for a headache"), or mentions any item that could be a product. Do not guess or assume product availability or details.
+2.  **Base your response ENTIRELY on the tool's output.**
+3.  The \`recommendedProducts\` field in your output MUST ONLY contain products returned by the \`productSearch\` tool.
+4.  If the tool finds products, list them in the \`recommendedProducts\` field and say something like: "Yes, I found these items for you:".
+5.  If the tool returns an empty list, the \`recommendedProducts\` field MUST be an empty array, and you MUST respond with: "I'm sorry, I couldn't find any products matching your search. Please try different keywords."
+6.  NEVER invent or hallucinate products or product details.
+7.  Maintain a helpful, direct, and friendly tone.`,
   prompt: `{{#if history}}
 Conversation History:
 {{#each history}}
@@ -101,31 +102,17 @@ const chatShoppingFlow = ai.defineFlow(
     outputSchema: ChatShoppingOutputSchema,
   },
   async (input) => {
-    const result = await prompt(input);
-    const modelOutput = result.output;
+    // Instead of manually parsing the history, we will rely on the model
+    // following the prompt instructions to populate the structured output correctly.
+    // This is a more direct and less brittle approach that solves the internal error.
+    const { output } = await prompt(input);
 
-    if (!modelOutput) {
-      return { response: "I'm sorry, I couldn't process that. Please try again.", recommendedProducts: [] };
+    if (!output) {
+      // This is a fallback for unexpected errors during generation.
+      return { response: "I'm sorry, I encountered an error. Please try again.", recommendedProducts: [] };
     }
     
-    // Extract the actual product list from the tool call history to prevent hallucinations.
-    let realProducts: Product[] = [];
-    const toolResponseMessage = result.history.find(
-      (m) => m.role === 'tool' && m.content.some(p => p.toolResponse?.name === 'productSearch')
-    );
-
-    if (toolResponseMessage) {
-      const toolResponsePart = toolResponseMessage.content.find(p => p.toolResponse?.name === 'productSearch');
-      const toolOutput = toolResponsePart?.toolResponse?.output;
-      if (toolOutput && Array.isArray(toolOutput)) {
-        realProducts = toolOutput as Product[];
-      }
-    }
-    
-    // Always return the text response from the model, but use the verified product list from the tool.
-    return {
-      response: modelOutput.response,
-      recommendedProducts: realProducts,
-    };
+    // The prompt and output schema guide the model to return the correct structure.
+    return output;
   }
 );
