@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Bot, Send, Loader2, User } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
-import { chatShopping } from '@/ai/flows/chat-shopping';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { cn } from '@/lib/utils';
 import type { Product } from '@/lib/types';
@@ -36,12 +35,25 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
 
     const userMessage: Message = { role: 'user', content: input };
     setMessages((prev) => [...prev, userMessage]);
+    const currentMessages = [...messages, userMessage];
     setInput('');
     setIsLoading(true);
 
     try {
-      const historyForApi = messages.map(({ role, content }) => ({ role, content }));
-      const result = await chatShopping({ query: input, history: historyForApi });
+      const historyForApi = currentMessages.map(({ role, content }) => ({ role, content }));
+      
+      const res = await fetch('/api/chat-shopping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: input, history: historyForApi }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: `API request failed with status ${res.status}` }));
+        throw new Error(errorData.error || 'ChatShopping API failed');
+      }
+
+      const result = await res.json();
       
       const aiMessage: Message = { 
         role: 'assistant', 
@@ -54,7 +66,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
         role: 'assistant',
-        content: "Sorry, I'm having trouble connecting. Please try again later.",
+        content: error instanceof Error ? error.message : "Sorry, I'm having trouble connecting. Please try again later.",
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
