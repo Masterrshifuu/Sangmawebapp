@@ -9,9 +9,21 @@ import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { CartSheet } from './cart-sheet';
 import AiChatSheet from './ai-chat-sheet';
+import { useEffect, useState } from 'react';
+import { auth } from '@/lib/firebase';
+import type { User as FirebaseUser } from 'firebase/auth';
 
 const BottomNavbar = () => {
   const pathname = usePathname();
+  const [user, setUser] = useState<FirebaseUser | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    return () => unsubscribe();
+  }, []);
+
+  const profileHref = user ? '/profile' : '/login';
+  const isProfileActive = pathname === '/profile' || (!user && pathname === '/login');
 
   return (
     <footer className="fixed bottom-0 w-full bg-background border-t z-40 md:hidden text-black dark:text-white">
@@ -40,9 +52,9 @@ const BottomNavbar = () => {
           </Button>
         </CartSheet>
         
-        <Link href="/profile" aria-label="Profile">
-            <Avatar className={cn('h-8 w-8 transition-transform', pathname === '/profile' && 'ring-2 ring-offset-background ring-offset-2 ring-black dark:ring-white')}>
-                <AvatarImage src="https://placehold.co/100x100.png" alt="User Profile" data-ai-hint="user avatar" />
+        <Link href={profileHref} aria-label="Profile">
+            <Avatar className={cn('h-8 w-8 transition-transform', isProfileActive && 'ring-2 ring-offset-background ring-offset-2 ring-black dark:ring-white')}>
+                <AvatarImage src={user?.photoURL || `https://placehold.co/100x100.png`} alt="User Profile" data-ai-hint="user avatar" />
                 <AvatarFallback>
                     <User className="h-5 w-5" />
                 </AvatarFallback>
