@@ -116,7 +116,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
           </SheetClose>
         </div>
         <Collapsible open={isCartOpen} onOpenChange={setIsCartOpen}>
-            <SheetHeader className="px-4 pb-4 border-b flex items-center justify-between">
+            <SheetHeader className="px-4 pb-4 border-b flex items-center justify-start gap-4">
                 <CollapsibleTrigger asChild>
                     <Button variant="ghost" size="icon" className="relative">
                         <ShoppingCart className="h-5 w-5"/>
@@ -124,10 +124,9 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                         <span className="sr-only">Toggle Cart View</span>
                     </Button>
                 </CollapsibleTrigger>
-                <SheetTitle className="flex items-center justify-center gap-2">
+                <SheetTitle className="flex items-center gap-2">
                     <Bot className="w-6 h-6" /> AI Shopping Assistant
                 </SheetTitle>
-                <div className="w-10" />
             </SheetHeader>
             <CollapsibleContent className="border-b">
               <div className="p-4">
