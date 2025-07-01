@@ -67,8 +67,9 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
 
       const result = await res.json();
       
-      if (!result || typeof result.response === 'undefined') {
-        throw new Error('Received an invalid response from the server.');
+      if (!result || typeof result.response !== 'string' || !result.response) {
+        console.error('Invalid AI response structure:', result);
+        throw new Error('Received an invalid or empty response from the server.');
       }
       
       const aiMessage: Message = { 
@@ -151,10 +152,9 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
 
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
-            {messages.map((message, index) => {
-              if (!message || typeof message.content === 'undefined') {
-                return null;
-              }
+            {messages
+              .filter(m => m && typeof m.content === 'string')
+              .map((message, index) => {
               return (
                 <div
                   key={index}
