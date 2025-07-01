@@ -15,7 +15,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
 import { GoogleIcon } from './google-icon';
 import { AppleIcon } from './apple-icon';
 
@@ -48,7 +47,6 @@ export function LoginForm() {
     setLoading(true);
     try {
       await signInWithPopup(auth, provider);
-      toast({ title: 'Success!', description: 'You have been successfully signed in.' });
       router.push('/');
     } catch (error: any) {
       console.error('Social sign-in error:', error);
@@ -65,7 +63,6 @@ export function LoginForm() {
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      toast({ title: 'Success!', description: 'You have been successfully signed in.' });
       router.push('/');
     } catch (error: any) {
       console.error('Email sign-in error:', error);
@@ -86,7 +83,6 @@ export function LoginForm() {
       const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifierRef.current);
       setConfirmationResult(confirmation);
       setOtpSent(true);
-      toast({ title: 'OTP Sent', description: `An OTP has been sent to ${formattedPhone}.` });
     } catch (error: any) {
       console.error('Phone sign-in error:', error);
       toast({ variant: 'destructive', title: 'Error sending OTP', description: error.message });
@@ -102,7 +98,6 @@ export function LoginForm() {
 
     try {
       await confirmationResult.confirm(otp);
-      toast({ title: 'Success!', description: 'You have been successfully signed in.' });
       router.push('/');
     } catch (error: any) {
       console.error('OTP verification error:', error);
@@ -130,7 +125,6 @@ export function LoginForm() {
               <Input id="login-password" type="password" placeholder="********" value={password} onChange={(e) => setPassword(e.target.value)} required disabled={loading} />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Login with Email
             </Button>
           </form>
@@ -143,7 +137,6 @@ export function LoginForm() {
                 <Input id="login-phone" type="tel" placeholder="e.g. 9876543210" value={phone} onChange={(e) => setPhone(e.target.value)} required disabled={loading} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send OTP
               </Button>
             </form>
@@ -154,7 +147,6 @@ export function LoginForm() {
                 <Input id="login-otp" type="text" placeholder="6-digit code" value={otp} onChange={(e) => setOtp(e.target.value)} required disabled={loading} />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Verify OTP & Login
               </Button>
             </form>
@@ -171,11 +163,11 @@ export function LoginForm() {
       </div>
       <div className="grid grid-cols-2 gap-2">
         <Button variant="outline" onClick={() => handleSocialLogin(googleProvider)} disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon className="mr-2 h-4 w-4" />}
+          <GoogleIcon className="mr-2 h-4 w-4" />
           Google
         </Button>
         <Button variant="outline" onClick={() => handleSocialLogin(appleProvider)} disabled={loading}>
-          {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <AppleIcon className="mr-2 h-4 w-4" />}
+          <AppleIcon className="mr-2 h-4 w-4" />
           Apple
         </Button>
       </div>
