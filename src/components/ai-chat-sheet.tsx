@@ -4,28 +4,23 @@ import { useState } from 'react';
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
   SheetTitle,
   SheetTrigger,
   SheetClose,
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Bot, Send, Loader2, User, ShoppingCart } from 'lucide-react';
+import { Bot, Send, Loader2, User } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { cn } from '@/lib/utils';
-import type { Product, Message, CartItem } from '@/lib/types';
+import type { Product, Message } from '@/lib/types';
 import ProductCard from './product-card';
-import { useCart } from '@/context/cart-context';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export default function AiChatSheet({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const { cartItems, syncAIAssistantCart, cartCount } = useCart();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -43,23 +38,10 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
         .filter(m => m.role === 'user' || m.role === 'assistant')
         .map(({ role, content }) => ({ role, content }));
       
-      const productsForApi = cartItems.flatMap(item => {
-        const productInfo: Product = {
-          id: item.id,
-          name: item.name,
-          description: item.description,
-          price: item.price,
-          imageUrl: item.imageUrl,
-          category: item.category,
-          bestseller: item.bestseller,
-        };
-        return Array(item.quantity).fill(productInfo);
-      });
-      
       const res = await fetch('/api/chat-shopping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: input, history: historyForApi, cart: productsForApi }),
+        body: JSON.stringify({ query: input, history: historyForApi }),
       });
 
       if (!res.ok) {
@@ -77,15 +59,10 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
         role: 'assistant', 
         content: result.response, 
         products: result.recommendedProducts || [],
-        cart: result.updatedCart || [],
       };
 
       setMessages((prev) => [...prev, aiMessage]);
       
-      if (result.updatedCart) {
-        syncAIAssistantCart(result.updatedCart);
-      }
-
     } catch (error) {
       const errorMessageContent = error instanceof Error ? error.message : "Sorry, I'm having trouble connecting. Please try again later.";
       const errorMessage: Message = {
@@ -97,17 +74,6 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       setIsLoading(false);
     }
   };
-  
-  const renderCart = (cartItems: Product[]) => (
-    <div className="mt-4">
-      <h4 className="font-bold mb-2">Your Cart ({cartItems.length})</h4>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {cartItems.map((product) => (
-          <ProductCard key={product.id} product={product} size="small" />
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <Sheet>
@@ -117,40 +83,13 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
         className="h-[75vh] flex flex-col p-0 rounded-t-2xl bg-card"
         showCloseButton={false}
       >
-        <div className="flex justify-center py-3">
+        <SheetTitle className="sr-only">AI Shopping Assistant</SheetTitle>
+        <div className="flex justify-center py-3 border-b">
           <SheetClose>
             <div className="w-12 h-1.5 rounded-full bg-muted" />
           </SheetClose>
         </div>
-        <Collapsible open={isCartOpen} onOpenChange={setIsCartOpen}>
-            <SheetHeader className="px-4 pb-4 border-b flex items-center justify-start gap-4">
-                <SheetTitle className="sr-only">AI Shopping Assistant</SheetTitle>
-                <CollapsibleTrigger asChild>
-                    <Button variant="ghost" size="icon" className="relative">
-                        <ShoppingCart className="h-5 w-5"/>
-                        {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">{cartCount}</span>}
-                        <span className="sr-only">Toggle Cart View</span>
-                    </Button>
-                </CollapsibleTrigger>
-            </SheetHeader>
-            <CollapsibleContent className="border-b">
-              <div className="p-4">
-                <h4 className="font-bold mb-4 text-left">Your Current Cart ({cartCount})</h4>
-                {cartCount > 0 ? (
-                  <ScrollArea className="max-h-[20vh]">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {cartItems.map((item) => (
-                        <ProductCard key={item.id} product={item} size="small" />
-                      ))}
-                    </div>
-                  </ScrollArea>
-                ) : (
-                  <p className="text-left text-muted-foreground text-sm py-4">Add items using chat!</p>
-                )}
-              </div>
-            </CollapsibleContent>
-        </Collapsible>
-
+        
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             {messages
@@ -175,6 +114,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                       </p>
                       {message.products && message.products.length > 0 && (
                         <div className="mt-4">
+                           <h4 className="font-bold mb-2 text-sm">Recommended Products:</h4>
                           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                             {message.products.map((product) => (
                               <ProductCard key={product.id} product={product} size="small" />
@@ -182,7 +122,6 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                           </div>
                         </div>
                       )}
-                      {message.content.toLowerCase().includes('your cart') && message.cart && message.cart.length > 0 && renderCart(message.cart)}
                     </div>
                   )}
                    {message.role === 'user' && (
@@ -206,7 +145,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
               <div className="flex flex-col items-center justify-center text-center text-muted-foreground pt-16">
                   <Bot className="w-16 h-16 mb-4" />
                   <h3 className="text-lg font-semibold text-foreground">AI Shopping Assistant</h3>
-                  <p className="text-sm">Ask me to find products, add to cart, or even checkout!</p>
+                  <p className="text-sm">Ask me to find products, or tell me what you're looking for!</p>
               </div>
             )}
           </div>
@@ -216,7 +155,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                placeholder="e.g., 'add shampoo to cart'"
+                placeholder="e.g., 'shampoo for dry hair'"
                 autoComplete="off"
                 disabled={isLoading}
               />
