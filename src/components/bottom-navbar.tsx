@@ -1,14 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, Search, Bot, ShoppingCart, User } from 'lucide-react';
+import { Home, Search, ShoppingCart, User } from 'lucide-react';
 import SearchSheet from './search-sheet';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { CartSheet } from './cart-sheet';
-import AiChatSheet from './ai-chat-sheet';
 import { ProfileSheet } from './profile-sheet';
 import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
@@ -59,16 +58,6 @@ const BottomNavbar = () => {
             <span className="sr-only">Search</span>
           </Button>
         </SearchSheet>
-
-        <AiChatSheet>
-          <Button
-            variant="ghost"
-            className="p-0 h-auto text-current hover:bg-transparent"
-            aria-label="AI Chat"
-          >
-            <Bot className="h-7 w-7" />
-          </Button>
-        </AiChatSheet>
 
         <CartSheet>
           <Button
