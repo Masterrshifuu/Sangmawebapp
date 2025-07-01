@@ -15,14 +15,17 @@ import { Bot, Send, Loader2, User, ShoppingCart } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { cn } from '@/lib/utils';
-import type { Product, Message } from '@/lib/types';
+import type { Product, Message, CartItem } from '@/lib/types';
 import ProductCard from './product-card';
+import { useCart } from '@/context/cart-context';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 export default function AiChatSheet({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [cart, setCart] = useState<Product[]>([]);
+  const { cartItems, syncAIAssistantCart, cartCount } = useCart();
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -37,10 +40,23 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
     try {
       const historyForApi = messages.map(({ role, content }) => ({ role, content }));
       
+      const productsForApi = cartItems.flatMap(item => {
+        const productInfo: Product = {
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          imageUrl: item.imageUrl,
+          category: item.category,
+          bestseller: item.bestseller,
+        };
+        return Array(item.quantity).fill(productInfo);
+      });
+      
       const res = await fetch('/api/chat-shopping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: input, history: historyForApi, cart: cart }),
+        body: JSON.stringify({ query: input, history: historyForApi, cart: productsForApi }),
       });
 
       if (!res.ok) {
@@ -54,11 +70,14 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
         role: 'assistant', 
         content: result.response, 
         products: result.recommendedProducts || [],
-        cart: result.updatedCart || [], // Pass cart for rendering if needed
+        cart: result.updatedCart || [],
       };
 
       setMessages((prev) => [...prev, aiMessage]);
-      setCart(result.updatedCart || []); // Update the client's cart state
+      
+      if (result.updatedCart) {
+        syncAIAssistantCart(result.updatedCart);
+      }
 
     } catch (error) {
       console.error('Failed to get AI response:', error);
@@ -158,30 +177,49 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
             )}
           </div>
         </ScrollArea>
-        <div className="p-4 border-t bg-background flex items-center gap-2">
-          <div className="relative">
-            <Button variant="outline" size="icon" disabled>
+        <Collapsible open={isCartOpen} onOpenChange={setIsCartOpen}>
+            <CollapsibleContent className="border-t">
+              <div className="p-4">
+                <h4 className="font-bold mb-4 text-center">Your Current Cart ({cartCount})</h4>
+                {cartCount > 0 ? (
+                  <ScrollArea className="max-h-[20vh]">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {cartItems.map((item) => (
+                        <ProductCard key={item.id} product={item} size="small" />
+                      ))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <p className="text-center text-muted-foreground text-sm py-4">Add items using chat!</p>
+                )}
+              </div>
+            </CollapsibleContent>
+          <div className="p-4 border-t bg-background flex items-center gap-2">
+            <CollapsibleTrigger asChild>
+              <Button variant="outline" size="icon" className="relative">
                 <ShoppingCart className="h-5 w-5"/>
-            </Button>
-            {cart.length > 0 && <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">{cart.length}</span>}
+                {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">{cartCount}</span>}
+                <span className="sr-only">Toggle Cart View</span>
+              </Button>
+            </CollapsibleTrigger>
+            <form onSubmit={handleSubmit} className="flex-1 flex items-center gap-2">
+              <Input
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="e.g., 'add shampoo to cart'"
+                autoComplete="off"
+                disabled={isLoading}
+              />
+              <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+              </Button>
+            </form>
           </div>
-          <form onSubmit={handleSubmit} className="flex-1 flex items-center gap-2">
-            <Input
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="e.g., 'add shampoo to cart'"
-              autoComplete="off"
-              disabled={isLoading}
-            />
-            <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
-              {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
-              )}
-            </Button>
-          </form>
-        </div>
+        </Collapsible>
       </SheetContent>
     </Sheet>
   );

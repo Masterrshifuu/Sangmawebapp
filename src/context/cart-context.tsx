@@ -11,6 +11,7 @@ interface CartContextType {
   getItemQuantity: (productId: string) => number;
   cartTotal: number;
   cartCount: number;
+  syncAIAssistantCart: (aiCart: Product[]) => void;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -51,6 +52,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return item ? item.quantity : 0;
   };
 
+  const syncAIAssistantCart = (aiCart: Product[]) => {
+    const itemMap = new Map<string, CartItem>();
+    aiCart.forEach(product => {
+      const { ...baseProduct } = product;
+      const existing = itemMap.get(baseProduct.id);
+      if (existing) {
+        existing.quantity++;
+      } else {
+        itemMap.set(baseProduct.id, { ...baseProduct, quantity: 1 });
+      }
+    });
+    setCartItems(Array.from(itemMap.values()));
+  };
+
   const cartTotal = useMemo(() => cartItems.reduce((total, item) => total + item.price * item.quantity, 0), [cartItems]);
   
   const cartCount = useMemo(() => cartItems.reduce((count, item) => count + item.quantity, 0), [cartItems]);
@@ -63,6 +78,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     getItemQuantity,
     cartTotal,
     cartCount,
+    syncAIAssistantCart,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
