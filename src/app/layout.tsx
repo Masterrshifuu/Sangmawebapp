@@ -1,10 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { Toaster } from '@/components/ui/toaster';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
-import BottomNavbar from '@/components/bottom-navbar';
-import EmailSignInHandler from '@/components/email-signin-handler';
+import AppLayoutClient from '@/components/app-layout-client';
 
 export const metadata: Metadata = {
   title: 'Sangma Megha Mart',
@@ -31,14 +27,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <EmailSignInHandler />
-        <div className="relative flex min-h-screen flex-col">
-          <Header />
-          <main className="flex-1 pb-16 md:pb-0">{children}</main>
-          <Footer />
-        </div>
-        <BottomNavbar />
-        <Toaster />
+        <AppLayoutClient>{children}</AppLayoutClient>
       </body>
     </html>
   );

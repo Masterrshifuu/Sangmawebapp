@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -157,14 +156,14 @@ export default function LoginPage() {
 
   if (authCheckLoading) {
     return (
-      <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center">
+      <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-8">
+    <div className="container mx-auto flex min-h-screen items-center justify-center px-4 py-8">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-2xl">Login or Sign Up</CardTitle>
