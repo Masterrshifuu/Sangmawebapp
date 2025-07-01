@@ -8,6 +8,7 @@ import {
   RecaptchaVerifier,
   signInWithPhoneNumber,
   sendSignInLinkToEmail,
+  onAuthStateChanged,
   type ConfirmationResult,
 } from 'firebase/auth';
 import { Button } from '@/components/ui/button';
@@ -24,9 +25,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
-// Note: Metadata export is for static analysis and won't work in a client component.
-// The app's metadata is handled in the root layout.
-
 export default function LoginPage() {
   const router = useRouter();
   const { toast } = useToast();
@@ -40,33 +38,45 @@ export default function LoginPage() {
   const [confirmationResult, setConfirmationResult] =
     useState<ConfirmationResult | null>(null);
 
+  const [authCheckLoading, setAuthCheckLoading] = useState(true);
+
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
   const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   useEffect(() => {
-    // This effect initializes the RecaptchaVerifier for phone authentication.
-    // It runs only once on the client-side after the component mounts.
-    if (recaptchaContainerRef.current) {
-        // We use a ref to ensure the verifier is created only once.
-        if (!recaptchaVerifierRef.current) {
-             recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-                size: 'invisible',
-                callback: (response: any) => {
-                    // reCAPTCHA solved, allow signInWithPhoneNumber.
-                    console.log('reCAPTCHA verified');
-                },
-             });
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        router.push('/');
+      } else {
+        setAuthCheckLoading(false);
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  useEffect(() => {
+    if (authCheckLoading) return;
+    if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
+      recaptchaVerifierRef.current = new RecaptchaVerifier(
+        auth,
+        recaptchaContainerRef.current,
+        {
+          size: 'invisible',
+          callback: () => {
+            console.log('reCAPTCHA verified');
+          },
         }
+      );
     }
-  }, []);
+  }, [authCheckLoading]);
 
   const handleSendEmailLink = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) return;
     setLoading(true);
-    
+
     const actionCodeSettings = {
-      url: `${window.location.origin}`, // URL to redirect back to
+      url: `${window.location.origin}`,
       handleCodeInApp: true,
     };
 
@@ -94,12 +104,15 @@ export default function LoginPage() {
     e.preventDefault();
     if (!phone || !recaptchaVerifierRef.current) return;
     setLoading(true);
-    
-    // Format phone number to E.164 format
+
     const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
 
     try {
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifierRef.current);
+      const confirmation = await signInWithPhoneNumber(
+        auth,
+        formattedPhone,
+        recaptchaVerifierRef.current
+      );
       setConfirmationResult(confirmation);
       setOtpSent(true);
       toast({
@@ -129,7 +142,7 @@ export default function LoginPage() {
         title: 'Success!',
         description: 'You have been successfully signed in.',
       });
-      router.push('/profile');
+      router.push('/');
     } catch (error: any) {
       console.error('OTP verification error:', error);
       toast({
@@ -141,7 +154,15 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-  
+
+  if (authCheckLoading) {
+    return (
+      <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto flex min-h-[calc(100vh-200px)] items-center justify-center px-4 py-8">
       <Card className="w-full max-w-sm">
@@ -173,12 +194,14 @@ export default function LoginPage() {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {loading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     Send OTP
                   </Button>
                 </form>
               ) : (
-                 <form onSubmit={handleVerifyOtp} className="space-y-4 pt-4">
+                <form onSubmit={handleVerifyOtp} className="space-y-4 pt-4">
                   <div className="space-y-2">
                     <Label htmlFor="otp">Enter OTP</Label>
                     <Input
@@ -195,7 +218,9 @@ export default function LoginPage() {
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {loading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     Verify OTP & Sign In
                   </Button>
                 </form>
@@ -216,7 +241,9 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {loading && (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  )}
                   Send Sign-in Link
                 </Button>
               </form>
@@ -224,7 +251,6 @@ export default function LoginPage() {
           </Tabs>
         </CardContent>
       </Card>
-      {/* This div is required for Firebase's invisible reCAPTCHA */}
       <div ref={recaptchaContainerRef}></div>
     </div>
   );
