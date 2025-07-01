@@ -13,13 +13,9 @@ type ProductCardProps = {
 export default function ProductCard({ product, size = 'default' }: ProductCardProps) {
   const isSmall = size === 'small';
 
-  // The AI can sometimes return invalid image URLs or URLs from non-whitelisted domains.
-  // This ensures we only use valid, whitelisted URLs, preventing app crashes.
-  const isAllowedUrl =
-    product.imageUrl &&
-    (product.imageUrl.startsWith('https://placehold.co') ||
-      product.imageUrl.startsWith('https://firebasestorage.googleapis.com'));
-  const imageUrl = isAllowedUrl ? product.imageUrl : 'https://placehold.co/300x300.png';
+  // Use the imageUrl from the product directly, or a fallback if it's missing.
+  // This ensures that whatever URL is in your database is what the app tries to load.
+  const imageUrl = product.imageUrl || 'https://placehold.co/300x300.png';
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
