@@ -107,7 +107,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent
         side="bottom"
-        className="h-[86vh] flex flex-col p-0 rounded-t-2xl bg-card"
+        className="h-[75vh] flex flex-col p-0 rounded-t-2xl bg-card"
         showCloseButton={false}
       >
         <div className="flex justify-center py-3">
@@ -127,7 +127,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
             </SheetHeader>
             <CollapsibleContent className="border-b">
               <div className="p-4">
-                <h4 className="font-bold mb-4 text-center">Your Current Cart ({cartCount})</h4>
+                <h4 className="font-bold mb-4 text-left">Your Current Cart ({cartCount})</h4>
                 {cartCount > 0 ? (
                   <ScrollArea className="max-h-[20vh]">
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -137,7 +137,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                     </div>
                   </ScrollArea>
                 ) : (
-                  <p className="text-center text-muted-foreground text-sm py-4">Add items using chat!</p>
+                  <p className="text-left text-muted-foreground text-sm py-4">Add items using chat!</p>
                 )}
               </div>
             </CollapsibleContent>
