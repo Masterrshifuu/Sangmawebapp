@@ -23,14 +23,9 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import type { Metadata } from 'next';
 
 // Note: Metadata export is for static analysis and won't work in a client component.
-// We keep it here for reference, but actual metadata should be handled in a parent layout or page if needed.
-export const metadata: Metadata = {
-    title: 'Login or Sign Up - Sangma Megha Mart',
-    description: 'Access your account or create a new one.',
-};
+// The app's metadata is handled in the root layout.
 
 export default function LoginPage() {
   const router = useRouter();
