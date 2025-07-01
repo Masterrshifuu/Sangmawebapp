@@ -11,21 +11,16 @@ import {
 } from '@/components/ui/sheet';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Bot, Send, Loader2, User } from 'lucide-react';
+import { Bot, Send, Loader2, User, ShoppingCart } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback } from './ui/avatar';
 import { cn } from '@/lib/utils';
-import type { Product } from '@/lib/types';
+import type { Product, Message } from '@/lib/types';
 import ProductCard from './product-card';
-
-type Message = {
-  role: 'user' | 'assistant';
-  content: string;
-  products?: Product[];
-};
 
 export default function AiChatSheet({ children }: { children: React.ReactNode }) {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [cart, setCart] = useState<Product[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -35,22 +30,22 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
 
     const userMessage: Message = { role: 'user', content: input };
     setMessages((prev) => [...prev, userMessage]);
-    const currentMessages = [...messages, userMessage];
+    
     setInput('');
     setIsLoading(true);
 
     try {
-      const historyForApi = currentMessages.map(({ role, content }) => ({ role, content }));
+      const historyForApi = messages.map(({ role, content }) => ({ role, content }));
       
       const res = await fetch('/api/chat-shopping', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: input, history: historyForApi }),
+        body: JSON.stringify({ query: input, history: historyForApi, cart: cart }),
       });
 
       if (!res.ok) {
         const errorData = await res.json().catch(() => ({ error: `API request failed with status ${res.status}` }));
-        throw new Error(errorData.error || 'ChatShopping API failed');
+        throw new Error(errorData.details || 'ChatShopping API failed');
       }
 
       const result = await res.json();
@@ -58,10 +53,13 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       const aiMessage: Message = { 
         role: 'assistant', 
         content: result.response, 
-        products: result.recommendedProducts as Product[] | undefined
+        products: result.recommendedProducts || [],
+        cart: result.updatedCart || [], // Pass cart for rendering if needed
       };
 
       setMessages((prev) => [...prev, aiMessage]);
+      setCart(result.updatedCart || []); // Update the client's cart state
+
     } catch (error) {
       console.error('Failed to get AI response:', error);
       const errorMessage: Message = {
@@ -73,6 +71,17 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       setIsLoading(false);
     }
   };
+  
+  const renderCart = (cartItems: Product[]) => (
+    <div className="mt-4">
+      <h4 className="font-bold mb-2">Your Cart ({cartItems.length})</h4>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {cartItems.map((product) => (
+          <ProductCard key={product.id} product={product} size="small" />
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <Sheet>
@@ -121,11 +130,11 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                         </div>
                       </div>
                     )}
+                    {message.content.toLowerCase().includes('your cart') && message.cart && message.cart.length > 0 && renderCart(message.cart)}
                   </div>
                 )}
                  {message.role === 'user' && (
                   <Avatar className="w-8 h-8">
-                     <AvatarImage src="https://placehold.co/100x100.png" alt="User" data-ai-hint="user avatar" />
                     <AvatarFallback>
                       <User className="w-5 h-5" />
                     </AvatarFallback>
@@ -136,7 +145,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
              {isLoading && (
               <div className="flex items-start gap-3 justify-start">
                 <p className="text-sm text-muted-foreground animate-pulse">
-                  Ai Chanchienga ...
+                  Ai Chanchienga is thinking...
                 </p>
               </div>
             )}
@@ -144,18 +153,25 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
               <div className="flex flex-col items-center justify-center text-center text-muted-foreground pt-16">
                   <Bot className="w-16 h-16 mb-4" />
                   <h3 className="text-lg font-semibold text-foreground">AI Shopping Assistant</h3>
-                  <p className="text-sm">Ask me anything about our products, and I'll help you find what you need!</p>
+                  <p className="text-sm">Ask me to find products, add to cart, or even checkout!</p>
               </div>
             )}
           </div>
         </ScrollArea>
-        <div className="p-4 border-t bg-background">
-          <form onSubmit={handleSubmit} className="flex items-center gap-2">
+        <div className="p-4 border-t bg-background flex items-center gap-2">
+          <div className="relative">
+            <Button variant="outline" size="icon" disabled>
+                <ShoppingCart className="h-5 w-5"/>
+            </Button>
+            {cart.length > 0 && <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">{cart.length}</span>}
+          </div>
+          <form onSubmit={handleSubmit} className="flex-1 flex items-center gap-2">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about products, offers, etc."
+              placeholder="e.g., 'add shampoo to cart'"
               autoComplete="off"
+              disabled={isLoading}
             />
             <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
               {isLoading ? (

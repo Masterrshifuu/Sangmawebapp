@@ -7,11 +7,15 @@ export const dynamic = 'force-dynamic'; // Ensures the route is always dynamic
 
 export async function POST(req: Request) {
   try {
+    // The request body now includes query, history, and the current cart state
     const body: ChatShoppingInput = await req.json();
     if (!body.query) {
        return NextResponse.json({ error: 'Query is required' }, { status: 400 });
     }
+
+    // The chatShopping flow will handle the logic and return the new state
     const result = await chatShopping(body);
+    
     return NextResponse.json(result);
   } catch (error) {
     console.error('Chat API Error:', error);

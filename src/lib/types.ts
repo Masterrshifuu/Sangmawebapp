@@ -12,3 +12,10 @@ export type Category = {
   id: string;
   name: string;
 };
+
+export type Message = {
+  role: 'user' | 'assistant';
+  content: string;
+  products?: Product[];
+  cart?: Product[];
+};
