@@ -124,9 +124,6 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                         <span className="sr-only">Toggle Cart View</span>
                     </Button>
                 </CollapsibleTrigger>
-                <SheetTitle className="flex items-center gap-2">
-                    <Bot className="w-6 h-6" /> AI Shopping Assistant
-                </SheetTitle>
             </SheetHeader>
             <CollapsibleContent className="border-b">
               <div className="p-4">
