@@ -115,11 +115,37 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
             <div className="w-12 h-1.5 rounded-full bg-muted" />
           </SheetClose>
         </div>
-        <SheetHeader className="px-4 pb-4 border-b text-center">
-          <SheetTitle className="flex items-center justify-center gap-2">
-            <Bot className="w-6 h-6" /> AI Shopping Assistant
-          </SheetTitle>
-        </SheetHeader>
+        <Collapsible open={isCartOpen} onOpenChange={setIsCartOpen}>
+            <SheetHeader className="px-4 pb-4 border-b flex items-center justify-between">
+                <CollapsibleTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative">
+                        <ShoppingCart className="h-5 w-5"/>
+                        {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">{cartCount}</span>}
+                        <span className="sr-only">Toggle Cart View</span>
+                    </Button>
+                </CollapsibleTrigger>
+                <SheetTitle className="flex items-center justify-center gap-2">
+                    <Bot className="w-6 h-6" /> AI Shopping Assistant
+                </SheetTitle>
+                <div className="w-10" />
+            </SheetHeader>
+            <CollapsibleContent className="border-b">
+              <div className="p-4">
+                <h4 className="font-bold mb-4 text-center">Your Current Cart ({cartCount})</h4>
+                {cartCount > 0 ? (
+                  <ScrollArea className="max-h-[20vh]">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                      {cartItems.map((item) => (
+                        <ProductCard key={item.id} product={item} size="small" />
+                      ))}
+                    </div>
+                  </ScrollArea>
+                ) : (
+                  <p className="text-center text-muted-foreground text-sm py-4">Add items using chat!</p>
+                )}
+              </div>
+            </CollapsibleContent>
+        </Collapsible>
 
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
@@ -177,31 +203,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
             )}
           </div>
         </ScrollArea>
-        <Collapsible open={isCartOpen} onOpenChange={setIsCartOpen}>
-            <CollapsibleContent className="border-t">
-              <div className="p-4">
-                <h4 className="font-bold mb-4 text-center">Your Current Cart ({cartCount})</h4>
-                {cartCount > 0 ? (
-                  <ScrollArea className="max-h-[20vh]">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                      {cartItems.map((item) => (
-                        <ProductCard key={item.id} product={item} size="small" />
-                      ))}
-                    </div>
-                  </ScrollArea>
-                ) : (
-                  <p className="text-center text-muted-foreground text-sm py-4">Add items using chat!</p>
-                )}
-              </div>
-            </CollapsibleContent>
-          <div className="p-4 border-t bg-background flex items-center gap-2">
-            <CollapsibleTrigger asChild>
-              <Button variant="outline" size="icon" className="relative">
-                <ShoppingCart className="h-5 w-5"/>
-                {cartCount > 0 && <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">{cartCount}</span>}
-                <span className="sr-only">Toggle Cart View</span>
-              </Button>
-            </CollapsibleTrigger>
+        <div className="p-4 border-t bg-background flex items-center gap-2">
             <form onSubmit={handleSubmit} className="flex-1 flex items-center gap-2">
               <Input
                 value={input}
@@ -218,8 +220,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
                 )}
               </Button>
             </form>
-          </div>
-        </Collapsible>
+        </div>
       </SheetContent>
     </Sheet>
   );
