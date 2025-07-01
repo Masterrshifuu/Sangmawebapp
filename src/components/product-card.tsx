@@ -15,7 +15,10 @@ export default function ProductCard({ product, size = 'default' }: ProductCardPr
 
   // The AI can sometimes return invalid image URLs or URLs from non-whitelisted domains.
   // This ensures we only use valid, whitelisted URLs, preventing app crashes.
-  const isAllowedUrl = product.imageUrl && product.imageUrl.startsWith('https://placehold.co');
+  const isAllowedUrl =
+    product.imageUrl &&
+    (product.imageUrl.startsWith('https://placehold.co') ||
+      product.imageUrl.startsWith('https://firebasestorage.googleapis.com'));
   const imageUrl = isAllowedUrl ? product.imageUrl : 'https://placehold.co/300x300.png';
 
   return (
