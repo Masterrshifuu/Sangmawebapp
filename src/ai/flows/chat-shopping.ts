@@ -30,7 +30,7 @@ const ChatShoppingInputSchema = z.object({
   query: z.string().describe('The latest user query.'),
   history: z.array(
     z.object({
-      role: z.enum(['user', 'assistant']),
+      role: z.enum(['user', 'assistant', 'tool']),
       content: z.string(),
     })
   ).optional().describe('The previous conversation history.'),
@@ -110,13 +110,12 @@ export async function chatShopping(input: ChatShoppingInput): Promise<ChatShoppi
   let currentCart = input.cart || [];
   let recommendedProducts: Product[] = [];
   
-  // Augment the user query with the current cart context for the AI
   const queryWithContext = `User query: "${input.query}" \n\nCurrent cart: ${JSON.stringify(currentCart.map(p => p.name))}`;
 
-  // Call the AI with the prompt, tools, and context
-  const { output } = await chatPrompt(queryWithContext, { history: input.history });
-  
-  if (!output) {
+  const llmResponse = await chatPrompt(queryWithContext, { history: input.history as Message[] });
+  const aiOutput = llmResponse.output();
+
+  if (!aiOutput) {
     return {
       response: "I'm sorry, I had trouble understanding that. Could you please rephrase?",
       updatedCart: currentCart,
@@ -124,28 +123,30 @@ export async function chatShopping(input: ChatShoppingInput): Promise<ChatShoppi
     };
   }
 
-  const { intent, productIdentifier, response } = output;
+  // If the AI used the search tool, extract the results to display them.
+  if (llmResponse.toolCalls) {
+    recommendedProducts = llmResponse.toolCalls
+      .map(tc => tc.output as Product[])
+      .flat()
+      .filter(Boolean);
+  }
+
+  const { intent, productIdentifier, response } = aiOutput;
   let finalResponse = response;
 
-  // Use the AI's identified intent to perform actions
   switch (intent) {
-    case 'search':
-      // The tool call is handled automatically by Genkit if the AI decides to use it.
-      // The 'response' from the AI will already contain the summary of the tool's output.
-      // We just need to get the products to send back to the client for display.
-      if (input.query) {
-        recommendedProducts = await searchProducts(input.query);
-      }
-      break;
-
     case 'add':
       if (productIdentifier) {
+        // Find product case-insensitively
         const productToAdd = allProducts.find(p => p.name.toLowerCase().includes(productIdentifier.toLowerCase()));
         if (productToAdd) {
-          currentCart.push(productToAdd);
+          // Avoid duplicates, just use the one from the master list.
+          if (!currentCart.find(p => p.id === productToAdd.id)) {
+            currentCart.push(productToAdd);
+          }
           finalResponse = `Added ${productToAdd.name} to your cart.`;
         } else {
-          finalResponse = `I couldn't find a product called "${productIdentifier}". Please try searching for it first.`;
+          finalResponse = `I couldn't find a product called "${productIdentifier}". Try searching for it first.`;
         }
       }
       break;
@@ -181,19 +182,18 @@ export async function chatShopping(input: ChatShoppingInput): Promise<ChatShoppi
         if (currentCart.length === 0) {
             finalResponse = "Your cart is empty! Please add some items before checking out.";
         } else {
-            // In a real app, this would trigger a multi-step process.
-            // For now, we simulate the first step.
             finalResponse = "Great! To proceed with checkout, I need your delivery address. What is your full address?";
         }
       break;
-
+    
+    case 'search':
     case 'general':
     default:
-      // The AI's conversational response is used directly.
+      // For search and general, the response from the AI is sufficient.
+      // Product recommendations from the tool call are already handled above.
       break;
   }
 
-  // Return the final state to the client
   return {
     response: finalResponse,
     updatedCart: currentCart,

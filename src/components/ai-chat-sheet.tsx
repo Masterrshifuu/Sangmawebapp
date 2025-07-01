@@ -39,7 +39,9 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
     setIsLoading(true);
 
     try {
-      const historyForApi = newMessages.map(({ role, content }) => ({ role, content }));
+      const historyForApi = newMessages
+        .filter(m => m.role === 'user' || m.role === 'assistant')
+        .map(({ role, content }) => ({ role, content }));
       
       const productsForApi = cartItems.flatMap(item => {
         const productInfo: Product = {
@@ -61,15 +63,14 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       });
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: `API request failed with status ${res.status}` }));
-        throw new Error(errorData.details || 'ChatShopping API failed');
+        const errorData = await res.json().catch(() => ({ details: `API request failed with status ${res.status}` }));
+        throw new Error(errorData.details || 'The AI assistant is currently unavailable.');
       }
 
       const result = await res.json();
       
-      if (!result || typeof result.response !== 'string' || !result.response) {
-        console.error('Invalid AI response structure:', result);
-        throw new Error('Received an invalid or empty response from the server.');
+      if (!result || typeof result.response !== 'string' || result.response.trim() === '') {
+          throw new Error('Received an invalid or empty response from the server.');
       }
       
       const aiMessage: Message = { 
@@ -86,10 +87,10 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       }
 
     } catch (error) {
-      console.error('Failed to get AI response:', error);
+      const errorMessageContent = error instanceof Error ? error.message : "Sorry, I'm having trouble connecting. Please try again later.";
       const errorMessage: Message = {
         role: 'assistant',
-        content: error instanceof Error ? error.message : "Sorry, I'm having trouble connecting. Please try again later.",
+        content: errorMessageContent,
       };
       setMessages((prev) => [...prev, errorMessage]);
     } finally {
@@ -153,7 +154,7 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
             {messages
-              .filter(m => m && typeof m.content === 'string')
+              .filter(m => m && typeof m.content === 'string' && m.content.trim() !== '')
               .map((message, index) => {
               return (
                 <div
