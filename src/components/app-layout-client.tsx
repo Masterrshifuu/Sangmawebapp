@@ -4,7 +4,6 @@ import { usePathname } from 'next/navigation';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import BottomNavbar from '@/components/bottom-navbar';
-import EmailSignInHandler from '@/components/email-signin-handler';
 import { Toaster } from '@/components/ui/toaster';
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
@@ -13,7 +12,6 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
 
   return (
     <>
-      <EmailSignInHandler />
       {isLoginPage ? (
         <main>{children}</main>
       ) : (
