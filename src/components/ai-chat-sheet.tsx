@@ -32,13 +32,14 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
     if (!input.trim()) return;
 
     const userMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => [...prev, userMessage]);
+    const newMessages = [...messages, userMessage];
+    setMessages(newMessages);
     
     setInput('');
     setIsLoading(true);
 
     try {
-      const historyForApi = messages.map(({ role, content }) => ({ role, content }));
+      const historyForApi = newMessages.map(({ role, content }) => ({ role, content }));
       
       const productsForApi = cartItems.flatMap(item => {
         const productInfo: Product = {
@@ -65,6 +66,10 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
       }
 
       const result = await res.json();
+      
+      if (!result || typeof result.response === 'undefined') {
+        throw new Error('Received an invalid response from the server.');
+      }
       
       const aiMessage: Message = { 
         role: 'assistant', 
@@ -146,44 +151,49 @@ export default function AiChatSheet({ children }: { children: React.ReactNode })
 
         <ScrollArea className="flex-1 p-4">
           <div className="space-y-4">
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={cn(
-                  'flex items-start gap-3',
-                  message.role === 'user' ? 'justify-end' : ''
-                )}
-              >
-                {message.role === 'user' ? (
-                  <div className="max-w-xs md:max-w-md rounded-lg p-3 text-sm bg-primary text-primary-foreground">
-                    <p>{message.content}</p>
-                  </div>
-                ) : (
-                  <div className="w-full">
-                    <p className="text-sm text-foreground max-w-full whitespace-pre-wrap">
-                      {message.content}
-                    </p>
-                    {message.products && message.products.length > 0 && (
-                      <div className="mt-4">
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                          {message.products.map((product) => (
-                            <ProductCard key={product.id} product={product} size="small" />
-                          ))}
+            {messages.map((message, index) => {
+              if (!message || typeof message.content === 'undefined') {
+                return null;
+              }
+              return (
+                <div
+                  key={index}
+                  className={cn(
+                    'flex items-start gap-3',
+                    message.role === 'user' ? 'justify-end' : ''
+                  )}
+                >
+                  {message.role === 'user' ? (
+                    <div className="max-w-xs md:max-w-md rounded-lg p-3 text-sm bg-primary text-primary-foreground">
+                      <p>{message.content}</p>
+                    </div>
+                  ) : (
+                    <div className="w-full">
+                      <p className="text-sm text-foreground max-w-full whitespace-pre-wrap">
+                        {message.content}
+                      </p>
+                      {message.products && message.products.length > 0 && (
+                        <div className="mt-4">
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                            {message.products.map((product) => (
+                              <ProductCard key={product.id} product={product} size="small" />
+                            ))}
+                          </div>
                         </div>
-                      </div>
-                    )}
-                    {message.content.toLowerCase().includes('your cart') && message.cart && message.cart.length > 0 && renderCart(message.cart)}
-                  </div>
-                )}
-                 {message.role === 'user' && (
-                  <Avatar className="w-8 h-8">
-                    <AvatarFallback>
-                      <User className="w-5 h-5" />
-                    </AvatarFallback>
-                  </Avatar>
-                )}
-              </div>
-            ))}
+                      )}
+                      {message.content.toLowerCase().includes('your cart') && message.cart && message.cart.length > 0 && renderCart(message.cart)}
+                    </div>
+                  )}
+                   {message.role === 'user' && (
+                    <Avatar className="w-8 h-8">
+                      <AvatarFallback>
+                        <User className="w-5 h-5" />
+                      </AvatarFallback>
+                    </Avatar>
+                  )}
+                </div>
+              );
+            })}
              {isLoading && (
               <div className="flex items-start gap-3 justify-start">
                 <p className="text-sm text-muted-foreground animate-pulse">
