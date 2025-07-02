@@ -18,7 +18,7 @@ export async function createOrder(orderData: OrderCreationData): Promise<string>
         newOrderNumber = counterDoc.data().currentNumber + 1;
       }
 
-      const displayId = `DG${String(newOrderNumber).padStart(6, '0')}`;
+      const displayId = `SMM${String(newOrderNumber).padStart(6, '0')}`;
 
       // Update the counter document
       transaction.set(counterRef, { currentNumber: newOrderNumber }, { merge: true });
