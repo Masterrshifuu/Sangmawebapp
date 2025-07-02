@@ -72,7 +72,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
             <div className="w-full space-y-4">
               <div className="flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span>₹{cartTotal.toFixed(2)}</span>
+                <span>INR {cartTotal.toFixed(2)}</span>
               </div>
               <CheckoutSheet>
                 <SheetClose asChild>
@@ -107,7 +107,7 @@ function CartItemRow({ item }: { item: CartItem }) {
       />
       <div className="flex-1 space-y-1 overflow-hidden">
         <p className="font-semibold line-clamp-1 truncate">{item.name}</p>
-        <p className="text-muted-foreground">₹{item.price.toFixed(2)}</p>
+        <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
       </div>
       <div className="flex flex-col items-end gap-2">
         <QuantitySelector
@@ -116,7 +116,7 @@ function CartItemRow({ item }: { item: CartItem }) {
           onDecrease={() => removeFromCart(item.id)}
           size="small"
         />
-        <p className="font-bold">₹{(item.price * item.quantity).toFixed(2)}</p>
+        <p className="font-bold">INR {(item.price * item.quantity).toFixed(2)}</p>
       </div>
     </div>
   );

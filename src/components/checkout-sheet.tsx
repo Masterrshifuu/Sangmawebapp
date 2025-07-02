@@ -281,7 +281,7 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
                         </p>
                       </div>
                       <p className="font-medium text-foreground">
-                        ₹{(item.price * item.quantity).toFixed(2)}
+                        INR {(item.price * item.quantity).toFixed(2)}
                       </p>
                     </div>
                   ))}
@@ -289,7 +289,7 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
               </ScrollArea>
               <div className="flex justify-between font-bold mt-4 text-lg border-t pt-4">
                 <span>Total</span>
-                <span>₹{cartTotal.toFixed(2)}</span>
+                <span>INR {cartTotal.toFixed(2)}</span>
               </div>
             </div>
             <Button onClick={handleConfirmOrder} className="w-full" disabled={loading}>

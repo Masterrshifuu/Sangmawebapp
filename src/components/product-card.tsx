@@ -41,7 +41,7 @@ export default function ProductCard({ product, size = 'default' }: ProductCardPr
         <CardDescription className="text-xs text-muted-foreground line-clamp-2">{product.description}</CardDescription>
       </CardContent>
       <CardFooter className={cn("flex justify-between items-center pt-0", isSmall ? "p-2" : "p-4")}>
-        <p className={cn("font-bold", isSmall ? "text-base" : "text-lg")}>₹{product.price.toFixed(2)}</p>
+        <p className={cn("font-bold", isSmall ? "text-base" : "text-lg")}>INR {product.price.toFixed(2)}</p>
         {quantity > 0 ? (
           <QuantitySelector
             quantity={quantity}
