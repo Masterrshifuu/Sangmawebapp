@@ -9,17 +9,21 @@ type OrderCreationData = Omit<Order, 'id' | 'createdAt' | 'status'>;
 
 export async function createOrder(orderData: OrderCreationData): Promise<string> {
   try {
+    // Sanitize the object to remove any `undefined` values that Firestore rejects.
+    const cleanOrderData = JSON.parse(JSON.stringify(orderData));
+
     const orderWithTimestamp = {
-      ...orderData,
+      ...cleanOrderData,
       status: 'Pending', // Default status for a new order
       createdAt: serverTimestamp(),
     };
     
     const docRef = await addDoc(collection(db, "orders"), orderWithTimestamp);
     return docRef.id;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating order: ", error);
     // Throw a more specific error to be handled by the calling function
-    throw new Error("Could not create order in the database.");
+    const detailedMessage = `Database error: ${error.code} - ${error.message || 'Please check Firestore rules and data structure.'}`;
+    throw new Error(detailedMessage);
   }
 }
