@@ -9,11 +9,8 @@ type OrderCreationData = Omit<Order, 'id' | 'createdAt' | 'status'>;
 
 export async function createOrder(orderData: OrderCreationData): Promise<string> {
   try {
-    // Sanitize the object to remove any `undefined` values that Firestore rejects.
-    const cleanOrderData = JSON.parse(JSON.stringify(orderData));
-
     const orderWithTimestamp = {
-      ...cleanOrderData,
+      ...orderData,
       status: 'Pending', // Default status for a new order
       createdAt: serverTimestamp(),
     };
