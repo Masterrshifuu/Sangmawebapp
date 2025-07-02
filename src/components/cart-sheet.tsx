@@ -16,6 +16,7 @@ import { ScrollArea } from './ui/scroll-area';
 import Image from 'next/image';
 import { QuantitySelector } from './quantity-selector';
 import type { CartItem } from '@/lib/types';
+import { CheckoutSheet } from './checkout-sheet';
 
 export function CartSheet({ children }: { children: React.ReactNode }) {
   const { cartItems, clearCart, cartTotal, cartCount } = useCart();
@@ -73,9 +74,13 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                 <span>Total</span>
                 <span>₹{cartTotal.toFixed(2)}</span>
               </div>
-              <Button className="w-full" size="lg">
-                Proceed to Checkout
-              </Button>
+              <CheckoutSheet>
+                <SheetClose asChild>
+                  <Button className="w-full" size="lg">
+                    Proceed to Checkout
+                  </Button>
+                </SheetClose>
+              </CheckoutSheet>
             </div>
           ) : (
             <SheetClose asChild>
