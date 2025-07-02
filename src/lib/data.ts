@@ -11,10 +11,10 @@ export async function getProducts(): Promise<Product[]> {
       id: doc.id,
       name: data.name || "",
       description: data.description || "",
-      price: data.mrp || 0,
-      imageUrl: data.image || "https://placehold.co/300x300.png",
+      price: (data.price && data.price > 0) ? data.price : (data.mrp || 0),
+      imageUrl: data.imageUrl || data.image || "https://placehold.co/300x300.png",
       category: data.category || "",
-      bestseller: data.bestseller || false,
+      bestseller: data.isBestseller || data.bestseller || false,
     };
   });
   return productList;
