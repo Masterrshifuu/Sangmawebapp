@@ -18,7 +18,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCart } from '@/context/cart-context';
 import { useToast } from '@/hooks/use-toast';
 import { auth } from '@/lib/firebase';
-import { createOrder } from '@/lib/orders';
+import { createOrder, type OrderCreationData } from '@/lib/orders';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { ScrollArea } from './ui/scroll-area';
@@ -135,11 +135,11 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
     }
     setLoading(true);
     try {
-      const orderData = {
+      const orderData: OrderCreationData = {
         userId: user.uid,
-        userName: user.displayName,
-        userEmail: user.email,
-        userPhone: phone,
+        userName: user.displayName || null,
+        userEmail: user.email || null,
+        userPhone: phone || user.phoneNumber || '',
         deliveryAddress: address,
         items: cartItems.map((item) => ({
           id: item.id,
@@ -156,12 +156,12 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
 
       setStep(CheckoutStep.CONFIRMED);
       clearCart();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
       toast({
         variant: 'destructive',
         title: 'Order Failed',
-        description: 'There was an error placing your order. Please try again.',
+        description: error.message || 'There was an error placing your order. Please try again.',
       });
     } finally {
       setLoading(false);
