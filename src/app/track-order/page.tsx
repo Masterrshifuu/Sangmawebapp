@@ -13,7 +13,7 @@ export default function TrackOrderPage() {
       <Card className="w-full max-w-2xl shadow-lg">
         <CardHeader>
           <CardTitle className="font-headline text-2xl">Track Your Order</CardTitle>
-          <CardDescription>Order ID: #SMM123456789</CardDescription>
+          <CardDescription>Example Order ID: DG000001</CardDescription>
         </CardHeader>
         <CardContent>
           <OrderStatusTracker currentStep={2} />
