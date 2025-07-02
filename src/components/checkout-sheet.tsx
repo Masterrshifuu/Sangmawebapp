@@ -28,7 +28,6 @@ enum CheckoutStep {
   CONTACT,
   PAYMENT,
   SUMMARY,
-  CONFIRMED,
 }
 
 export function CheckoutSheet({ children }: { children: React.ReactNode }) {
@@ -154,8 +153,9 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
 
       await createOrder(orderData);
 
-      setStep(CheckoutStep.CONFIRMED);
       clearCart();
+      setOpen(false);
+      router.push('/track-order');
     } catch (error: any) {
       console.error(error);
       toast({
@@ -170,7 +170,7 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
   
   const renderStep = () => {
     // Show a global loader if user state is not resolved yet
-    if (loading && step < CheckoutStep.CONFIRMED) {
+    if (loading && !user) {
       return (
         <div className="flex justify-center items-center h-full py-10">
           <Loader2 className="h-8 w-8 animate-spin" />
@@ -298,25 +298,6 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
             </Button>
           </div>
         );
-      case CheckoutStep.CONFIRMED:
-        return (
-          <div className="text-center space-y-4 py-8">
-            <h3 className="text-2xl font-bold">Order Placed!</h3>
-            <p>
-              Thank you for your purchase. You can track your order in the
-              &quot;Track Order&quot; section.
-            </p>
-            <Button
-              onClick={() => {
-                setOpen(false);
-                router.push('/track-order');
-              }}
-              className="w-full"
-            >
-              Track Your Order
-            </Button>
-          </div>
-        );
       default:
         return null;
     }
@@ -332,8 +313,6 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
         return 'Payment Method';
       case CheckoutStep.SUMMARY:
         return 'Order Summary';
-      case CheckoutStep.CONFIRMED:
-        return 'Order Confirmed';
       default:
         return 'Checkout';
     }
@@ -351,7 +330,7 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
             <div className="w-12 h-1.5 rounded-full bg-muted" />
         </div>
         <SheetHeader className="p-4 pt-0 border-b flex flex-row items-center">
-          {step > CheckoutStep.ADDRESS && step < CheckoutStep.CONFIRMED && (
+          {step > CheckoutStep.ADDRESS && (
             <Button variant="ghost" size="icon" onClick={handleBack} className="mr-2">
               <ArrowLeft className="h-4 w-4" />
             </Button>
