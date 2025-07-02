@@ -1,5 +1,3 @@
-'use server';
-
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import type { Order } from "@/lib/types";
