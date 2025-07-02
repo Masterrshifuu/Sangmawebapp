@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   Sheet,
   SheetContent,
@@ -20,6 +21,7 @@ import { auth } from '@/lib/firebase';
 import { createOrder } from '@/lib/orders';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import type { User } from 'firebase/auth';
+import { ScrollArea } from './ui/scroll-area';
 
 enum CheckoutStep {
   ADDRESS,
@@ -259,16 +261,35 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
               )}
             </div>
             <div className="border-t pt-4">
-              <h4 className="font-semibold">Order Items</h4>
-              <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1 mt-2">
-                {cartItems.map((item) => (
-                  <li key={item.id}>
-                    {item.quantity} x {item.name}
-                  </li>
-                ))}
-              </ul>
-              <div className="text-right font-bold mt-2 text-lg">
-                Total: ₹{cartTotal.toFixed(2)}
+              <h4 className="font-semibold mb-2">Order Items</h4>
+              <ScrollArea className="max-h-48">
+                <div className="space-y-4 pr-4">
+                  {cartItems.map((item) => (
+                    <div key={item.id} className="flex items-start gap-4 text-sm">
+                      <Image
+                        src={item.imageUrl}
+                        alt={item.name}
+                        width={40}
+                        height={40}
+                        className="rounded-md object-cover h-10 w-10 border"
+                        data-ai-hint="product image"
+                      />
+                      <div className="flex-1 space-y-1 overflow-hidden">
+                        <p className="font-medium text-foreground line-clamp-2">{item.name}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Qty: {item.quantity}
+                        </p>
+                      </div>
+                      <p className="font-medium text-foreground">
+                        ₹{(item.price * item.quantity).toFixed(2)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+              <div className="flex justify-between font-bold mt-4 text-lg border-t pt-4">
+                <span>Total</span>
+                <span>₹{cartTotal.toFixed(2)}</span>
               </div>
             </div>
             <Button onClick={handleConfirmOrder} className="w-full" disabled={loading}>
