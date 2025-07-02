@@ -9,7 +9,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +21,7 @@ import { createOrder, type OrderCreationData } from '@/lib/orders';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { ScrollArea } from './ui/scroll-area';
+import { OrderConfirmationDialog } from './order-confirmation-dialog';
 
 enum CheckoutStep {
   ADDRESS,
@@ -39,6 +39,7 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
   const [address, setAddress] = useState('');
   const [phone, setPhone] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'UPI'>('COD');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   const { cartItems, cartTotal, clearCart } = useCart();
   const { toast } = useToast();
@@ -155,17 +156,30 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
 
       clearCart();
       setOpen(false);
-      router.push('/track-order');
+      setShowConfirmation(true);
     } catch (error: any) {
       console.error(error);
+      const detailedMessage = error.message.includes('permission-denied')
+        ? 'Permission denied. Please ensure you are logged in.'
+        : error.message || 'There was an error placing your order. Please try again.';
+
       toast({
         variant: 'destructive',
         title: 'Order Failed',
-        description: error.message || 'There was an error placing your order. Please try again.',
+        description: detailedMessage,
       });
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleTrackOrder = () => {
+    setShowConfirmation(false);
+    router.push('/track-order');
+  };
+
+  const handleContinueShopping = () => {
+    setShowConfirmation(false);
   };
   
   const renderStep = () => {
@@ -319,26 +333,34 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent
-        side="bottom"
-        className="h-auto max-h-[90vh] flex flex-col p-0 rounded-t-2xl"
-        showCloseButton={false}
-      >
-        <div className="flex justify-center py-3" onClick={() => setOpen(false)}>
-            <div className="w-12 h-1.5 rounded-full bg-muted" />
-        </div>
-        <SheetHeader className="p-4 pt-0 border-b flex flex-row items-center">
-          {step > CheckoutStep.ADDRESS && (
-            <Button variant="ghost" size="icon" onClick={handleBack} className="mr-2">
-              <ArrowLeft className="h-4 w-4" />
-            </Button>
-          )}
-          <SheetTitle className="flex-1">{getTitle()}</SheetTitle>
-        </SheetHeader>
-        <div className="p-4 flex-1 overflow-y-auto">{renderStep()}</div>
-      </SheetContent>
-    </Sheet>
+    <>
+      <Sheet open={open} onOpenChange={setOpen}>
+        <SheetTrigger asChild>{children}</SheetTrigger>
+        <SheetContent
+          side="bottom"
+          className="h-auto max-h-[90vh] flex flex-col p-0 rounded-t-2xl"
+          showCloseButton={false}
+        >
+          <div className="flex justify-center py-3" onClick={() => setOpen(false)}>
+              <div className="w-12 h-1.5 rounded-full bg-muted" />
+          </div>
+          <SheetHeader className="p-4 pt-0 border-b flex flex-row items-center">
+            {step > CheckoutStep.ADDRESS && (
+              <Button variant="ghost" size="icon" onClick={handleBack} className="mr-2">
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+            )}
+            <SheetTitle className="flex-1">{getTitle()}</SheetTitle>
+          </SheetHeader>
+          <div className="p-4 flex-1 overflow-y-auto">{renderStep()}</div>
+        </SheetContent>
+      </Sheet>
+      <OrderConfirmationDialog
+        open={showConfirmation}
+        onOpenChange={setShowConfirmation}
+        onTrackOrder={handleTrackOrder}
+        onContinueShopping={handleContinueShopping}
+      />
+    </>
   );
 }
