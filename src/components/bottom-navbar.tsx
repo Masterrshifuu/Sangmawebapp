@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, Search, ShoppingCart, User } from 'lucide-react';
+import { Home, Search, ShoppingCart, User, LayoutGrid } from 'lucide-react';
 import SearchSheet from './search-sheet';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
@@ -39,12 +39,21 @@ const BottomNavbar = () => {
 
   return (
     <footer className="fixed bottom-0 w-full bg-background border-t z-40 md:hidden text-black dark:text-white">
-      <div className="flex justify-around items-center h-14 px-2">
-        <Link href="/" aria-label="Home">
+      <div className="grid grid-cols-5 justify-items-center items-center h-14 px-2">
+        <Link href="/" aria-label="Home" className="flex justify-center w-full">
           <Home
             className={cn(
               'h-7 w-7 transition-transform',
               pathname === '/' && 'scale-110'
+            )}
+          />
+        </Link>
+        
+        <Link href="/categories" aria-label="Categories" className="flex justify-center w-full">
+          <LayoutGrid
+            className={cn(
+              'h-7 w-7 transition-transform',
+              pathname === '/categories' && 'scale-110'
             )}
           />
         </Link>
@@ -76,9 +85,11 @@ const BottomNavbar = () => {
         </CartSheet>
 
         {user ? (
-          <ProfileSheet>{ProfileTrigger}</ProfileSheet>
+          <div className="flex justify-center w-full">
+            <ProfileSheet>{ProfileTrigger}</ProfileSheet>
+          </div>
         ) : (
-          <Link href="/login" aria-label="Profile">
+          <Link href="/login" aria-label="Profile" className="flex justify-center w-full">
             {ProfileTrigger}
           </Link>
         )}

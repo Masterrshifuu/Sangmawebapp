@@ -28,6 +28,7 @@ export async function getCategories(): Promise<Category[]> {
     return {
       id: doc.id,
       name: data.name || "",
+      subcategories: data.subcategories || [],
     };
   });
   return categoryList;

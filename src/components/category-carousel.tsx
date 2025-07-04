@@ -5,6 +5,8 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import type { Category, Product } from "@/lib/types";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 type CategoryCarouselProps = {
   categories: Category[];
@@ -35,30 +37,37 @@ export default function CategoryCarousel({
 
   return (
     <section className="mb-12">
-      <h2 className="text-3xl font-bold font-headline mb-6">Categories</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold font-headline">Categories</h2>
+        <Link href="/categories" className="flex items-center text-sm font-semibold text-primary hover:underline">
+          View All
+          <ChevronRight className="h-4 w-4 ml-1" />
+        </Link>
+      </div>
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <div className="flex w-max space-x-4 pb-4">
           {categories.map((category) => {
             const imageUrl = categoryImages[category.name] || `https://placehold.co/64x64.png`;
             return (
-              <Card
-                key={category.id}
-                className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal"
-              >
-                <div
-                  className="w-16 h-16 mb-2 relative"
-                  data-ai-hint="grocery category"
+              <Link href="/categories" key={category.id}>
+                <Card
+                  className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal"
                 >
-                  <Image
-                    src={imageUrl}
-                    alt={category.name}
-                    fill
-                    sizes="64px"
-                    className="object-contain"
-                  />
-                </div>
-                <span className="font-semibold text-center line-clamp-2">{category.name}</span>
-              </Card>
+                  <div
+                    className="w-16 h-16 mb-2 relative"
+                    data-ai-hint="grocery category"
+                  >
+                    <Image
+                      src={imageUrl}
+                      alt={category.name}
+                      fill
+                      sizes="64px"
+                      className="object-contain"
+                    />
+                  </div>
+                  <span className="font-semibold text-center line-clamp-2">{category.name}</span>
+                </Card>
+              </Link>
             );
           })}
         </div>

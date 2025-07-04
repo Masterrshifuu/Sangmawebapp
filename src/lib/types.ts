@@ -17,6 +17,7 @@ export type CartItem = Product & {
 export type Category = {
   id: string;
   name: string;
+  subcategories?: string[];
 };
 
 export type OrderItem = {
