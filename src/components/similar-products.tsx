@@ -1,13 +1,16 @@
-
-import ProductCard from "@/components/product-card";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import type { Product } from "@/lib/types";
+import ProductCard from '@/components/product-card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import type { Product } from '@/lib/types';
 
 type SimilarProductsProps = {
   products: Product[];
+  onProductClick: (product: Product) => void;
 };
 
-export default function SimilarProducts({ products }: SimilarProductsProps) {
+export default function SimilarProducts({
+  products,
+  onProductClick,
+}: SimilarProductsProps) {
   if (products.length === 0) {
     return null;
   }
@@ -19,7 +22,11 @@ export default function SimilarProducts({ products }: SimilarProductsProps) {
         <div className="flex w-max space-x-4 pb-4">
           {products.map((product) => (
             <div key={product.id} className="w-[200px] flex-shrink-0">
-                <ProductCard product={product} size="small" />
+              <ProductCard
+                product={product}
+                size="small"
+                onProductClick={onProductClick}
+              />
             </div>
           ))}
         </div>
