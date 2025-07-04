@@ -4,12 +4,10 @@ import type { Product } from '@/lib/types';
 
 type SimilarProductsProps = {
   products: Product[];
-  onProductClick: (product: Product) => void;
 };
 
 export default function SimilarProducts({
   products,
-  onProductClick,
 }: SimilarProductsProps) {
   if (products.length === 0) {
     return null;
@@ -25,7 +23,6 @@ export default function SimilarProducts({
               <ProductCard
                 product={product}
                 size="small"
-                onProductClick={onProductClick}
               />
             </div>
           ))}

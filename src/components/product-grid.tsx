@@ -4,13 +4,11 @@ import type { Product } from '@/lib/types';
 type ProductGridProps = {
   title: string;
   products: Product[];
-  onProductClick: (product: Product) => void;
 };
 
 export default function ProductGrid({
   title,
   products,
-  onProductClick,
 }: ProductGridProps) {
   if (products.length === 0) {
     return null;
@@ -25,7 +23,6 @@ export default function ProductGrid({
             key={product.id}
             product={product}
             size="small"
-            onProductClick={onProductClick}
           />
         ))}
       </div>

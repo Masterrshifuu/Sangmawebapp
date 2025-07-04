@@ -1,5 +1,9 @@
 'use client';
 
+// This component is no longer used in the main application flow
+// but is kept to avoid breaking changes if it were referenced elsewhere.
+// The main product view has been reverted to a dedicated page.
+
 import {
   Sheet,
   SheetContent,
@@ -13,24 +17,30 @@ import { AddToCartSection } from '@/components/add-to-cart-section';
 import SimilarProducts from '@/components/similar-products';
 import type { Product } from '@/lib/types';
 import { ScrollArea } from './ui/scroll-area';
+import { useRouter } from 'next/navigation';
 
 interface ProductSheetProps {
   product: Product | null;
   similarProducts: Product[];
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onProductSelect: (product: Product) => void;
 }
 
 export function ProductSheet({
   product,
-  similarProducts,
   open,
   onOpenChange,
-  onProductSelect,
 }: ProductSheetProps) {
+  const router = useRouter();
+
   if (!product) {
     return null;
+  }
+  
+  // This handler is a fallback to navigate to the page-based view
+  const handleProductSelect = (selectedProduct: Product) => {
+      onOpenChange(false);
+      router.push(`/product/${selectedProduct.id}`);
   }
 
   return (
@@ -81,10 +91,11 @@ export function ProductSheet({
                 <AddToCartSection product={product} />
               </div>
             </div>
-            <SimilarProducts
+            {/* The similar products would be passed here, but for this fallback, it's okay to omit */}
+            {/* <SimilarProducts
               products={similarProducts}
-              onProductClick={onProductSelect}
-            />
+              onProductClick={handleProductSelect}
+            /> */}
           </div>
         </ScrollArea>
       </SheetContent>
