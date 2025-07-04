@@ -27,6 +27,12 @@ const nextConfig: NextConfig = {
         hostname: 'www.bbassets.com',
         port: '',
         pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fetchnbuy.in',
+        port: '',
+        pathname: '/**',
       }
     ],
   },
