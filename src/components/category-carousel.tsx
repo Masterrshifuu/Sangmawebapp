@@ -43,7 +43,7 @@ export default function CategoryCarousel({
             return (
               <Card
                 key={category.id}
-                className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer"
+                className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal"
               >
                 <div
                   className="w-16 h-16 mb-2 relative"
