@@ -1,7 +1,10 @@
+'use client';
+
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import type { Category, Product } from "@/lib/types";
+import { useState, useEffect } from "react";
 
 type CategoryCarouselProps = {
   categories: Category[];
@@ -12,16 +15,23 @@ export default function CategoryCarousel({
   categories,
   products,
 }: CategoryCarouselProps) {
-  const getCategoryImage = (categoryName: string) => {
-    const productsInCategory = products.filter(
-      (p) => p.category === categoryName
-    );
-    if (productsInCategory.length > 0) {
-      const randomIndex = Math.floor(Math.random() * productsInCategory.length);
-      return productsInCategory[randomIndex].imageUrl;
+  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const images: Record<string, string> = {};
+    for (const category of categories) {
+      const productsInCategory = products.filter(
+        (p) => p.category === category.name
+      );
+      if (productsInCategory.length > 0) {
+        const randomIndex = Math.floor(Math.random() * productsInCategory.length);
+        images[category.name] = productsInCategory[randomIndex].imageUrl;
+      } else {
+        images[category.name] = `https://placehold.co/64x64.png`;
+      }
     }
-    return `https://placehold.co/64x64.png`;
-  };
+    setCategoryImages(images);
+  }, [categories, products]);
 
   return (
     <section className="mb-12">
@@ -29,7 +39,7 @@ export default function CategoryCarousel({
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <div className="flex w-max space-x-4 pb-4">
           {categories.map((category) => {
-            const imageUrl = getCategoryImage(category.name);
+            const imageUrl = categoryImages[category.name] || `https://placehold.co/64x64.png`;
             return (
               <Card
                 key={category.id}
@@ -47,7 +57,7 @@ export default function CategoryCarousel({
                     className="object-contain"
                   />
                 </div>
-                <span className="font-semibold text-center">{category.name}</span>
+                <span className="font-semibold text-center line-clamp-2">{category.name}</span>
               </Card>
             );
           })}
