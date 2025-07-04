@@ -18,7 +18,7 @@ export default async function Home() {
   return (
     <AuthWrapper>
       <div className="container mx-auto px-4 py-8">
-        <CategoryCarousel categories={categories} />
+        <CategoryCarousel categories={categories} products={products} />
         
         <ProductGrid title="Bestsellers" products={bestsellers} />
 
