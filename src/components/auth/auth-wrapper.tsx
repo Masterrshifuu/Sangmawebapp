@@ -12,10 +12,20 @@ export default function AuthWrapper({ children }: { children: React.ReactNode })
   const [isAuthenticating, setIsAuthenticating] = useState(true);
 
   useEffect(() => {
+    // This check runs only on the client-side.
+    if (sessionStorage.getItem('skippedLogin') === 'true') {
+      setIsAuthenticating(false);
+      return;
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
+        // If a user is found, they are authenticated.
+        // We can remove the flag as it's no longer needed.
+        sessionStorage.removeItem('skippedLogin');
         setIsAuthenticating(false);
       } else {
+        // If no user is found and they haven't skipped, redirect to login.
         router.push('/login');
       }
     });

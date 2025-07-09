@@ -96,6 +96,11 @@ export default function AuthPage() {
     }
   };
 
+  const handleSkipLogin = () => {
+    sessionStorage.setItem('skippedLogin', 'true');
+    router.push('/');
+  };
+
 
   if (authCheckLoading) {
     return (
@@ -180,6 +185,11 @@ export default function AuthPage() {
           <p className="px-4 pt-2 text-center text-xs text-muted-foreground">
             By continuing, you agree to our Terms of Service and Privacy Policy.
           </p>
+          <div className="border-t pt-4 mt-4">
+            <Button variant="link" className="w-full text-muted-foreground" onClick={handleSkipLogin}>
+              Skip for now
+            </Button>
+          </div>
         </CardContent>
       </Card>
       <div ref={recaptchaContainerRef}></div>
