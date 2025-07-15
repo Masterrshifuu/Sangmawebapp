@@ -7,7 +7,7 @@ import LocationSheet from './location-sheet';
 import { cn } from '@/lib/utils';
 import Logo from './logo';
 import Link from 'next/link';
-import { CartSheet } from './cart-sheet';
+import { Cart } from './cart-sheet';
 import { Button } from './ui/button';
 import { useCart } from '@/context/cart-context';
 import { SearchWrapper } from './search';
@@ -59,7 +59,7 @@ export default function Header() {
               </div>
 
               <div className="hidden md:flex items-center gap-2">
-                <CartSheet>
+                <Cart>
                   <Button variant="ghost" size="icon" className="relative">
                     <ShoppingCart className="w-5 h-5" />
                     {cartCount > 0 && (
@@ -69,7 +69,7 @@ export default function Header() {
                     )}
                     <span className="sr-only">Shopping Cart</span>
                   </Button>
-                </CartSheet>
+                </Cart>
               </div>
             </div>
           </div>

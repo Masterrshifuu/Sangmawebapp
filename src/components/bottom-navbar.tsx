@@ -7,7 +7,7 @@ import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { CartSheet } from './cart-sheet';
+import { Cart } from './cart-sheet';
 import { ProfileSheet } from './profile-sheet';
 import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
@@ -61,7 +61,7 @@ const BottomNavbar = () => {
 
         <SearchWrapper isBottomNav={true} />
 
-        <CartSheet>
+        <Cart>
           <Button
             variant="ghost"
             className="p-0 h-auto text-current hover:bg-transparent relative"
@@ -75,7 +75,7 @@ const BottomNavbar = () => {
             )}
             <span className="sr-only">Cart</span>
           </Button>
-        </CartSheet>
+        </Cart>
 
         {user ? (
           <div className="flex justify-center w-full">
