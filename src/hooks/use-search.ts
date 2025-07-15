@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,7 +7,7 @@ import { searchProducts } from '@/lib/search';
 import { getProducts } from '@/lib/data';
 import type { Product } from '@/lib/types';
 
-export function useSearch(open: boolean) {
+export function useSearch(open: boolean, isDesktop: boolean = false) {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [initialProducts, setInitialProducts] = useState<Product[]>([]);
@@ -15,7 +16,9 @@ export function useSearch(open: boolean) {
   const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
 
   useEffect(() => {
-    if (open && !hasFetchedInitial) {
+    // For desktop, we fetch initial products right away.
+    // For mobile, we wait until the sheet is opened.
+    if ((isDesktop || open) && !hasFetchedInitial) {
       const fetchInitialProducts = async () => {
         setIsLoading(true);
         setSearchSource(null);
@@ -41,7 +44,7 @@ export function useSearch(open: boolean) {
 
       fetchInitialProducts();
     }
-  }, [open, hasFetchedInitial]);
+  }, [open, hasFetchedInitial, isDesktop]);
 
   useEffect(() => {
     if (!hasFetchedInitial) return;
