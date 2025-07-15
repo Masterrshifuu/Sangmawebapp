@@ -6,37 +6,46 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion"
-import type { Category } from "@/lib/types";
-import { ChevronRight } from "lucide-react";
+import type { Category, Product } from "@/lib/types";
+import ProductCard from "./product-card";
 
 type CategoryListProps = {
   categories: Category[];
+  products: Product[];
 };
 
-export default function CategoryList({ categories }: CategoryListProps) {
+export default function CategoryList({ categories, products }: CategoryListProps) {
   return (
     <Accordion type="multiple" className="w-full">
-      {categories.map((category) => (
-        <AccordionItem value={category.id} key={category.id}>
-          <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-            {category.name}
-          </AccordionTrigger>
-          <AccordionContent>
-            {category.subcategories && category.subcategories.length > 0 ? (
-              <ul className="pl-4 space-y-2 pt-2">
-                {category.subcategories.map((sub, index) => (
-                  <li key={index} className="flex items-center text-muted-foreground hover:text-foreground cursor-pointer">
-                     <ChevronRight className="h-4 w-4 mr-2" />
-                    {sub}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="pl-4 text-muted-foreground">No subcategories available.</p>
-            )}
-          </AccordionContent>
-        </AccordionItem>
-      ))}
+      {categories.map((category) => {
+        const productsInCategory = products.filter(
+          (p) => p.category === category.name
+        );
+        return (
+          <AccordionItem value={category.id} key={category.id}>
+            <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+              {category.name}
+            </AccordionTrigger>
+            <AccordionContent>
+              {productsInCategory.length > 0 ? (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 pt-2">
+                  {productsInCategory.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      size="small"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="pl-4 text-muted-foreground">
+                  No products in this category.
+                </p>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        );
+      })}
     </Accordion>
   );
 }
