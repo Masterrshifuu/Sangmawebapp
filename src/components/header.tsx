@@ -1,8 +1,8 @@
+
 'use client';
 
-import { Search, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import SearchSheet from './search-sheet';
 import LocationSheet from './location-sheet';
 import { cn } from '@/lib/utils';
 import Logo from './logo';
@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { CartSheet } from './cart-sheet';
 import { Button } from './ui/button';
 import { useCart } from '@/context/cart-context';
+import { SearchWrapper } from './search';
 
 export default function Header() {
   const [location, setLocation] = useState('Chandmari, South Tura');
@@ -75,12 +76,7 @@ export default function Header() {
         </div>
 
         <div>
-          <SearchSheet>
-            <button className="flex items-center w-full h-11 rounded-lg bg-muted px-4 text-left text-sm text-muted-foreground hover:bg-secondary/80 transition-colors">
-              <Search className="h-5 w-5 mr-3" />
-              <span>Search for products...</span>
-            </button>
-          </SearchSheet>
+          <SearchWrapper />
         </div>
       </div>
     </header>

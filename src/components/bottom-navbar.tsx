@@ -1,8 +1,8 @@
+
 'use client';
 
 import Link from 'next/link';
 import { Home, Search, ShoppingCart, User, LayoutGrid } from 'lucide-react';
-import SearchSheet from './search-sheet';
 import { Button } from './ui/button';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { useCart } from '@/context/cart-context';
+import { SearchWrapper } from './search';
 
 const BottomNavbar = () => {
   const pathname = usePathname();
@@ -58,15 +59,7 @@ const BottomNavbar = () => {
           />
         </Link>
 
-        <SearchSheet>
-          <Button
-            variant="ghost"
-            className="p-0 h-auto text-current hover:bg-transparent"
-          >
-            <Search className="h-7 w-7" />
-            <span className="sr-only">Search</span>
-          </Button>
-        </SearchSheet>
+        <SearchWrapper isBottomNav={true} />
 
         <CartSheet>
           <Button

@@ -15,25 +15,17 @@ import { ScrollArea } from "./ui/scroll-area";
 import { Badge } from "./ui/badge";
 import { useSearch } from "@/hooks/use-search";
 
-export default function SearchSheet({
+export default function MobileSearch({
   children,
 }: {
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const { query, setQuery, results, isLoading, searchSource, hasFetchedInitial } = useSearch(open);
 
-  const trigger =
-    children ?? (
-      <button>
-        <Search className="w-5 h-5" />
-        <span className="sr-only">Search</span>
-      </button>
-    );
-
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{trigger}</SheetTrigger>
+      <SheetTrigger asChild>{children}</SheetTrigger>
       <SheetContent
         side="bottom"
         className="h-[86vh] flex flex-col p-0 rounded-t-2xl bg-card"
