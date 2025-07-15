@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -156,7 +157,7 @@ export default function AuthPage() {
                   disabled={loading}
                 />
               </div>
-              <Button type="submit" variant="destructive" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Continue with Phone
               </Button>
@@ -175,7 +176,7 @@ export default function AuthPage() {
                   disabled={loading}
                 />
               </div>
-              <Button type="submit" variant="destructive" className="w-full" disabled={loading}>
+              <Button type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Verify & Continue
               </Button>
