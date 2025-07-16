@@ -9,15 +9,16 @@ export const metadata: Metadata = {
   description: 'Browse all product categories and subcategories.',
 };
 
-export default async function CategoriesPage() {
+export default async function CategoriesPage({ searchParams }: { searchParams: { open?: string } }) {
   const categories = await getCategories();
   const products: Product[] = await getProducts();
+  const openCategoryId = searchParams.open;
 
   return (
     <AuthWrapper>
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold font-headline mb-8">All Categories</h1>
-        <CategoryList categories={categories} products={products} />
+        <CategoryList categories={categories} products={products} openCategoryId={openCategoryId} />
       </div>
     </AuthWrapper>
   );

@@ -49,7 +49,7 @@ export default function CategoryCarousel({
           {categories.map((category) => {
             const imageUrl = categoryImages[category.name] || `https://placehold.co/64x64.png`;
             return (
-              <Link href="/categories" key={category.id}>
+              <Link href={`/categories?open=${category.id}`} key={category.id}>
                 <Card
                   className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal"
                 >

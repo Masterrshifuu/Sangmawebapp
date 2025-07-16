@@ -12,11 +12,12 @@ import ProductCard from "./product-card";
 type CategoryListProps = {
   categories: Category[];
   products: Product[];
+  openCategoryId?: string;
 };
 
-export default function CategoryList({ categories, products }: CategoryListProps) {
+export default function CategoryList({ categories, products, openCategoryId }: CategoryListProps) {
   return (
-    <Accordion type="multiple" className="w-full">
+    <Accordion type="multiple" defaultValue={openCategoryId ? [openCategoryId] : []} className="w-full">
       {categories.map((category) => {
         const productsInCategory = products.filter(
           (p) => p.category === category.name
