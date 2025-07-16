@@ -25,12 +25,11 @@ export default function DesktopSearch() {
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              if (!open) {
-                setOpen(true);
-              }
             }}
-            className="bg-muted pl-10"
-            onClick={() => setOpen(true)}
+            onFocus={() => {
+              if (!open) setOpen(true);
+            }}
+            className="bg-background pl-10 shadow-sm"
           />
         </div>
       </PopoverTrigger>

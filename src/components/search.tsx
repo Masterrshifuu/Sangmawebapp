@@ -28,7 +28,7 @@ export function SearchWrapper({ isBottomNav = false }: { isBottomNav?: boolean }
     // In the header on mobile, we show the search bar trigger
     return (
       <MobileSearch>
-        <button className="flex items-center w-full h-11 rounded-lg bg-muted px-4 text-left text-sm text-muted-foreground hover:bg-secondary/80 transition-colors">
+        <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-secondary/80 transition-colors">
           <Search className="h-5 w-5 mr-3" />
           <span>Search for products...</span>
         </button>

@@ -47,7 +47,7 @@ export default function MobileSearch({
                 placeholder="e.g., 'fresh vegetables' or 'milk'"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="bg-muted pl-10"
+                className="bg-background pl-10 shadow-sm"
                 autoFocus
               />
             </div>
