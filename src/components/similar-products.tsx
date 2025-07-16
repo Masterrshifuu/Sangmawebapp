@@ -1,5 +1,4 @@
 import ProductCard from '@/components/product-card';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import type { Product } from '@/lib/types';
 
 type SimilarProductsProps = {
@@ -16,19 +15,15 @@ export default function SimilarProducts({
   return (
     <section className="mt-16">
       <h2 className="text-3xl font-bold font-headline mb-6">Similar Products</h2>
-      <ScrollArea className="w-full whitespace-nowrap rounded-md">
-        <div className="flex w-max space-x-4 pb-4">
-          {products.map((product) => (
-            <div key={product.id} className="w-[200px] flex-shrink-0">
-              <ProductCard
-                product={product}
-                size="small"
-              />
-            </div>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            size="small"
+          />
+        ))}
+      </div>
     </section>
   );
 }
