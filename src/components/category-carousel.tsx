@@ -7,6 +7,7 @@ import type { Category, Product } from "@/lib/types";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type CategoryCarouselProps = {
   categories: Category[];
@@ -17,23 +18,47 @@ export default function CategoryCarousel({
   categories,
   products,
 }: CategoryCarouselProps) {
-  const [categoryImages, setCategoryImages] = useState<Record<string, string>>({});
+  const [categoryImageUrls, setCategoryImageUrls] = useState<Record<string, string[]>>({});
+  const [currentImageIndices, setCurrentImageIndices] = useState<Record<string, number>>({});
 
   useEffect(() => {
-    const images: Record<string, string> = {};
+    const images: Record<string, string[]> = {};
+    const initialIndices: Record<string, number> = {};
+
     for (const category of categories) {
       const productsInCategory = products.filter(
         (p) => p.category === category.name
       );
       if (productsInCategory.length > 0) {
-        const randomIndex = Math.floor(Math.random() * productsInCategory.length);
-        images[category.name] = productsInCategory[randomIndex].imageUrl;
+        images[category.id] = productsInCategory.map(p => p.imageUrl);
       } else {
-        images[category.name] = `https://placehold.co/64x64.png`;
+        images[category.id] = [`https://placehold.co/64x64.png`];
       }
+      initialIndices[category.id] = 0;
     }
-    setCategoryImages(images);
+    setCategoryImageUrls(images);
+    setCurrentImageIndices(initialIndices);
   }, [categories, products]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndices(prevIndices => {
+        const newIndices: Record<string, number> = {};
+        for (const categoryId in prevIndices) {
+          const imagesForCategory = categoryImageUrls[categoryId] || [];
+          if (imagesForCategory.length > 1) {
+            newIndices[categoryId] = (prevIndices[categoryId] + 1) % imagesForCategory.length;
+          } else {
+            newIndices[categoryId] = 0;
+          }
+        }
+        return newIndices;
+      });
+    }, 3000); // Change image every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [categoryImageUrls]);
+
 
   return (
     <section className="mb-12">
@@ -47,23 +72,32 @@ export default function CategoryCarousel({
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <div className="flex w-max space-x-4 pb-4">
           {categories.map((category) => {
-            const imageUrl = categoryImages[category.name] || `https://placehold.co/64x64.png`;
+            const imageUrls = categoryImageUrls[category.id] || [`https://placehold.co/64x64.png`];
+            const currentIndex = currentImageIndices[category.id] || 0;
+            const imageUrl = imageUrls[currentIndex];
+
             return (
               <Link href={`/categories?open=${category.id}`} key={category.id}>
                 <Card
-                  className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal"
+                  className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal overflow-hidden"
                 >
                   <div
                     className="w-16 h-16 mb-2 relative"
                     data-ai-hint="grocery category"
                   >
-                    <Image
-                      src={imageUrl}
-                      alt={category.name}
-                      fill
-                      sizes="64px"
-                      className="object-contain"
-                    />
+                   {imageUrls.map((url, index) => (
+                      <Image
+                        key={url}
+                        src={url}
+                        alt={`${category.name} - image ${index + 1}`}
+                        fill
+                        sizes="64px"
+                        className={cn(
+                            "object-contain transition-opacity duration-1000 ease-in-out",
+                            index === currentIndex ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                    ))}
                   </div>
                   <span className="font-semibold text-center line-clamp-2">{category.name}</span>
                 </Card>
