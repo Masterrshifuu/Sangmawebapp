@@ -13,7 +13,6 @@ import { useSearch } from "@/hooks/use-search";
 export default function DesktopSearch() {
   const [open, setOpen] = useState(false);
   const { query, setQuery, results, isLoading, searchSource, hasFetchedInitial } = useSearch(open, true);
-  const imageUrls = results.map(p => p.imageUrl);
   
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -24,14 +23,14 @@ export default function DesktopSearch() {
             type="text"
             placeholder="Search for products..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            className="bg-muted pl-10"
-            onFocus={() => {
-              // Open on focus only if there's no query, to show initial items
-              if (query.trim() || !hasFetchedInitial) {
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (!open) {
                 setOpen(true);
               }
             }}
+            className="bg-muted pl-10"
+            onClick={() => setOpen(true)}
           />
         </div>
       </PopoverTrigger>
@@ -67,7 +66,6 @@ export default function DesktopSearch() {
                     product={product}
                     size="small"
                     onProductClick={() => setOpen(false)}
-                    imageUrls={imageUrls}
                   />
                 ))}
               </div>

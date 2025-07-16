@@ -12,8 +12,6 @@ export default function SimilarProducts({
     return null;
   }
 
-  const imageUrls = products.map(p => p.imageUrl);
-
   return (
     <section className="mt-16">
       <h2 className="text-3xl font-bold font-headline mb-6">Similar Products</h2>
@@ -23,7 +21,6 @@ export default function SimilarProducts({
             key={product.id}
             product={product}
             size="small"
-            imageUrls={imageUrls}
           />
         ))}
       </div>

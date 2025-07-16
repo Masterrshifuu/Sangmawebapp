@@ -16,37 +16,21 @@ import { type Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/cart-context';
 import { QuantitySelector } from './quantity-selector';
-import { useState, useEffect } from 'react';
 
 type ProductCardProps = {
   product: Product;
   size?: 'default' | 'small';
   onProductClick?: () => void;
-  imageUrls?: string[];
 };
 
 export default function ProductCard({
   product,
   size = 'default',
   onProductClick,
-  imageUrls = [],
 }: ProductCardProps) {
   const { addToCart, removeFromCart, getItemQuantity } = useCart();
   const quantity = getItemQuantity(product.id);
   const isSmall = size === 'small';
-  const displayImageUrls = imageUrls.length > 0 ? imageUrls : [product.imageUrl];
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    if (displayImageUrls.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex(prevIndex => (prevIndex + 1) % displayImageUrls.length);
-    }, 3000 + Math.random() * 1000); 
-
-    return () => clearInterval(interval);
-  }, [displayImageUrls.length]);
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
@@ -56,24 +40,15 @@ export default function ProductCard({
         className="flex flex-col flex-grow"
       >
         <CardHeader className="p-0 relative">
-          <div className="aspect-square w-full relative overflow-hidden">
-             <div 
-              className="absolute inset-0 flex transition-transform duration-1000 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {displayImageUrls.map((url, index) => (
-                <div key={`${url}-${index}`} className="absolute top-0 left-0 w-full h-full flex-shrink-0" style={{ transform: `translateX(${index * 100}%)` }}>
-                    <Image
-                        src={url}
-                        alt={`${product.name} - image ${index + 1}`}
-                        fill
-                        sizes="(max-width: 768px) 50vw, 20vw"
-                        className="object-contain p-2"
-                        data-ai-hint="product image"
-                    />
-                </div>
-              ))}
-            </div>
+          <div className="aspect-square w-full relative">
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, 20vw"
+              className="object-contain p-2"
+              data-ai-hint="product image"
+            />
           </div>
           <Badge
             variant="secondary"

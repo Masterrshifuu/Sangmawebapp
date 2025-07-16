@@ -14,8 +14,6 @@ export default function ProductGrid({
     return null;
   }
   
-  const allImageUrls = products.map(p => p.imageUrl);
-
   return (
     <section className="mb-12">
       <h2 className="text-3xl font-bold font-headline mb-6">{title}</h2>
@@ -25,7 +23,6 @@ export default function ProductGrid({
             key={product.id}
             product={product}
             size="small"
-            imageUrls={allImageUrls}
           />
         ))}
       </div>
