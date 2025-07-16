@@ -16,11 +16,11 @@ export default function DesktopSearch() {
   const triggerRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    // Open popover if there's a query and results, or if loading
-    if ((query.trim() && (results.length > 0 || isLoading)) || (isLoading && !hasFetchedInitial)) {
+    // Open popover only if user is actively searching
+    if (query.trim()) {
       setOpen(true);
     }
-  }, [query, results, isLoading, hasFetchedInitial]);
+  }, [query, results, isLoading]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -33,7 +33,12 @@ export default function DesktopSearch() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             className="bg-muted pl-10"
-            onFocus={() => setOpen(true)}
+            onFocus={() => {
+              // Open on focus only if there's no query, to show initial items
+              if (!query.trim()) {
+                setOpen(true);
+              }
+            }}
           />
         </div>
       </PopoverTrigger>
