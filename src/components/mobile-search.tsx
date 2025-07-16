@@ -22,6 +22,7 @@ export default function MobileSearch({
 }) {
   const [open, setOpen] = useState(false);
   const { query, setQuery, results, isLoading, searchSource, hasFetchedInitial } = useSearch(open);
+  const imageUrls = results.map(p => p.imageUrl);
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -81,6 +82,7 @@ export default function MobileSearch({
                     product={product}
                     size="small"
                     onProductClick={() => setOpen(false)}
+                    imageUrls={imageUrls}
                   />
                 ))}
               </div>

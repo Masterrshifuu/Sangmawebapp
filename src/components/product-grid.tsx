@@ -13,6 +13,8 @@ export default function ProductGrid({
   if (products.length === 0) {
     return null;
   }
+  
+  const allImageUrls = products.map(p => p.imageUrl);
 
   return (
     <section className="mb-12">
@@ -23,6 +25,7 @@ export default function ProductGrid({
             key={product.id}
             product={product}
             size="small"
+            imageUrls={allImageUrls}
           />
         ))}
       </div>

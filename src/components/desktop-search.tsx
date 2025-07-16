@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Search, Loader2, Bot } from "lucide-react";
@@ -13,19 +13,12 @@ import { useSearch } from "@/hooks/use-search";
 export default function DesktopSearch() {
   const [open, setOpen] = useState(false);
   const { query, setQuery, results, isLoading, searchSource, hasFetchedInitial } = useSearch(open, true);
-  const triggerRef = useRef<HTMLDivElement>(null);
+  const imageUrls = results.map(p => p.imageUrl);
   
-  useEffect(() => {
-    // Open popover only if user is actively searching
-    if (query.trim()) {
-      setOpen(true);
-    }
-  }, [query, results, isLoading]);
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <div className="relative w-full" ref={triggerRef}>
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
           <Input
             type="text"
@@ -35,7 +28,7 @@ export default function DesktopSearch() {
             className="bg-muted pl-10"
             onFocus={() => {
               // Open on focus only if there's no query, to show initial items
-              if (!query.trim()) {
+              if (query.trim() || !hasFetchedInitial) {
                 setOpen(true);
               }
             }}
@@ -74,6 +67,7 @@ export default function DesktopSearch() {
                     product={product}
                     size="small"
                     onProductClick={() => setOpen(false)}
+                    imageUrls={imageUrls}
                   />
                 ))}
               </div>

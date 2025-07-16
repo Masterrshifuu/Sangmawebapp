@@ -22,6 +22,8 @@ export default function CategoryList({ categories, products, openCategoryId }: C
         const productsInCategory = products.filter(
           (p) => p.category === category.name
         );
+        const imageUrls = productsInCategory.map(p => p.imageUrl);
+
         return (
           <AccordionItem value={category.id} key={category.id}>
             <AccordionTrigger className="text-lg font-semibold hover:no-underline">
@@ -35,6 +37,7 @@ export default function CategoryList({ categories, products, openCategoryId }: C
                       key={product.id}
                       product={product}
                       size="small"
+                      imageUrls={imageUrls}
                     />
                   ))}
                 </div>
