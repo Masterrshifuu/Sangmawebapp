@@ -69,7 +69,7 @@ export default function ProductPage() {
               src={product.imageUrl}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-contain p-4"
               data-ai-hint="product image"
             />
              <Badge

@@ -285,7 +285,7 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
                         alt={item.name}
                         width={40}
                         height={40}
-                        className="rounded-md object-cover h-10 w-10 border"
+                        className="rounded-md object-contain h-10 w-10 border"
                         data-ai-hint="product image"
                       />
                       <div className="flex-1 space-y-1 overflow-hidden">

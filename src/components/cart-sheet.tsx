@@ -94,7 +94,7 @@ function CartItemRow({ item }: { item: CartItem }) {
         alt={item.name}
         width={64}
         height={64}
-        className="rounded-md object-cover h-16 w-16 border"
+        className="rounded-md object-contain h-16 w-16 border"
         data-ai-hint="product image"
       />
       <div className="flex-1 space-y-1 overflow-hidden">

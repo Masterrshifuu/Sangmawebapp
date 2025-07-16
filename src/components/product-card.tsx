@@ -46,7 +46,7 @@ export default function ProductCard({
               src={imageUrl}
               alt={product.name}
               fill
-              className="object-cover"
+              className="object-contain p-2"
               data-ai-hint="product image"
             />
           </div>
