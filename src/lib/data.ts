@@ -8,20 +8,22 @@ export async function getProducts(): Promise<Product[]> {
   const productList = productSnapshot.docs
     .map(doc => {
       const data = doc.data();
+      const imageUrl = data.imageUrl || data.image || null;
       return {
         id: doc.id,
         name: data.name || "",
         description: data.description || "",
         price: (data.price && data.price > 0) ? data.price : (data.mrp || 0),
-        imageUrl: data.imageUrl || data.image || null, // Set to null if no image
+        imageUrl: typeof imageUrl === 'string' && imageUrl.trim() !== '' ? imageUrl : null,
         category: data.category || "",
         bestseller: data.isBestseller || data.bestseller || false,
       };
     })
-    .filter(product => product.imageUrl !== null) // Filter out products without an image
+    .filter(product => product.imageUrl !== null) // Filter out products without a valid image URL
     .map(product => ({
       ...product,
-      imageUrl: product.imageUrl || "https://placehold.co/300x300.png", // Assign placeholder to satisfy type, though it should not be null here
+      // This mapping is now safe because the filter has removed nulls.
+      imageUrl: product.imageUrl as string, 
     }));
     
   return productList as Product[];
