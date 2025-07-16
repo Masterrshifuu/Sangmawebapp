@@ -8,7 +8,6 @@ import type { Category, Product } from "@/lib/types";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 type CategoryCarouselProps = {
   categories: Category[];
@@ -86,11 +85,11 @@ export default function CategoryCarousel({
                     data-ai-hint="grocery category"
                   >
                    <div 
-                      className="absolute inset-0 transition-transform duration-1000 ease-in-out"
-                      style={{ transform: `translateY(-${currentIndex * 100}%)` }}
+                      className="absolute inset-0 flex transition-transform duration-1000 ease-in-out"
+                      style={{ transform: `translateX(-${currentIndex * 100}%)` }}
                     >
                       {imageUrls.map((url, index) => (
-                        <div key={`${url}-${index}`} className="absolute top-0 left-0 w-full h-full" style={{ transform: `translateY(${index * 100}%)` }}>
+                        <div key={`${url}-${index}`} className="absolute top-0 left-0 w-full h-full flex-shrink-0" style={{ transform: `translateX(${index * 100}%)` }}>
                             <Image
                                 src={url}
                                 alt={`${category.name} - image ${index + 1}`}
