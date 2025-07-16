@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -24,14 +25,15 @@ import type { CartItem } from '@/lib/types';
 import { CheckoutSheet } from './checkout-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 function CartContent() {
   const { cartItems, clearCart, cartTotal, cartCount } = useCart();
 
   return (
     <>
-      <SheetHeader className="p-4 border-b flex flex-row justify-between items-center">
-        <SheetTitle className="text-lg">Your Cart ({cartCount})</SheetTitle>
+      <div className={cn("p-4 border-b flex flex-row justify-between items-center text-center sm:text-left")}>
+        <h2 className="text-lg font-semibold text-foreground">Your Cart ({cartCount})</h2>
         {cartCount > 0 && (
           <Button
             variant="ghost"
@@ -43,7 +45,7 @@ function CartContent() {
             <span className="sr-only">Clear Cart</span>
           </Button>
         )}
-      </SheetHeader>
+      </div>
 
       <div className="flex-1 flex flex-col">
         {cartCount === 0 ? (
