@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from "next/image";
@@ -74,30 +75,32 @@ export default function CategoryCarousel({
           {categories.map((category) => {
             const imageUrls = categoryImageUrls[category.id] || [`https://placehold.co/64x64.png`];
             const currentIndex = currentImageIndices[category.id] || 0;
-            const imageUrl = imageUrls[currentIndex];
-
+            
             return (
               <Link href={`/categories?open=${category.id}`} key={category.id}>
                 <Card
                   className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal overflow-hidden"
                 >
                   <div
-                    className="w-16 h-16 mb-2 relative"
+                    className="w-16 h-16 mb-2 relative overflow-hidden"
                     data-ai-hint="grocery category"
                   >
-                   {imageUrls.map((url, index) => (
-                      <Image
-                        key={url}
-                        src={url}
-                        alt={`${category.name} - image ${index + 1}`}
-                        fill
-                        sizes="64px"
-                        className={cn(
-                            "object-contain transition-opacity duration-1000 ease-in-out",
-                            index === currentIndex ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                    ))}
+                   <div 
+                      className="absolute inset-0 transition-transform duration-1000 ease-in-out"
+                      style={{ transform: `translateY(-${currentIndex * 100}%)` }}
+                    >
+                      {imageUrls.map((url, index) => (
+                        <div key={`${url}-${index}`} className="absolute top-0 left-0 w-full h-full" style={{ transform: `translateY(${index * 100}%)` }}>
+                            <Image
+                                src={url}
+                                alt={`${category.name} - image ${index + 1}`}
+                                fill
+                                sizes="64px"
+                                className="object-contain"
+                            />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <span className="font-semibold text-center line-clamp-2">{category.name}</span>
                 </Card>
