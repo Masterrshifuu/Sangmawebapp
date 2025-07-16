@@ -57,26 +57,27 @@ export default function Header() {
                 </Link>
                 <LocationSheet location={location} onSave={handleSaveLocation} />
               </div>
-
-              <div className="hidden md:flex items-center gap-2">
-                <Cart>
-                  <Button variant="ghost" size="icon" className="relative">
-                    <ShoppingCart className="w-5 h-5" />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                        {cartCount}
-                      </span>
-                    )}
-                    <span className="sr-only">Shopping Cart</span>
-                  </Button>
-                </Cart>
-              </div>
             </div>
           </div>
         </div>
 
-        <div>
-          <SearchWrapper />
+        <div className="flex items-center gap-4">
+          <div className="flex-grow">
+             <SearchWrapper />
+          </div>
+          <div className="hidden md:flex items-center">
+            <Cart>
+              <Button variant="ghost" size="icon" className="relative">
+                <ShoppingCart className="w-5 h-5" />
+                 {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+                <span className="sr-only">Shopping Cart</span>
+              </Button>
+            </Cart>
+          </div>
         </div>
       </div>
     </header>
