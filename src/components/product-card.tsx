@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from 'next/image';
@@ -17,39 +16,21 @@ import { type Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/context/cart-context';
 import { QuantitySelector } from './quantity-selector';
-import { useEffect, useState } from 'react';
 
 type ProductCardProps = {
   product: Product;
-  imageUrls?: string[];
   size?: 'default' | 'small';
   onProductClick?: () => void;
 };
 
 export default function ProductCard({
   product,
-  imageUrls = [],
   size = 'default',
   onProductClick,
 }: ProductCardProps) {
   const { addToCart, removeFromCart, getItemQuantity } = useCart();
   const quantity = getItemQuantity(product.id);
   const isSmall = size === 'small';
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  const imagesToDisplay = imageUrls.length > 0 ? imageUrls : [product.imageUrl];
-
-  useEffect(() => {
-    if (imagesToDisplay.length <= 1) return;
-
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % imagesToDisplay.length);
-    }, 3000); // Change image every 3 seconds
-
-    return () => clearInterval(interval);
-  }, [imagesToDisplay.length]);
-
 
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
@@ -59,24 +40,15 @@ export default function ProductCard({
         className="flex flex-col flex-grow"
       >
         <CardHeader className="p-0 relative">
-          <div className="aspect-square w-full relative overflow-hidden">
-             <div
-              className="absolute inset-0 flex transition-transform duration-1000 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
-            >
-              {imagesToDisplay.map((url, index) => (
-                <div key={index} className="relative w-full h-full flex-shrink-0">
-                  <Image
-                    src={url}
-                    alt={`${product.name} image ${index + 1}`}
-                    fill
-                    sizes="(max-width: 768px) 50vw, 20vw"
-                    className="object-contain p-2"
-                    data-ai-hint="product image"
-                  />
-                </div>
-              ))}
-            </div>
+          <div className="aspect-square w-full relative">
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              sizes="(max-width: 768px) 50vw, 20vw"
+              className="object-contain p-2"
+              data-ai-hint="product image"
+            />
           </div>
           <Badge
             variant="secondary"
