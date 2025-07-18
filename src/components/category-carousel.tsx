@@ -17,47 +17,24 @@ export default function CategoryCarousel({
   categories,
   products,
 }: CategoryCarouselProps) {
-  const [categoryImageUrls, setCategoryImageUrls] = useState<Record<string, string[]>>({});
-  const [currentImageIndices, setCurrentImageIndices] = useState<Record<string, number>>({});
+  const [categoryImageUrls, setCategoryImageUrls] = useState<
+    Record<string, string>
+  >({});
 
   useEffect(() => {
-    const images: Record<string, string[]> = {};
-    const initialIndices: Record<string, number> = {};
-
+    const images: Record<string, string> = {};
     for (const category of categories) {
-      const productsInCategory = products.filter(
+      const firstProductInCategory = products.find(
         (p) => p.category === category.name
       );
-      if (productsInCategory.length > 0) {
-        images[category.id] = productsInCategory.map((p) => p.imageUrl);
+      if (firstProductInCategory) {
+        images[category.id] = firstProductInCategory.imageUrl;
       } else {
-        images[category.id] = [`https://placehold.co/64x64.png`];
+        images[category.id] = `https://placehold.co/64x64.png`;
       }
-      initialIndices[category.id] = 0;
     }
     setCategoryImageUrls(images);
-    setCurrentImageIndices(initialIndices);
   }, [categories, products]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentImageIndices((prevIndices) => {
-        const newIndices: Record<string, number> = {};
-        for (const categoryId in prevIndices) {
-          const imagesForCategory = categoryImageUrls[categoryId] || [];
-          if (imagesForCategory.length > 1) {
-            newIndices[categoryId] = (prevIndices[categoryId] + 1) % imagesForCategory.length;
-          } else {
-            newIndices[categoryId] = 0;
-          }
-        }
-        return newIndices;
-      });
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [categoryImageUrls]);
-
 
   return (
     <section className="mb-12">
@@ -74,35 +51,23 @@ export default function CategoryCarousel({
       <ScrollArea className="w-full whitespace-nowrap rounded-md">
         <div className="flex w-max space-x-4 pb-4">
           {categories.map((category) => {
-            const imageUrls = categoryImageUrls[category.id] || [`https://placehold.co/64x64.png`];
-            const currentIndex = currentImageIndices[category.id] || 0;
-            
+            const imageUrl =
+              categoryImageUrls[category.id] || `https://placehold.co/64x64.png`;
+
             return (
               <Link href={`/categories?open=${category.id}`} key={category.id}>
                 <Card className="flex-shrink-0 w-[150px] h-[150px] flex flex-col items-center justify-center p-4 hover:shadow-lg transition-shadow cursor-pointer whitespace-normal overflow-hidden">
                   <div
-                    className="w-16 h-16 mb-2 relative overflow-hidden"
+                    className="w-16 h-16 mb-2 relative"
                     data-ai-hint="grocery category"
                   >
-                    <div 
-                      className="absolute inset-0 flex transition-transform duration-1000 ease-in-out"
-                      style={{ 
-                        transform: `translateX(-${currentIndex * 100}%)`,
-                        width: `${imageUrls.length * 100}%`
-                      }}
-                    >
-                      {imageUrls.map((url, index) => (
-                        <div key={`${url}-${index}`} className="w-full h-full flex-shrink-0">
-                          <Image
-                            src={url}
-                            alt={`${category.name} - image ${index + 1}`}
-                            fill
-                            sizes="64px"
-                            className="object-contain"
-                          />
-                        </div>
-                      ))}
-                    </div>
+                    <Image
+                      src={imageUrl}
+                      alt={category.name}
+                      fill
+                      sizes="64px"
+                      className="object-contain"
+                    />
                   </div>
                   <span className="font-semibold text-center line-clamp-2">
                     {category.name}
