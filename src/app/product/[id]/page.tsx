@@ -8,8 +8,9 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { AddToCartSection } from '@/components/add-to-cart-section';
 import SimilarProducts from '@/components/similar-products';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ArrowLeft } from 'lucide-react';
 import AuthWrapper from '@/components/auth/auth-wrapper';
+import { Button } from '@/components/ui/button';
 
 export default function ProductPage() {
   const params = useParams();
@@ -58,7 +59,17 @@ export default function ProductPage() {
 
   return (
     <AuthWrapper>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-8 relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 left-4 z-10 bg-background/50 backdrop-blur-sm rounded-full"
+          onClick={() => router.back()}
+          aria-label="Go back"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+
         <div className="grid md:grid-cols-2 gap-8 mb-16">
           <div className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
             <Image
