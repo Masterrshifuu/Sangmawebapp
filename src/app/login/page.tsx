@@ -24,8 +24,9 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
-
-  const recaptchaContainerRef = useRef<HTMLDivElement>(null);
+  
+  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
+  const sendOtpButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -37,6 +38,19 @@ export default function AuthPage() {
     });
     return () => unsubscribe();
   }, [router]);
+
+  useEffect(() => {
+    // Initialize reCAPTCHA verifier only once on the client side.
+    if (!recaptchaVerifierRef.current && sendOtpButtonRef.current) {
+      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, sendOtpButtonRef.current, {
+        'size': 'invisible',
+        'callback': () => {
+          console.log('reCAPTCHA verified');
+        }
+      });
+    }
+  }, [authCheckLoading]);
+
 
   const handleSocialLogin = async (provider: typeof googleProvider | typeof appleProvider) => {
     setLoading(true);
@@ -53,18 +67,13 @@ export default function AuthPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone) return;
+    if (!phone || !recaptchaVerifierRef.current) return;
     setLoading(true);
 
     const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
 
     try {
-      // reCAPTCHA is rendered invisibly and attaches to the button
-      const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
-        'size': 'invisible',
-        'callback': () => { console.log('reCAPTCHA verified'); }
-      });
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifierRef.current);
       setConfirmationResult(confirmation);
       setOtpSent(true);
       toast({ title: 'OTP Sent', description: `An OTP has been sent to ${formattedPhone}` });
@@ -152,7 +161,7 @@ export default function AuthPage() {
                   disabled={loading}
                 />
               </div>
-              <Button id="recaptcha-container" type="submit" className="w-full" disabled={loading}>
+              <Button ref={sendOtpButtonRef} type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Continue with Phone
               </Button>
@@ -169,6 +178,7 @@ export default function AuthPage() {
                   onChange={(e) => setOtp(e.target.value)}
                   required
                   disabled={loading}
+                  autoFocus
                 />
               </div>
               <Button type="submit" className="w-full" disabled={loading}>
@@ -188,8 +198,6 @@ export default function AuthPage() {
           </div>
         </CardContent>
       </Card>
-      {/* This ref is no longer needed as reCAPTCHA binds to the button now */}
-      {/* <div ref={recaptchaContainerRef}></div> */}
     </div>
   );
 }
