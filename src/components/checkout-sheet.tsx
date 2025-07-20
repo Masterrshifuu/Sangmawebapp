@@ -159,14 +159,10 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
       setShowConfirmation(true);
     } catch (error: any) {
       console.error(error);
-      const detailedMessage = error.message.includes('permission-denied')
-        ? 'Permission denied. Please ensure you are logged in.'
-        : error.message || 'There was an error placing your order. Please try again.';
-
       toast({
         variant: 'destructive',
         title: 'Order Failed',
-        description: detailedMessage,
+        description: 'There was an error placing your order. Please try again.',
       });
     } finally {
       setLoading(false);

@@ -41,7 +41,11 @@ export default function AuthPage() {
       router.push('/');
     } catch (error: any) {
       console.error('Email sign-in error:', error);
-      toast({ variant: 'destructive', title: 'Login Failed', description: error.message });
+      toast({ 
+        variant: 'destructive', 
+        title: 'Login Failed', 
+        description: 'Invalid email or password. Please try again.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -55,7 +59,17 @@ export default function AuthPage() {
       router.push('/');
     } catch (error: any) {
       console.error('Email sign-up error:', error);
-      toast({ variant: 'destructive', title: 'Sign-up Failed', description: error.message });
+      let description = 'An unexpected error occurred. Please try again.';
+      if (error.code === 'auth/email-already-in-use') {
+        description = 'This email is already registered. Please log in.';
+      } else if (error.code === 'auth/weak-password') {
+        description = 'The password is too weak. Please use at least 6 characters.';
+      }
+      toast({ 
+        variant: 'destructive', 
+        title: 'Sign-up Failed', 
+        description
+      });
     } finally {
       setLoading(false);
     }
