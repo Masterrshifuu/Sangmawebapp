@@ -34,7 +34,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 function CartContent() {
-  const { cartItems, clearCart, cartTotal, cartCount } = useCart();
+  const { cartItems, cartTotal, cartCount } = useCart();
 
   return (
     <>
@@ -47,17 +47,6 @@ function CartContent() {
           </div>
         ) : (
           <ScrollArea className="flex-1">
-             <div className="flex justify-end p-2">
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={clearCart}
-                    className="text-muted-foreground hover:text-destructive"
-                >
-                    <Trash2 className="h-4 w-4 mr-1" />
-                    Clear Cart
-                </Button>
-            </div>
             <div className="divide-y">
               {cartItems.map((item) => (
                 <CartItemRow key={item.id} item={item} />
@@ -92,7 +81,7 @@ function CartContent() {
 
 
 function CartItemRow({ item }: { item: CartItem }) {
-  const { addToCart, removeFromCart } = useCart();
+  const { addToCart, removeFromCart, clearItemFromCart } = useCart();
   return (
     <div className="flex items-center gap-4 p-4">
       <Image
@@ -106,15 +95,23 @@ function CartItemRow({ item }: { item: CartItem }) {
       <div className="flex-1 space-y-1 overflow-hidden">
         <p className="font-semibold line-clamp-1 truncate">{item.name}</p>
         <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
+        <p className="font-bold text-sm">INR {(item.price * item.quantity).toFixed(2)}</p>
       </div>
-      <div className="flex flex-col items-end gap-2">
+      <div className="flex items-center gap-2">
         <QuantitySelector
           quantity={item.quantity}
           onIncrease={() => addToCart(item)}
           onDecrease={() => removeFromCart(item.id)}
           size="small"
         />
-        <p className="font-bold">INR {(item.price * item.quantity).toFixed(2)}</p>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          onClick={() => clearItemFromCart(item.id)}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
     </div>
   );
