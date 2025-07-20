@@ -16,6 +16,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerClose,
+} from '@/components/ui/drawer';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
 import { ScrollArea } from './ui/scroll-area';
@@ -47,7 +53,7 @@ function CartContent() {
         )}
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {cartCount === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
             <ShoppingCart className="w-16 h-16 mb-4" />
@@ -65,7 +71,7 @@ function CartContent() {
         )}
       </div>
 
-      <SheetFooter className="p-4 border-t bg-background mt-auto">
+      <div className="p-4 border-t bg-background mt-auto">
         {cartCount > 0 ? (
           <div className="w-full space-y-4">
             <div className="flex justify-between font-bold text-lg">
@@ -79,9 +85,11 @@ function CartContent() {
             </CheckoutSheet>
           </div>
         ) : (
-            <Button className="w-full" disabled>Continue Shopping</Button>
+            <DrawerClose asChild>
+              <Button className="w-full" variant="outline">Continue Shopping</Button>
+            </DrawerClose>
         )}
-      </SheetFooter>
+      </div>
     </>
   );
 }
@@ -125,21 +133,12 @@ export function Cart({ children }: { children: React.ReactNode }) {
 
   if (isMobile) {
     return (
-      <Sheet>
-        <SheetTrigger asChild>{children}</SheetTrigger>
-        <SheetContent
-          side="bottom"
-          className="h-3/4 flex flex-col p-0 rounded-t-2xl"
-          showCloseButton={false}
-        >
-          <div className="flex justify-center py-3">
-            <SheetClose>
-              <div className="w-12 h-1.5 rounded-full bg-muted" />
-            </SheetClose>
-          </div>
+      <Drawer>
+        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerContent className="h-[75vh] flex flex-col p-0">
           <CartContent />
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
     );
   }
 
@@ -147,7 +146,12 @@ export function Cart({ children }: { children: React.ReactNode }) {
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-96 p-0 flex flex-col" align="end">
-        <CartContent />
+         <div className="p-4 border-b">
+          <h2 className="text-lg font-semibold">Your Cart</h2>
+         </div>
+         <div className="max-h-[60vh] flex flex-col">
+            <CartContent />
+         </div>
       </PopoverContent>
     </Popover>
   );
