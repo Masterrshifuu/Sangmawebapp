@@ -114,9 +114,6 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent className="h-auto flex flex-col p-0">
-          <DrawerHeader className="p-4 pt-0 border-b">
-            <DrawerTitle className="text-center">Your Profile</DrawerTitle>
-          </DrawerHeader>
           <ProfileContent />
         </DrawerContent>
       </Drawer>
@@ -132,10 +129,7 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
         className="w-[350px] flex flex-col p-0"
         showCloseButton={true}
       >
-        <SheetHeader className="p-4 pt-4 border-b">
-          <SheetTitle className="text-center">Your Profile</SheetTitle>
-        </SheetHeader>
-        <div className="flex flex-col justify-between flex-1">
+        <div className="flex flex-col justify-between flex-1 pt-6">
           <ProfileContent />
         </div>
       </SheetContent>
