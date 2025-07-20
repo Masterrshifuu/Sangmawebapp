@@ -26,7 +26,6 @@ export default function AuthPage() {
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
   const recaptchaContainerRef = useRef<HTMLDivElement>(null);
-  const recaptchaVerifierRef = useRef<RecaptchaVerifier | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -38,15 +37,6 @@ export default function AuthPage() {
     });
     return () => unsubscribe();
   }, [router]);
-
-  useEffect(() => {
-    if (recaptchaContainerRef.current && !recaptchaVerifierRef.current) {
-      recaptchaVerifierRef.current = new RecaptchaVerifier(auth, recaptchaContainerRef.current, {
-        size: 'invisible',
-        callback: () => { console.log('reCAPTCHA verified'); },
-      });
-    }
-  }, []);
 
   const handleSocialLogin = async (provider: typeof googleProvider | typeof appleProvider) => {
     setLoading(true);
@@ -63,13 +53,18 @@ export default function AuthPage() {
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone || !recaptchaVerifierRef.current) return;
+    if (!phone) return;
     setLoading(true);
 
     const formattedPhone = phone.startsWith('+') ? phone : `+91${phone}`;
 
     try {
-      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifierRef.current);
+      // reCAPTCHA is rendered invisibly and attaches to the button
+      const recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+        'size': 'invisible',
+        'callback': () => { console.log('reCAPTCHA verified'); }
+      });
+      const confirmation = await signInWithPhoneNumber(auth, formattedPhone, recaptchaVerifier);
       setConfirmationResult(confirmation);
       setOtpSent(true);
       toast({ title: 'OTP Sent', description: `An OTP has been sent to ${formattedPhone}` });
@@ -157,7 +152,7 @@ export default function AuthPage() {
                   disabled={loading}
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={loading}>
+              <Button id="recaptcha-container" type="submit" className="w-full" disabled={loading}>
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Continue with Phone
               </Button>
@@ -193,7 +188,8 @@ export default function AuthPage() {
           </div>
         </CardContent>
       </Card>
-      <div ref={recaptchaContainerRef}></div>
+      {/* This ref is no longer needed as reCAPTCHA binds to the button now */}
+      {/* <div ref={recaptchaContainerRef}></div> */}
     </div>
   );
 }
