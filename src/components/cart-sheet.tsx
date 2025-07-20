@@ -121,7 +121,7 @@ export function Cart({ children }: { children: React.ReactNode }) {
     return (
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent className="h-[75vh] flex flex-col p-0">
+        <DrawerContent className="flex flex-col p-0 max-h-[90vh]">
           <DrawerTitle className="sr-only">Your Cart</DrawerTitle>
           <CartContent />
         </DrawerContent>
