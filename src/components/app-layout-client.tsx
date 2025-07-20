@@ -10,6 +10,7 @@ import { CartProvider } from '@/context/cart-context';
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
+  const isHomePage = pathname === '/';
 
   return (
     <CartProvider>
@@ -18,9 +19,9 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
       ) : (
         <>
           <div className="relative flex min-h-screen flex-col">
-            <Header />
+            {isHomePage && <Header />}
             <main className="flex-1 pb-16 md:pb-0">{children}</main>
-            <Footer />
+            {isHomePage && <Footer />}
           </div>
           <BottomNavbar />
         </>
