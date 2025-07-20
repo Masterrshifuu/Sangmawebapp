@@ -2,11 +2,10 @@
 
 import { useState } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetClose,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,19 +21,10 @@ export default function MobileSearch({
   const { query, setQuery, ...searchResultProps } = useSearch({ open });
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent
-        side="bottom"
-        className="h-[86vh] flex flex-col p-0 rounded-t-2xl bg-card"
-        showCloseButton={false}
-      >
-        <div className="flex justify-center py-3">
-          <SheetClose>
-            <div className="w-12 h-1.5 rounded-full bg-muted" />
-          </SheetClose>
-        </div>
-        <div className="px-4 pb-4 border-b">
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>{children}</DrawerTrigger>
+      <DrawerContent className="h-[86vh] bg-card">
+        <div className="p-4 border-b">
           <div
             className="flex w-full max-w-lg mx-auto items-center space-x-2 pt-4"
           >
@@ -51,11 +41,10 @@ export default function MobileSearch({
             </div>
           </div>
         </div>
-
         <ScrollArea className="flex-1">
           <SearchResults {...searchResultProps} query={query} onProductClick={() => setOpen(false)} />
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }
