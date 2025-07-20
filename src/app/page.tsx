@@ -5,6 +5,9 @@ import ProductGrid from '@/components/product-grid';
 import AuthWrapper from '@/components/auth/auth-wrapper';
 import { useData } from '@/context/data-context';
 import { Skeleton } from '@/components/ui/skeleton';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
+import PromoCarousel from '@/components/promo-carousel';
 
 function HomePageContent() {
   const { products, categories, loading } = useData();
@@ -26,19 +29,24 @@ function HomePageContent() {
   const bestsellers = products.filter((p) => p.bestseller);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <CategoryCarousel categories={categories} products={products} />
+    <>
+      <Header />
+      <div className="container mx-auto px-4 py-8">
+        <CategoryCarousel categories={categories} products={products} />
+        <PromoCarousel />
 
-      <ProductGrid title="Bestsellers" products={bestsellers} />
+        <ProductGrid title="Bestsellers" products={bestsellers} />
 
-      {categories.map((category) => (
-        <ProductGrid
-          key={category.id}
-          title={category.name}
-          products={products.filter((p) => p.category === category.name)}
-        />
-      ))}
-    </div>
+        {categories.map((category) => (
+          <ProductGrid
+            key={category.id}
+            title={category.name}
+            products={products.filter((p) => p.category === category.name)}
+          />
+        ))}
+      </div>
+      <Footer />
+    </>
   );
 }
 
