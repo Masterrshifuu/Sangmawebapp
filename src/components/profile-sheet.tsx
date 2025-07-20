@@ -7,7 +7,6 @@ import { signOut, type User as FirebaseUser } from 'firebase/auth';
 import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
   DrawerFooter,
@@ -17,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { User, LogOut } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from './ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 
 function ProfileContent() {
   const [user, setUser] = useState<FirebaseUser | null>(auth.currentUser);
@@ -114,6 +113,7 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent className="h-auto flex flex-col p-0">
+          <DrawerTitle className="sr-only">Your Profile</DrawerTitle>
           <ProfileContent />
         </DrawerContent>
       </Drawer>

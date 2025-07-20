@@ -3,15 +3,6 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-  SheetClose,
-} from '@/components/ui/sheet';
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -21,6 +12,7 @@ import {
   DrawerContent,
   DrawerTrigger,
   DrawerClose,
+  DrawerTitle,
 } from '@/components/ui/drawer';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
@@ -34,7 +26,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 function CartContent() {
-  const { cartItems, cartTotal, cartCount } = useCart();
+  const { cartItems, cartTotal, cartCount, clearCart } = useCart();
 
   return (
     <>
@@ -109,6 +101,7 @@ function CartItemRow({ item }: { item: CartItem }) {
           size="icon" 
           className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
           onClick={() => clearItemFromCart(item.id)}
+          aria-label="Remove item"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -129,6 +122,7 @@ export function Cart({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent className="h-[75vh] flex flex-col p-0">
+          <DrawerTitle className="sr-only">Your Cart</DrawerTitle>
           <CartContent />
         </DrawerContent>
       </Drawer>

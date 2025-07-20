@@ -5,6 +5,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerTrigger,
+  DrawerTitle,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
@@ -24,6 +25,7 @@ export default function MobileSearch({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent className="h-[86vh] bg-card">
+        <DrawerTitle className="sr-only">Search Products</DrawerTitle>
         <div className="p-4 border-b">
           <div
             className="flex w-full max-w-lg mx-auto items-center space-x-2 pt-4"
