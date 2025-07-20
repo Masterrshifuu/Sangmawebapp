@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getProducts } from '@/lib/data';
+import { listenToProducts } from '@/lib/data-realtime';
 import type { Product } from '@/lib/types';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -22,32 +22,28 @@ export default function ProductPage() {
 
   useEffect(() => {
     if (!productId) return;
+    
+    setLoading(true);
+    window.scrollTo(0, 0);
 
-    async function fetchData() {
-      setLoading(true);
-      window.scrollTo(0, 0); 
-      try {
-        const allProducts = await getProducts();
-        const currentProduct = allProducts.find((p) => p.id === productId);
+    const unsubscribe = listenToProducts((allProducts) => {
+      const currentProduct = allProducts.find((p) => p.id === productId);
 
-        if (currentProduct) {
-          setProduct(currentProduct);
-          const relatedProducts = allProducts.filter(
-            (p) =>
-              p.category === currentProduct.category && p.id !== currentProduct.id
-          );
-          setSimilarProducts(relatedProducts);
-        } else {
-          router.replace('/');
-        }
-      } catch (err) {
-        console.error('Failed to fetch product data:', err);
+      if (currentProduct) {
+        setProduct(currentProduct);
+        const relatedProducts = allProducts.filter(
+          (p) =>
+            p.category === currentProduct.category && p.id !== currentProduct.id
+        );
+        setSimilarProducts(relatedProducts);
+      } else {
+        // If product disappears from DB, redirect
         router.replace('/');
-      } finally {
-        setLoading(false);
       }
-    }
-    fetchData();
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, [productId, router]);
 
   if (loading || !product) {
