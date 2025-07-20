@@ -38,21 +38,6 @@ function CartContent() {
 
   return (
     <>
-      <div className={cn("p-4 border-b flex flex-row justify-between items-center text-center sm:text-left")}>
-        <h2 className="text-lg font-semibold text-foreground">Your Cart ({cartCount})</h2>
-        {cartCount > 0 && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={clearCart}
-            className="text-muted-foreground hover:text-destructive h-8 w-8"
-          >
-            <Trash2 className="h-4 w-4" />
-            <span className="sr-only">Clear Cart</span>
-          </Button>
-        )}
-      </div>
-
       <div className="flex-1 flex flex-col overflow-hidden">
         {cartCount === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
@@ -62,6 +47,17 @@ function CartContent() {
           </div>
         ) : (
           <ScrollArea className="flex-1">
+             <div className="flex justify-end p-2">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={clearCart}
+                    className="text-muted-foreground hover:text-destructive"
+                >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Clear Cart
+                </Button>
+            </div>
             <div className="divide-y">
               {cartItems.map((item) => (
                 <CartItemRow key={item.id} item={item} />
@@ -146,9 +142,6 @@ export function Cart({ children }: { children: React.ReactNode }) {
     <Popover>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
       <PopoverContent className="w-96 p-0 flex flex-col" align="end">
-         <div className="p-4 border-b">
-          <h2 className="text-lg font-semibold">Your Cart</h2>
-         </div>
          <div className="max-h-[60vh] flex flex-col">
             <CartContent />
          </div>
