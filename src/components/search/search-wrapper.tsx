@@ -5,7 +5,7 @@ import DesktopSearch from "./desktop-search";
 import MobileSearch from "./mobile-search";
 import { Search } from "lucide-react";
 import { Button } from "../ui/button";
-import { AnimatedPlaceholder } from "./animated-placeholder";
+import { cn } from "@/lib/utils";
 
 export function SearchWrapper({ isBottomNav = false }: { isBottomNav?: boolean }) {
   const isMobile = useIsMobile();
@@ -33,7 +33,16 @@ export function SearchWrapper({ isBottomNav = false }: { isBottomNav?: boolean }
     // In the header on mobile, we show the search bar trigger
     return (
       <MobileSearch>
-        <AnimatedPlaceholder />
+        <button
+          className={cn(
+            'flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground active:bg-secondary/80'
+          )}
+        >
+          <Search className="h-5 w-5 mr-3" />
+          <span className="flex-1 h-5 overflow-hidden relative">
+            Search for products...
+          </span>
+        </button>
       </MobileSearch>
     );
   }

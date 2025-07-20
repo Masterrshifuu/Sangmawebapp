@@ -12,7 +12,6 @@ import { Search } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useSearch } from "@/hooks/use-search";
 import { SearchResults } from "./search-results";
-import { AnimatedPlaceholder } from "./animated-placeholder";
 
 export default function MobileSearch({
   children,
@@ -35,13 +34,12 @@ export default function MobileSearch({
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
               <Input
                 type="text"
-                placeholder=""
+                placeholder="Search for products..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="bg-background pl-10 shadow-sm"
                 autoFocus
               />
-              {!query && <AnimatedPlaceholder isInput={true} />}
             </div>
           </div>
         </div>
