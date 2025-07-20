@@ -1,13 +1,17 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { itemRecommendation } from '@/ai/flows/item-recommendation';
 import { searchProducts } from '@/lib/search';
 import { getProducts } from '@/lib/data';
 import type { Product } from '@/lib/types';
 
-export function useSearch(open: boolean, isDesktop: boolean = false) {
+interface UseSearchProps {
+  open: boolean;
+  isDesktop?: boolean;
+}
+
+export function useSearch({ open, isDesktop = false }: UseSearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [initialProducts, setInitialProducts] = useState<Product[]>([]);
@@ -15,36 +19,35 @@ export function useSearch(open: boolean, isDesktop: boolean = false) {
   const [searchSource, setSearchSource] = useState<'direct' | 'ai' | null>(null);
   const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
 
+  const fetchInitialProducts = useCallback(async () => {
+    setIsLoading(true);
+    setSearchSource(null);
+    try {
+      const allProducts = await getProducts();
+      const bestsellers = allProducts.filter((p) => p.bestseller).slice(0, 15);
+      const initialDisplay = bestsellers.length > 0 ? bestsellers : allProducts.slice(0, 15);
+
+      setInitialProducts(initialDisplay);
+      setResults(initialDisplay);
+      if (initialDisplay.length > 0) {
+        setSearchSource('direct');
+      }
+    } catch (error) {
+      console.error('Failed to fetch initial products:', error);
+      setInitialProducts([]);
+      setResults([]);
+    } finally {
+      setIsLoading(false);
+      setHasFetchedInitial(true);
+    }
+  }, []);
+
+
   useEffect(() => {
-    // For desktop, we fetch initial products right away.
-    // For mobile, we wait until the sheet is opened.
     if ((isDesktop || open) && !hasFetchedInitial) {
-      const fetchInitialProducts = async () => {
-        setIsLoading(true);
-        setSearchSource(null);
-        try {
-          const allProducts = await getProducts();
-          const bestsellers = allProducts.filter((p) => p.bestseller).slice(0, 15);
-          const initialDisplay = bestsellers.length > 0 ? bestsellers : allProducts.slice(0, 15);
-
-          setInitialProducts(initialDisplay);
-          setResults(initialDisplay);
-          if (initialDisplay.length > 0) {
-            setSearchSource('direct');
-          }
-        } catch (error) {
-          console.error('Failed to fetch initial products:', error);
-          setInitialProducts([]);
-          setResults([]);
-        } finally {
-          setIsLoading(false);
-          setHasFetchedInitial(true);
-        }
-      };
-
       fetchInitialProducts();
     }
-  }, [open, hasFetchedInitial, isDesktop]);
+  }, [open, hasFetchedInitial, isDesktop, fetchInitialProducts]);
 
   useEffect(() => {
     if (!hasFetchedInitial) return;
@@ -85,7 +88,7 @@ export function useSearch(open: boolean, isDesktop: boolean = false) {
       } finally {
         setIsLoading(false);
       }
-    }, 300); // 300ms debounce delay
+    }, 300);
 
     return () => clearTimeout(debounceSearch);
   }, [query, hasFetchedInitial, initialProducts]);

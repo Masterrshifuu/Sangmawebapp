@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Cart } from './cart-sheet';
 import { Button } from './ui/button';
 import { useCart } from '@/context/cart-context';
-import { SearchWrapper } from './search';
+import { SearchWrapper } from './search/search-wrapper';
 
 export default function Header() {
   const [location, setLocation] = useState('Chandmari, South Tura');

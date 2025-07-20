@@ -1,10 +1,17 @@
+// This file is deprecated and will be removed.
+// All data fetching should use src/lib/data-realtime.ts for real-time updates
+// or a new file in src/lib for server-side static fetching if needed.
+
 import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import type { Product, Category } from "@/lib/types";
 
+// This function is kept for the AI flow but should be considered for replacement
+// with a more optimized data source if performance becomes an issue.
 export async function getProducts(): Promise<Product[]> {
   const productsCol = collection(db, "products");
-  const productSnapshot = await getDocs(productsCol);
+  const q = query(productsCol, orderBy("name"));
+  const productSnapshot = await getDocs(q);
   const productList = productSnapshot.docs
     .map(doc => {
       const data = doc.data();
@@ -19,10 +26,9 @@ export async function getProducts(): Promise<Product[]> {
         bestseller: data.isBestseller || data.bestseller || false,
       };
     })
-    .filter(product => product.imageUrl !== null) // Filter out products without a valid image URL
+    .filter(product => product.imageUrl !== null)
     .map(product => ({
       ...product,
-      // This mapping is now safe because the filter has removed nulls.
       imageUrl: product.imageUrl as string, 
     }));
     
@@ -31,7 +37,8 @@ export async function getProducts(): Promise<Product[]> {
 
 export async function getCategories(): Promise<Category[]> {
   const categoriesCol = collection(db, "categories");
-  const categorySnapshot = await getDocs(categoriesCol);
+  const q = query(categoriesCol, orderBy("name"));
+  const categorySnapshot = await getDocs(q);
   const categoryList = categorySnapshot.docs.map(doc => {
     const data = doc.data();
     return {

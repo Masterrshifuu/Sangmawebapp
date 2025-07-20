@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { useCart } from '@/context/cart-context';
-import { SearchWrapper } from './search';
+import { SearchWrapper } from './search/search-wrapper';
 
 const BottomNavbar = () => {
   const pathname = usePathname();

@@ -1,14 +1,18 @@
-
 "use client";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import DesktopSearch from "./desktop-search";
 import MobileSearch from "./mobile-search";
 import { Search } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 
 export function SearchWrapper({ isBottomNav = false }: { isBottomNav?: boolean }) {
   const isMobile = useIsMobile();
+
+  if (isMobile === undefined) {
+    // Return a placeholder or null to avoid SSR/CSR mismatch
+    return null;
+  }
 
   if (isMobile) {
     if (isBottomNav) {
