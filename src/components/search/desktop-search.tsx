@@ -7,6 +7,7 @@ import { Search } from "lucide-react";
 import { useSearch } from "@/hooks/use-search";
 import { SearchResults } from "./search-results";
 import { ScrollArea } from "../ui/scroll-area";
+import { AnimatedPlaceholder } from "./animated-placeholder";
 
 export default function DesktopSearch() {
   const [open, setOpen] = useState(false);
@@ -19,7 +20,7 @@ export default function DesktopSearch() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
           <Input
             type="text"
-            placeholder="Search for products..."
+            placeholder=""
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
@@ -29,6 +30,7 @@ export default function DesktopSearch() {
             }}
             className="bg-background pl-10 shadow-sm"
           />
+          {!query && <AnimatedPlaceholder isInput={true} />}
         </div>
       </PopoverTrigger>
       <PopoverContent 
@@ -36,7 +38,7 @@ export default function DesktopSearch() {
         align="start"
         onOpenAutoFocus={(e) => e.preventDefault()}
       >
-        <ScrollArea className="h-[60vh]">
+        <ScrollArea className="max-h-[60vh]">
           <SearchResults {...searchResultProps} query={query} onProductClick={() => setOpen(false)} />
         </ScrollArea>
       </PopoverContent>

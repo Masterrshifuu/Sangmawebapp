@@ -6,9 +6,9 @@ import { Search } from 'lucide-react';
 
 const messages = [
   'Search for Products..',
-  'Free delivery on orders over ₹1000 in South Tura',
-  'Free delivery on orders over ₹1000 in North Tura',
-  'Free delivery on orders over ₹3000 in Tura NEHU',
+  'Free delivery on orders over INR 1000 in South Tura',
+  'Free delivery on orders over INR 1000 in North Tura',
+  'Free delivery on orders over INR 3000 in Tura NEHU',
   'Search for Products..', // Repeat first message for smooth loop
 ];
 
