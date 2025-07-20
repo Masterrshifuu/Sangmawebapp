@@ -6,6 +6,8 @@ import AuthWrapper from '@/components/auth/auth-wrapper';
 import { useEffect, useState } from 'react';
 import type { Product, Category } from '@/lib/types';
 import { listenToProducts, listenToCategories } from '@/lib/data-realtime';
+import Header from '@/components/header';
+import Footer from '@/components/footer';
 
 export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -25,6 +27,7 @@ export default function Home() {
 
   return (
     <AuthWrapper>
+      <Header />
       <div className="container mx-auto px-4 py-8">
         <CategoryCarousel categories={categories} products={products} />
 
@@ -38,6 +41,7 @@ export default function Home() {
           />
         ))}
       </div>
+      <Footer />
     </AuthWrapper>
   );
 }
