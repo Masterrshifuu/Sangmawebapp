@@ -5,8 +5,6 @@ import ProductGrid from '@/components/product-grid';
 import AuthWrapper from '@/components/auth/auth-wrapper';
 import { useData } from '@/context/data-context';
 import { Skeleton } from '@/components/ui/skeleton';
-import Header from '@/components/header';
-import Footer from '@/components/footer';
 import PromoCarousel from '@/components/promo-carousel';
 
 function HomePageContent() {
@@ -30,7 +28,6 @@ function HomePageContent() {
 
   return (
     <>
-      <Header />
       <div className="container mx-auto px-4 py-8">
         <CategoryCarousel categories={categories} products={products} />
         <PromoCarousel />
@@ -45,7 +42,6 @@ function HomePageContent() {
           />
         ))}
       </div>
-      <Footer />
     </>
   );
 }
