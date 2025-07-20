@@ -1,8 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { listenToProducts } from '@/lib/data-realtime';
 import type { Product } from '@/lib/types';
 import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
@@ -11,43 +10,45 @@ import SimilarProducts from '@/components/similar-products';
 import { Loader2, ArrowLeft } from 'lucide-react';
 import AuthWrapper from '@/components/auth/auth-wrapper';
 import { Button } from '@/components/ui/button';
+import { useData } from '@/context/data-context';
 
 export default function ProductPage() {
   const params = useParams();
   const router = useRouter();
+  const { products, loading: isDataLoading } = useData();
   const productId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  const [product, setProduct] = useState<Product | null>(null);
-  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { product, similarProducts } = useMemo(() => {
+    if (isDataLoading) {
+      return { product: null, similarProducts: [] };
+    }
+
+    const currentProduct = products.find((p) => p.id === productId);
+    if (!currentProduct) {
+      return { product: null, similarProducts: [] };
+    }
+
+    const relatedProducts = products.filter(
+      (p) =>
+        p.category === currentProduct.category && p.id !== currentProduct.id
+    );
+    
+    return { product: currentProduct, similarProducts: relatedProducts };
+  }, [productId, products, isDataLoading]);
 
   useEffect(() => {
-    if (!productId) return;
-    
-    setLoading(true);
     window.scrollTo(0, 0);
+  }, [productId]);
+  
+  // Redirect if the product is not found after data has loaded
+  useEffect(() => {
+    if (!isDataLoading && !product) {
+       router.replace('/');
+    }
+  }, [isDataLoading, product, router]);
 
-    const unsubscribe = listenToProducts((allProducts) => {
-      const currentProduct = allProducts.find((p) => p.id === productId);
 
-      if (currentProduct) {
-        setProduct(currentProduct);
-        const relatedProducts = allProducts.filter(
-          (p) =>
-            p.category === currentProduct.category && p.id !== currentProduct.id
-        );
-        setSimilarProducts(relatedProducts);
-      } else {
-        // If product disappears from DB, redirect
-        router.replace('/');
-      }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [productId, router]);
-
-  if (loading || !product) {
+  if (isDataLoading || !product) {
     return (
       <AuthWrapper>
         <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[calc(100vh-200px)]">
