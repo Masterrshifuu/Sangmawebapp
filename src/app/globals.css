@@ -65,3 +65,17 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  .animate-slide-up {
+    animation: slide-up 20s infinite;
+  }
+
+  @keyframes slide-up {
+    0%, 100% { transform: translateY(0%); }
+    20%, 25% { transform: translateY(-100%); }
+    45%, 50% { transform: translateY(-200%); }
+    70%, 75% { transform: translateY(-300%); }
+    95% { transform: translateY(-400%); } /* To loop back smoothly */
+  }
+}
