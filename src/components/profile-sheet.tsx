@@ -247,7 +247,7 @@ function ProfileContent() {
                         
                        <div className="flex border-t">
                           <CollapsibleTrigger asChild>
-                            <Button variant="ghost" size="sm" className="flex-1 rounded-none rounded-bl-md text-xs">
+                            <Button variant="ghost" size="sm" className="flex-1 rounded-none rounded-bl-md text-xs group">
                               <span className="mr-2">View Details</span>
                               <ChevronDown className="h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
                             </Button>
