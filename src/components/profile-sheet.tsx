@@ -8,6 +8,7 @@ import {
   Drawer,
   DrawerContent,
   DrawerTrigger,
+  DrawerTitle,
 } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -230,6 +231,7 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent className="h-[90vh] flex flex-col p-0">
+          <DrawerTitle className="sr-only">User Profile</DrawerTitle>
           <div className="flex-1 min-h-0">
             <ProfileContent />
           </div>
