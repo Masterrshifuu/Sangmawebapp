@@ -335,7 +335,7 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
     return (
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent className="h-[90vh] flex flex-col p-0">
+        <DrawerContent className="max-h-[90vh] flex flex-col p-0">
            <DrawerTitle className="sr-only">User Profile</DrawerTitle>
           <div className="flex-1 min-h-0 flex flex-col">
             <ProfileContent />
