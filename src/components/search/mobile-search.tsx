@@ -1,9 +1,11 @@
+
 "use client";
 
 import { useState } from "react";
 import {
   Drawer,
   DrawerContent,
+  DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
@@ -24,6 +26,7 @@ export default function MobileSearch({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent className="h-[86vh] bg-card flex flex-col">
+        <DrawerTitle className="sr-only">Search Products</DrawerTitle>
         <div className="p-4 border-b">
           <div
             className="flex w-full max-w-lg mx-auto items-center space-x-2 pt-1"
