@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import type { Order } from "@/lib/types";
 import { Loader2, ShoppingBag } from "lucide-react";
 import AuthWrapper from "@/components/auth/auth-wrapper";
+import { Badge } from "@/components/ui/badge";
 
 function TrackOrderContent() {
   const { user, loading: authLoading } = useAuth();
@@ -51,7 +52,10 @@ function TrackOrderContent() {
   return (
     <Card className="w-full max-w-2xl shadow-lg">
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Track Your Latest Order</CardTitle>
+        <div className="flex justify-between items-center">
+            <CardTitle className="font-headline text-2xl">Track Your Latest Order</CardTitle>
+            <Badge variant="secondary" className="text-sm">{latestOrder.status}</Badge>
+        </div>
         <CardDescription>Order ID: {latestOrder.id}</CardDescription>
       </CardHeader>
       <CardContent>
