@@ -36,7 +36,9 @@ export type Order = {
   userPhone: string;
   deliveryAddress: string;
   items: OrderItem[];
-  totalAmount: number;
+  subtotal: number;
+  deliveryCharge: number;
+  grandTotal: number;
   paymentMethod: 'COD' | 'UPI';
   status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled';
   createdAt: Timestamp;

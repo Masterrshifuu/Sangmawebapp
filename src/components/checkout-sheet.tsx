@@ -22,6 +22,7 @@ import { Loader2, ArrowLeft } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { ScrollArea } from './ui/scroll-area';
 import { OrderConfirmationDialog } from './order-confirmation-dialog';
+import { calculateDeliveryCharge } from '@/lib/delivery';
 
 enum CheckoutStep {
   ADDRESS,
@@ -44,6 +45,9 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
   const { cartItems, cartTotal, clearCart } = useCart();
   const { toast } = useToast();
   const router = useRouter();
+
+  const deliveryCharge = useMemo(() => calculateDeliveryCharge(cartTotal, address), [cartTotal, address]);
+  const grandTotal = useMemo(() => cartTotal + deliveryCharge, [cartTotal, deliveryCharge]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
@@ -148,7 +152,9 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
           quantity: item.quantity,
           imageUrl: item.imageUrl,
         })),
-        totalAmount: cartTotal,
+        subtotal: cartTotal,
+        deliveryCharge,
+        grandTotal,
         paymentMethod,
       };
 
@@ -297,9 +303,19 @@ export function CheckoutSheet({ children }: { children: React.ReactNode }) {
                   ))}
                 </div>
               </ScrollArea>
-              <div className="flex justify-between font-bold mt-4 text-lg border-t pt-4">
-                <span>Total</span>
-                <span>INR {cartTotal.toFixed(2)}</span>
+              <div className="space-y-2 border-t pt-4 mt-4">
+                <div className="flex justify-between">
+                  <span>Subtotal</span>
+                  <span>INR {cartTotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Delivery Fee</span>
+                  <span>{deliveryCharge > 0 ? `INR ${deliveryCharge.toFixed(2)}` : 'Free'}</span>
+                </div>
+                <div className="flex justify-between font-bold text-lg">
+                  <span>Grand Total</span>
+                  <span>INR {grandTotal.toFixed(2)}</span>
+                </div>
               </div>
             </div>
             <Button onClick={handleConfirmOrder} className="w-full" disabled={loading}>

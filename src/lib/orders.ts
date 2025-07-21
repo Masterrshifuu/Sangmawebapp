@@ -39,7 +39,6 @@ export async function createOrder(orderData: OrderCreationData): Promise<string>
   } catch (error: any) {
     console.error("Error creating order: ", error);
     // Throw a more specific error to be handled by the calling function
-    const detailedMessage = `Database error: ${error.code} - ${error.message || 'Please check Firestore rules and data structure.'}`;
-    throw new Error(detailedMessage);
+    throw new Error("There was an error placing your order. Please try again.");
   }
 }
