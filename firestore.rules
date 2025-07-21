@@ -28,11 +28,6 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
 
-    // Users - can only read/write their own profile
-    match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
-    }
-
     // Missing SKUs - authenticated users only
     match /missingSkus/{skuId} {
       allow read, write: if request.auth != null;
@@ -47,10 +42,18 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
 
-    // Orders - each user can only manage their own orders
+    // Orders - admins have full access, users can only manage their own orders
     match /orders/{orderId} {
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
-      allow read, update: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow read, update: if request.auth != null && (
+        resource.data.userId == request.auth.uid ||
+        exists(/databases/$(database)/documents/Admins/$(request.auth.uid))
+      );
+    }
+
+    // Users - users can only manage their own profile
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
     // Counters - authenticated users can read and write
@@ -68,6 +71,12 @@ service cloud.firestore {
     // Pending Updates - only authenticated users (admin/staff)
     match /pendingUpdates/{updateId} {
       allow read, write: if request.auth != null;
+    }
+
+    // Admins - Only admins can read this collection
+    match /Admins/{userId} {
+      allow read: if exists(/databases/$(database)/documents/Admins/$(request.auth.uid));
+      allow write: if false; // Disallow writing from client
     }
   }
 }
