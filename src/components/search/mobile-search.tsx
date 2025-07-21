@@ -25,7 +25,7 @@ export default function MobileSearch({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent className="h-[86vh] bg-card flex flex-col">
+      <DrawerContent className="bg-card flex flex-col h-[85%]">
         <DrawerTitle className="sr-only">Search Products</DrawerTitle>
         <div className="p-4 border-b">
           <div
