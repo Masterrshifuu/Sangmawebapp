@@ -9,10 +9,11 @@ import {
   DrawerContent,
   DrawerTrigger,
   DrawerTitle,
+  DrawerClose,
 } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, MapPin, Phone, Building, Save, Loader2, ShoppingBag, ChevronRight } from 'lucide-react';
+import { LogOut, User, MapPin, Phone, Building, Save, Loader2, ShoppingBag, ChevronRight, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -28,9 +29,23 @@ import {
 import { getUserProfile, updateUserProfile, type UserProfileData } from '@/lib/user';
 import { useToast } from '@/hooks/use-toast';
 import { listenToUserOrders } from '@/lib/data-realtime';
+import { updateOrderStatus } from '@/lib/orders';
 import type { Order } from '@/lib/types';
 import { ScrollArea } from './ui/scroll-area';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+
 
 function ProfileContent() {
   const [user, setUser] = useState<FirebaseUser | null>(auth.currentUser);
@@ -39,6 +54,7 @@ function ProfileContent() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribeAuth = auth.onAuthStateChanged(async (currentUser) => {
@@ -65,8 +81,10 @@ function ProfileContent() {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
+      // The onAuthStateChanged listener will handle routing
     } catch (error) {
       console.error('Error signing out: ', error);
+      toast({ variant: 'destructive', title: 'Sign Out Failed', description: 'Could not sign you out. Please try again.' });
     }
   };
   
@@ -82,6 +100,15 @@ function ProfileContent() {
       setSaving(false);
     }
   };
+  
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      await updateOrderStatus(orderId, 'Cancelled');
+      toast({ title: "Order Cancelled", description: `Order #${orderId} has been cancelled.` });
+    } catch (error) {
+       toast({ variant: 'destructive', title: "Cancellation Failed", description: "Could not cancel the order." });
+    }
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setProfile({ ...profile, [e.target.id]: e.target.value });
@@ -172,18 +199,52 @@ function ProfileContent() {
           <ScrollArea className="h-full">
             {orders.length > 0 ? (
               <div className="p-4 space-y-3">
-                {orders.map(order => (
-                   <div key={order.id} className="border rounded-lg p-3 text-sm">
-                    <div className="flex justify-between items-center font-semibold">
-                       <span>Order #{order.id}</span>
-                       <span>INR {order.grandTotal.toFixed(2)}</span>
-                    </div>
-                     <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
-                       <span>{order.createdAt ? format(order.createdAt.toDate(), 'PPP') : 'Date unavailable'}</span>
-                       <span>{order.status}</span>
+                {orders.map(order => {
+                   const canCancel = order.status === 'Pending' || order.status === 'Confirmed';
+                   return (
+                     <div key={order.id} className="border rounded-lg p-3 text-sm space-y-2">
+                      <div className="flex justify-between items-center font-semibold">
+                         <span>Order #{order.id}</span>
+                         <span>INR {order.grandTotal.toFixed(2)}</span>
+                      </div>
+                       <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
+                         <span>{order.createdAt ? format(order.createdAt.toDate(), 'PPP') : 'Date unavailable'}</span>
+                         <span className="font-medium px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{order.status}</span>
+                       </div>
+                       <div className="flex gap-2 pt-2 border-t">
+                          <DrawerClose asChild>
+                            <Button variant="outline" size="sm" className="flex-1" onClick={() => router.push('/track-order')}>
+                                Track
+                            </Button>
+                          </DrawerClose>
+                          {canCancel && (
+                             <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button variant="destructive" size="sm" className="flex-1">
+                                      <X className="mr-1 h-4 w-4" />
+                                      Cancel
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently cancel your order.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Go Back</AlertDialogCancel>
+                                    <AlertDialogAction onClick={() => handleCancelOrder(order.id)}>
+                                      Yes, Cancel Order
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                          )}
+                       </div>
                      </div>
-                   </div>
-                ))}
+                   )
+                })}
               </div>
             ) : (
                <div className="flex flex-col items-center justify-center h-full text-center p-4 text-muted-foreground">
@@ -231,7 +292,7 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent className="h-[90vh] flex flex-col p-0">
-          <DrawerTitle className="sr-only">User Profile</DrawerTitle>
+           <DrawerTitle className="sr-only">User Profile</DrawerTitle>
           <div className="flex-1 min-h-0">
             <ProfileContent />
           </div>

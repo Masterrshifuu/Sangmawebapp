@@ -28,6 +28,8 @@ export type OrderItem = {
   imageUrl: string;
 };
 
+export type OrderStatus = 'Pending' | 'Confirmed' | 'Shipped' | 'Out for Delivery' | 'Delivered' | 'Cancelled';
+
 export type Order = {
   id: string;
   userId: string;
@@ -40,7 +42,7 @@ export type Order = {
   deliveryCharge: number;
   grandTotal: number;
   paymentMethod: 'COD' | 'UPI';
-  status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled';
+  status: OrderStatus;
   createdAt: Timestamp;
 };
 
