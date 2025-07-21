@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
 import { Button } from '@/components/ui/button';
-import { LogOut, User, MapPin, Phone, Building, Save, Loader2, ShoppingBag, ChevronRight, X } from 'lucide-react';
+import { LogOut, User, MapPin, Phone, Building, Save, Loader2, ShoppingBag, ChevronRight, X, ChevronDown } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
@@ -45,6 +45,12 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Separator } from './ui/separator';
 
 
 function ProfileContent() {
@@ -202,26 +208,63 @@ function ProfileContent() {
                 {orders.map(order => {
                    const canCancel = order.status === 'Pending' || order.status === 'Confirmed';
                    return (
-                     <div key={order.id} className="border rounded-lg p-3 text-sm space-y-2">
-                      <div className="flex justify-between items-center font-semibold">
-                         <span>Order #{order.id}</span>
-                         <span>INR {(order.grandTotal || 0).toFixed(2)}</span>
-                      </div>
-                       <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
-                         <span>{order.createdAt ? format(order.createdAt.toDate(), 'PPP') : 'Date unavailable'}</span>
-                         <span className="font-medium px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{order.status}</span>
-                       </div>
-                       <div className="flex gap-2 pt-2 border-t">
+                     <Collapsible key={order.id} className="border rounded-lg text-sm">
+                        <div className="p-3 space-y-2">
+                           <div className="flex justify-between items-center font-semibold">
+                             <span>Order #{order.id}</span>
+                             <span>INR {(order.grandTotal || 0).toFixed(2)}</span>
+                           </div>
+                           <div className="flex justify-between items-center text-xs text-muted-foreground">
+                             <span>{order.createdAt ? format(order.createdAt.toDate(), 'PPP') : 'Date unavailable'}</span>
+                             <span className="font-medium px-2 py-1 rounded-full bg-secondary text-secondary-foreground">{order.status}</span>
+                           </div>
+                        </div>
+
+                        <CollapsibleContent className="px-3 pb-3">
+                          <div className="space-y-2 pt-2 border-t">
+                             <h4 className="font-semibold text-xs text-muted-foreground">Items</h4>
+                             {order.items.map(item => (
+                               <div key={item.id} className="flex justify-between items-center text-xs">
+                                 <span className="flex-1 truncate pr-2">{item.name} (x{item.quantity})</span>
+                                 <span className="font-mono">INR {(item.price * item.quantity).toFixed(2)}</span>
+                               </div>
+                             ))}
+                             <Separator className="my-2"/>
+                              <div className="flex justify-between items-center text-xs">
+                                <span>Subtotal</span>
+                                <span className='font-mono'>INR {order.subtotal.toFixed(2)}</span>
+                              </div>
+                               <div className="flex justify-between items-center text-xs">
+                                <span>Delivery Fee</span>
+                                <span className='font-mono'>INR {order.deliveryCharge.toFixed(2)}</span>
+                              </div>
+                               <div className="flex justify-between items-center text-xs font-bold text-foreground">
+                                <span>Grand Total</span>
+                                <span className='font-mono'>INR {order.grandTotal.toFixed(2)}</span>
+                              </div>
+                          </div>
+                        </CollapsibleContent>
+                        
+                       <div className="flex border-t">
+                          <CollapsibleTrigger asChild>
+                            <Button variant="ghost" size="sm" className="flex-1 rounded-none rounded-bl-md text-xs">
+                              <span className="mr-2">View Details</span>
+                              <ChevronDown className="h-3 w-3 transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                            </Button>
+                          </CollapsibleTrigger>
+                          <div className="w-px bg-border"/>
                           <DrawerClose asChild>
-                            <Button variant="outline" size="sm" className="flex-1" onClick={() => router.push('/track-order')}>
-                                Track
+                            <Button variant="ghost" size="sm" className="flex-1 rounded-none text-xs" onClick={() => router.push('/track-order')}>
+                                Track Order
                             </Button>
                           </DrawerClose>
                           {canCancel && (
+                            <>
+                              <div className="w-px bg-border"/>
                              <AlertDialog>
                                 <AlertDialogTrigger asChild>
-                                  <Button variant="destructive" size="sm" className="flex-1">
-                                      <X className="mr-1 h-4 w-4" />
+                                  <Button variant="ghost" size="sm" className="flex-1 rounded-none rounded-br-md text-xs text-destructive hover:text-destructive">
+                                      <X className="mr-1 h-3 w-3" />
                                       Cancel
                                   </Button>
                                 </AlertDialogTrigger>
@@ -240,9 +283,10 @@ function ProfileContent() {
                                   </AlertDialogFooter>
                                 </AlertDialogContent>
                               </AlertDialog>
+                              </>
                           )}
                        </div>
-                     </div>
+                     </Collapsible>
                    )
                 })}
               </div>
