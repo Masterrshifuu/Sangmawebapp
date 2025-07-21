@@ -205,7 +205,7 @@ function ProfileContent() {
                      <div key={order.id} className="border rounded-lg p-3 text-sm space-y-2">
                       <div className="flex justify-between items-center font-semibold">
                          <span>Order #{order.id}</span>
-                         <span>INR {order.grandTotal.toFixed(2)}</span>
+                         <span>INR {(order.grandTotal || 0).toFixed(2)}</span>
                       </div>
                        <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                          <span>{order.createdAt ? format(order.createdAt.toDate(), 'PPP') : 'Date unavailable'}</span>
