@@ -29,7 +29,7 @@ export type OrderItem = {
 };
 
 export type Order = {
-  id?: string;
+  id: string;
   userId: string;
   userName: string | null;
   userEmail: string | null;
@@ -42,4 +42,14 @@ export type Order = {
   paymentMethod: 'COD' | 'UPI';
   status: 'Pending' | 'Confirmed' | 'Shipped' | 'Delivered' | 'Cancelled';
   createdAt: Timestamp;
+};
+
+
+export type UserProfileData = {
+  uid: string;
+  email: string | null;
+  phone?: string;
+  address?: string;
+  landmark?: string;
+  region?: string;
 };

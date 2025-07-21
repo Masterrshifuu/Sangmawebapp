@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -106,6 +107,7 @@ export default function LocationSheet({ location, onSave }: LocationSheetProps) 
               <SelectContent>
                 <SelectItem value="North Tura">North Tura</SelectItem>
                 <SelectItem value="South Tura">South Tura</SelectItem>
+                <SelectItem value="Tura NEHU">Tura NEHU</SelectItem>
               </SelectContent>
             </Select>
           </div>

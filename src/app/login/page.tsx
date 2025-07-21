@@ -12,6 +12,7 @@ import { onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndP
 import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
+import { createUserProfileDocument } from '@/lib/user';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -55,9 +56,11 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      await createUserProfileDocument(userCredential.user);
       router.push('/');
-    } catch (error: any) {
+    } catch (error: any)
+{
       console.error('Email sign-up error:', error);
       let description = 'An unexpected error occurred. Please try again.';
       if (error.code === 'auth/email-already-in-use') {

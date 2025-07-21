@@ -1,8 +1,9 @@
+
 'use client';
 
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
-import type { Product, Category } from "@/lib/types";
+import { collection, onSnapshot, query, orderBy, where } from "firebase/firestore";
+import type { Product, Category, Order } from "@/lib/types";
 
 // Note: These functions are intended for client-side use only.
 
@@ -66,6 +67,29 @@ export function listenToCategories(callback: (categories: Category[]) => void): 
     callback(categoryList);
   }, (error) => {
     console.error("Error listening to categories collection:", error);
+  });
+
+  return unsubscribe;
+}
+
+
+/**
+ * Listens for real-time updates to a user's orders.
+ * @param userId The ID of the user whose orders to fetch.
+ * @param callback A function to be called with the updated orders list.
+ * @returns An unsubscribe function to stop listening for updates.
+ */
+export function listenToUserOrders(userId: string, callback: (orders: Order[]) => void): () => void {
+  const ordersCol = collection(db, 'orders');
+  const q = query(ordersCol, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+
+  const unsubscribe = onSnapshot(q, (snapshot) => {
+    const orderList = snapshot.docs.map(doc => {
+      return { id: doc.id, ...doc.data() } as Order;
+    });
+    callback(orderList);
+  }, (error) => {
+    console.error(`Error listening to orders for user ${userId}:`, error);
   });
 
   return unsubscribe;
