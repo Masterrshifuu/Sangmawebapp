@@ -232,15 +232,15 @@ function ProfileContent() {
                              <Separator className="my-2"/>
                               <div className="flex justify-between items-center text-xs">
                                 <span>Subtotal</span>
-                                <span className='font-mono'>INR {order.subtotal.toFixed(2)}</span>
+                                <span className='font-mono'>INR {(order.subtotal || 0).toFixed(2)}</span>
                               </div>
                                <div className="flex justify-between items-center text-xs">
                                 <span>Delivery Fee</span>
-                                <span className='font-mono'>INR {order.deliveryCharge.toFixed(2)}</span>
+                                <span className='font-mono'>INR {(order.deliveryCharge || 0).toFixed(2)}</span>
                               </div>
                                <div className="flex justify-between items-center text-xs font-bold text-foreground">
                                 <span>Grand Total</span>
-                                <span className='font-mono'>INR {order.grandTotal.toFixed(2)}</span>
+                                <span className='font-mono'>INR {(order.grandTotal || 0).toFixed(2)}</span>
                               </div>
                           </div>
                         </CollapsibleContent>
