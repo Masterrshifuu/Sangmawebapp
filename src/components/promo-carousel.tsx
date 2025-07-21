@@ -4,11 +4,10 @@
 import { Card, CardContent } from '@/components/ui/card';
 
 const promoMessages = [
-  'Search for any product you need!',
   'Free delivery on orders over INR 1000 in South Tura',
   'Free delivery on orders over INR 1000 in North Tura',
   'Free delivery on orders over INR 3000 in Tura NEHU',
-  'Search for any product you need!', // Repeat first for smooth loop
+  'Free delivery on orders over INR 1000 in South Tura', // Repeat first for smooth loop
 ];
 
 export default function PromoCarousel() {
