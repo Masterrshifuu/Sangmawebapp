@@ -99,7 +99,7 @@ function CartItemRow({ item }: { item: CartItem }) {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
           onClick={() => clearItemFromCart(item.id)}
           aria-label="Remove item"
         >
