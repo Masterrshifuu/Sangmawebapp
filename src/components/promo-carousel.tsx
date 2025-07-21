@@ -18,7 +18,7 @@ export default function PromoCarousel() {
            <div className="h-5 overflow-hidden relative w-full text-center">
              <div className="animate-slide-up absolute inset-0 flex flex-col justify-around">
                {promoMessages.map((message, index) => (
-                <span key={index} className="text-sm md:text-base font-semibold text-white">
+                <span key={index} className="text-sm md:text-base font-bold text-white">
                   {message}
                 </span>
               ))}
