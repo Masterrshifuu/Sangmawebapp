@@ -2,7 +2,7 @@
 'use client';
 
 import { db } from "@/lib/firebase";
-import { collection, onSnapshot, query, orderBy, where } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, where, Timestamp } from "firebase/firestore";
 import type { Product, Category, Order } from "@/lib/types";
 
 // Note: These functions are intended for client-side use only.
@@ -81,12 +81,22 @@ export function listenToCategories(callback: (categories: Category[]) => void): 
  */
 export function listenToUserOrders(userId: string, callback: (orders: Order[]) => void): () => void {
   const ordersCol = collection(db, 'orders');
-  const q = query(ordersCol, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  // The query was simplified to remove orderBy to avoid needing a composite index.
+  // Sorting will be handled on the client-side.
+  const q = query(ordersCol, where('userId', '==', userId));
 
   const unsubscribe = onSnapshot(q, (snapshot) => {
     const orderList = snapshot.docs.map(doc => {
       return { id: doc.id, ...doc.data() } as Order;
     });
+
+    // Sort the orders by creation date, newest first.
+    orderList.sort((a, b) => {
+      const dateA = a.createdAt instanceof Timestamp ? a.createdAt.toMillis() : 0;
+      const dateB = b.createdAt instanceof Timestamp ? b.createdAt.toMillis() : 0;
+      return dateB - dateA;
+    });
+
     callback(orderList);
   }, (error) => {
     console.error(`Error listening to orders for user ${userId}:`, error);
