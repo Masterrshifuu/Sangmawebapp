@@ -25,7 +25,7 @@ export default function MobileSearch({
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent className="bg-card flex flex-col h-[85%]">
+      <DrawerContent className="bg-card flex flex-col max-h-[85vh]">
         <DrawerTitle className="sr-only">Search Products</DrawerTitle>
         <div className="p-4 border-b">
           <div
@@ -44,7 +44,7 @@ export default function MobileSearch({
             </div>
           </div>
         </div>
-        <ScrollArea className="flex-1">
+        <ScrollArea className="flex-1 min-h-0">
           <SearchResults {...searchResultProps} query={query} onProductClick={() => setOpen(false)} />
         </ScrollArea>
       </DrawerContent>

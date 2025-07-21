@@ -26,7 +26,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
 function CartContent() {
-  const { cartItems, cartTotal, cartCount, clearCart } = useCart();
+  const { cartItems, cartTotal, cartCount, clearCart, addToCart, removeFromCart, clearItemFromCart } = useCart();
 
   return (
     <>
@@ -41,7 +41,38 @@ function CartContent() {
           <ScrollArea className="flex-1">
             <div className="divide-y pr-4">
               {cartItems.map((item) => (
-                <CartItemRow key={item.id} item={item} />
+                <div key={item.id} className="flex items-center gap-4 p-4">
+                  <Image
+                    src={item.imageUrl}
+                    alt={item.name}
+                    width={64}
+                    height={64}
+                    className="rounded-md object-contain h-16 w-16 border"
+                    data-ai-hint="product image"
+                  />
+                  <div className="flex-1 space-y-1 overflow-hidden">
+                    <p className="font-semibold line-clamp-1 truncate">{item.name}</p>
+                    <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
+                    <p className="font-bold text-sm">INR {(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <QuantitySelector
+                      quantity={item.quantity}
+                      onIncrease={() => addToCart(item)}
+                      onDecrease={() => removeFromCart(item.id)}
+                      size="small"
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => clearItemFromCart(item.id)}
+                      aria-label="Remove item"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           </ScrollArea>
@@ -68,45 +99,6 @@ function CartContent() {
         )}
       </div>
     </>
-  );
-}
-
-
-function CartItemRow({ item }: { item: CartItem }) {
-  const { addToCart, removeFromCart, clearItemFromCart } = useCart();
-  return (
-    <div className="flex items-center gap-4 p-4">
-      <Image
-        src={item.imageUrl}
-        alt={item.name}
-        width={64}
-        height={64}
-        className="rounded-md object-contain h-16 w-16 border"
-        data-ai-hint="product image"
-      />
-      <div className="flex-1 space-y-1 overflow-hidden">
-        <p className="font-semibold line-clamp-1 truncate">{item.name}</p>
-        <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
-        <p className="font-bold text-sm">INR {(item.price * item.quantity).toFixed(2)}</p>
-      </div>
-      <div className="flex items-center gap-2">
-        <QuantitySelector
-          quantity={item.quantity}
-          onIncrease={() => addToCart(item)}
-          onDecrease={() => removeFromCart(item.id)}
-          size="small"
-        />
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-          onClick={() => clearItemFromCart(item.id)}
-          aria-label="Remove item"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
-    </div>
   );
 }
 
