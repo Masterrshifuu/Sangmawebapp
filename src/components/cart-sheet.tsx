@@ -30,7 +30,7 @@ function CartContent() {
 
   return (
     <>
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0">
         {cartCount === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
             <ShoppingCart className="w-16 h-16 mb-4" />
@@ -39,7 +39,7 @@ function CartContent() {
           </div>
         ) : (
           <ScrollArea className="flex-1">
-            <div className="divide-y">
+            <div className="divide-y pr-4">
               {cartItems.map((item) => (
                 <CartItemRow key={item.id} item={item} />
               ))}
@@ -48,7 +48,7 @@ function CartContent() {
         )}
       </div>
 
-      <div className="p-4 border-t bg-background mt-auto">
+      <div className="p-4 border-t bg-background shrink-0">
         {cartCount > 0 ? (
           <div className="w-full space-y-4">
             <div className="flex justify-between font-bold text-lg">
@@ -121,7 +121,7 @@ export function Cart({ children }: { children: React.ReactNode }) {
     return (
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent className="flex flex-col p-0 max-h-[90vh]">
+        <DrawerContent className="flex flex-col max-h-[90vh]">
           <DrawerTitle className="sr-only">Your Cart</DrawerTitle>
           <CartContent />
         </DrawerContent>
