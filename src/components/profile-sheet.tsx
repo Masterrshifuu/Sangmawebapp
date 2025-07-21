@@ -160,8 +160,8 @@ function ProfileContent() {
         <p className="font-semibold">{user.displayName || user.email || user.phoneNumber}</p>
         <p className="text-xs text-muted-foreground">Welcome back!</p>
       </div>
-      <Tabs defaultValue="account" className="w-full flex flex-col flex-1 overflow-hidden">
-        <TabsList className="grid w-full grid-cols-2 mt-2">
+      <Tabs defaultValue="account" className="w-full flex flex-col flex-1 min-h-0">
+        <TabsList className="grid w-full grid-cols-2 mt-2 shrink-0">
           <TabsTrigger value="account">My Account</TabsTrigger>
           <TabsTrigger value="orders">My Orders</TabsTrigger>
         </TabsList>
@@ -201,7 +201,7 @@ function ProfileContent() {
             </Button>
           </div>
         </TabsContent>
-        <TabsContent value="orders" className="flex-1 overflow-y-auto mt-0">
+        <TabsContent value="orders" className="flex-1 flex flex-col mt-0 min-h-0">
           <ScrollArea className="h-full">
             {orders.length > 0 ? (
               <div className="p-4 space-y-3">
@@ -300,7 +300,7 @@ function ProfileContent() {
           </ScrollArea>
         </TabsContent>
       </Tabs>
-      <div className="p-4 border-t bg-background mt-auto">
+      <div className="p-4 border-t bg-background shrink-0">
         <Button
           variant="outline"
           className="w-full"
