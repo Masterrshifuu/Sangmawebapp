@@ -75,7 +75,7 @@ function AppShellContent() {
               }}
             >
               <Suspense fallback={<div className="w-full h-full bg-background" />}>
-                 {/* We render all tabs, but only the active one is visible */}
+                 {/* We render all tabs, but only the active one is visible by sliding */}
                  <TabComponent />
               </Suspense>
             </div>
