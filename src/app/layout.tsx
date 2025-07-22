@@ -1,25 +1,19 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import AppLayoutClient from '@/components/app-layout-client';
-import { PT_Sans, Poppins, Roboto } from 'next/font/google';
+import { Lato, Montserrat } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
-const ptSans = PT_Sans({
+const lato = Lato({
   subsets: ['latin'],
   weight: ['400', '700'],
-  variable: '--font-pt-sans',
+  variable: '--font-lato',
 });
 
-const poppins = Poppins({
+const montserrat = Montserrat({
   subsets: ['latin'],
   weight: ['600', '700'],
-  variable: '--font-poppins',
-});
-
-const roboto = Roboto({
-  subsets: ['latin'],
-  weight: ['700'],
-  variable: '--font-roboto',
+  variable: '--font-montserrat',
 });
 
 export const metadata: Metadata = {
@@ -52,9 +46,8 @@ export default function RootLayout({
       lang="en"
       suppressHydrationWarning
       className={cn(
-        ptSans.variable,
-        poppins.variable,
-        roboto.variable
+        lato.variable,
+        montserrat.variable
       )}
     >
       <body className="font-body antialiased">
