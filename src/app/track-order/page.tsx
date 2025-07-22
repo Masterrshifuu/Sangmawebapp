@@ -43,7 +43,7 @@ function TrackOrderContent() {
 
   if (!latestOrder) {
     return (
-      <Card className="w-full max-w-2xl mx-auto mt-8">
+      <Card className="w-full max-w-2xl mx-auto">
         <CardHeader>
           <CardTitle>Track Order</CardTitle>
         </CardHeader>
@@ -55,7 +55,7 @@ function TrackOrderContent() {
   }
 
   return (
-    <Card className="w-full max-w-2xl mx-auto mt-8">
+    <Card className="w-full max-w-2xl mx-auto">
       <CardHeader>
         <CardTitle>Track Your Latest Order</CardTitle>
         <CardDescription>Order ID: {latestOrder.id}</CardDescription>
@@ -73,7 +73,7 @@ export default function TrackOrderPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1 container mx-auto px-4 py-8">
-          <TrackOrderContent />
+            <TrackOrderContent />
         </main>
         <Footer />
         <div className="md:hidden">

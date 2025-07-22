@@ -31,26 +31,31 @@ function HomePageContent() {
   const bestsellers = products.filter((p) => p.bestseller);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <CategoryCarousel categories={categories} products={products} />
-      <PromoCarousel />
-      <ProductGrid title="Bestsellers" products={bestsellers} />
-      {categories.map((category) => {
-        const categoryProducts = products.filter(
-          (p) => p.category === category.name
-        );
-        if (categoryProducts.length > 0) {
-          return (
-            <ProductGrid
-              key={category.id}
-              title={category.name}
-              products={categoryProducts}
-            />
-          );
-        }
-        return null;
-      })}
-    </div>
+    <>
+      <Header />
+      <main className="flex-1">
+        <div className="container mx-auto px-4 py-8">
+          <CategoryCarousel categories={categories} products={products} />
+          <PromoCarousel />
+          <ProductGrid title="Bestsellers" products={bestsellers} />
+          {categories.map((category) => {
+            const categoryProducts = products.filter(
+              (p) => p.category === category.name
+            );
+            if (categoryProducts.length > 0) {
+              return (
+                <ProductGrid
+                  key={category.id}
+                  title={category.name}
+                  products={categoryProducts}
+                />
+              );
+            }
+            return null;
+          })}
+        </div>
+      </main>
+    </>
   );
 }
 
@@ -58,10 +63,7 @@ export default function Home() {
   return (
     <AuthWrapper>
       <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">
-          <HomePageContent />
-        </main>
+        <HomePageContent />
         <Footer />
         <div className="md:hidden">
           <BottomNavbar />

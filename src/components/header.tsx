@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { SearchWrapper } from './search/search-wrapper';
 
@@ -32,7 +32,10 @@ export default function Header() {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const { cartCount } = useCart();
   const router = useRouter();
+  const pathname = usePathname();
   const { toast } = useToast();
+
+  const isHomePage = pathname === '/';
 
   useEffect(() => {
     const savedLocation = localStorage.getItem('userLocation');
@@ -44,6 +47,11 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
+    if (!isHomePage) {
+      setIsScrolled(true); // Keep header compact on non-home pages
+      return;
+    }
+
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
@@ -52,7 +60,7 @@ export default function Header() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isHomePage]);
 
   const handleSaveLocation = (newLocation: string) => {
     setLocation(newLocation);
@@ -100,28 +108,13 @@ export default function Header() {
       </DropdownMenu>
   )
 
-  const ProfileTriggerSheet = (
-    <div className="flex justify-center w-full">
-      <Avatar className={cn('h-8 w-8')}>
-        <AvatarImage
-          src={user?.photoURL || `https://placehold.co/100x100.png`}
-          alt="User Profile"
-          data-ai-hint="user avatar"
-        />
-        <AvatarFallback>
-          <User className="h-5 w-5" />
-        </AvatarFallback>
-      </Avatar>
-    </div>
-  );
-
   return (
     <header className="sticky top-0 z-50 w-full bg-primary/80 backdrop-blur-sm border-b text-primary-foreground transition-all duration-300">
       <div className="container mx-auto px-4 py-3">
         <div
           className={cn(
             'grid transition-all duration-300 ease-in-out',
-            isScrolled ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
+            isScrolled || !isHomePage ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
           )}
         >
           <div className="overflow-hidden">

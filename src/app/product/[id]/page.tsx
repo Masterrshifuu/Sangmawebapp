@@ -54,18 +54,18 @@ function ProductPageContent() {
 
   if (isDataLoading || !product) {
     return (
-      <div className="container mx-auto px-4 py-8 flex justify-center items-center min-h-[calc(100vh-200px)]">
+      <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
         <Loader2 className="h-12 w-12 animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 relative">
+    <div className="relative">
       <Button
         variant="ghost"
         size="icon"
-        className="absolute top-4 left-4 z-10 bg-background/50 backdrop-blur-sm rounded-full"
+        className="absolute top-4 left-4 z-10 bg-background/50 backdrop-blur-sm rounded-full md:hidden"
         onClick={() => router.back()}
         aria-label="Go back"
       >
@@ -113,7 +113,9 @@ export default function ProductPage() {
       <div className="flex flex-col min-h-screen">
         <Header />
         <main className="flex-1">
-          <ProductPageContent />
+          <div className="container mx-auto px-4 py-8">
+            <ProductPageContent />
+          </div>
         </main>
         <Footer />
         <div className="md:hidden">
