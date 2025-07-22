@@ -11,7 +11,7 @@ const Logo = ({ className }: { className?: string }) => {
         height={60}
         priority
       />
-      <span className="font-headline text-lg font-bold relative top-px">
+      <span className="font-headline text-lg font-bold">
         Sangma Megha Mart
       </span>
     </div>
