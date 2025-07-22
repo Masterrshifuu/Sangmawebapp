@@ -4,27 +4,19 @@
 import { Home, Search, ShoppingCart, User, LayoutGrid, Bot } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { useEffect, useState } from 'react';
-import { auth } from '@/lib/firebase';
-import type { User as FirebaseUser } from 'firebase/auth';
 import { useCart } from '@/context/cart-context';
 import type { AppTab } from './app-shell';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface BottomNavbarProps {
-  activeTab: AppTab;
-  setActiveTab: (tab: AppTab) => void;
+  activeTab?: AppTab;
+  setActiveTab?: (tab: AppTab) => void;
 }
 
 const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
-  const [user, setUser] = useState<FirebaseUser | null>(null);
   const { cartCount } = useCart();
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(setUser);
-    return () => unsubscribe();
-  }, []);
+  const router = useRouter();
 
   const navItems: { tab: AppTab; icon: React.ElementType; label: string }[] = [
     { tab: 'home', icon: Home, label: 'Home' },
@@ -33,6 +25,16 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
     { tab: 'ai-chat', icon: Bot, label: 'AI Chat' },
     { tab: 'account', icon: User, label: 'Account' },
   ];
+  
+  const handleNav = (tab: AppTab) => {
+    if (setActiveTab) {
+      // If used within AppShell, just switch the tab
+      setActiveTab(tab);
+    } else {
+      // If used on a standalone page, navigate
+      router.push(`/?tab=${tab}`);
+    }
+  }
 
   return (
     <div className="fixed bottom-0 w-full bg-background border-t z-40 md:hidden text-black dark:text-white">
@@ -42,7 +44,7 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
             key={tab}
             variant="ghost"
             className="flex flex-col items-center justify-center w-full h-full p-0"
-            onClick={() => setActiveTab(tab)}
+            onClick={() => handleNav(tab)}
             aria-label={label}
           >
             <Icon
