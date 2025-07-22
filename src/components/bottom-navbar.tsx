@@ -7,7 +7,6 @@ import { Home, Search, ShoppingCart, User, LayoutGrid } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { Cart } from './cart-sheet';
 import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
@@ -43,17 +42,14 @@ const BottomNavbar = () => {
           </Link>
         ))}
         
-        <Cart>
-          <Button variant="ghost" className="p-0 h-auto text-current relative active:bg-transparent">
-            <ShoppingCart className="h-6 w-6" />
+        <Link href="/cart" aria-label="Cart" className="flex justify-center w-full relative">
+            <ShoppingCart className={cn('h-6 w-6', pathname === '/cart' && 'text-primary scale-110')} />
             {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
                 {cartCount}
                 </span>
             )}
-            <span className="sr-only">Cart</span>
-          </Button>
-        </Cart>
+        </Link>
 
         <Link href="/profile" aria-label="Profile" className="flex justify-center w-full">
           <Avatar className={cn('h-7 w-7', pathname === '/profile' && 'ring-2 ring-primary')}>

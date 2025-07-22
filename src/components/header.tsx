@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Search, ShoppingCart, User } from 'lucide-react';
@@ -6,10 +7,8 @@ import LocationSheet from './location-sheet';
 import { cn } from '@/lib/utils';
 import Logo from './logo';
 import Link from 'next/link';
-import { Cart } from './cart-sheet';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { ProfileSheet } from './profile-sheet';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { useCart } from '@/context/cart-context';
@@ -142,17 +141,17 @@ export default function Header() {
             <SearchWrapper />
           </div>
           <div className="hidden md:flex items-center gap-2">
-            <Cart>
-              <Button variant="ghost" size="icon" className="relative">
-                <ShoppingCart className="w-5 h-5" />
-                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-                <span className="sr-only">Shopping Cart</span>
-              </Button>
-            </Cart>
+             <Button asChild variant="ghost" size="icon" className="relative">
+                <Link href="/cart">
+                    <ShoppingCart className="w-5 h-5" />
+                    {cartCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                        {cartCount}
+                    </span>
+                    )}
+                    <span className="sr-only">Shopping Cart</span>
+                </Link>
+            </Button>
             {user ? (
                 ProfileDropdown
             ) : (
