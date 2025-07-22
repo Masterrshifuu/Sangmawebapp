@@ -1,19 +1,13 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import AppLayoutClient from '@/components/app-layout-client';
-import { Lato, Montserrat } from 'next/font/google';
+import { PT_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
 
-const lato = Lato({
+const ptSans = PT_Sans({
   subsets: ['latin'],
   weight: ['400', '700'],
-  variable: '--font-lato',
-});
-
-const montserrat = Montserrat({
-  subsets: ['latin'],
-  weight: ['600', '700'],
-  variable: '--font-montserrat',
+  variable: '--font-pt-sans',
 });
 
 export const metadata: Metadata = {
@@ -46,12 +40,9 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(
-        lato.variable,
-        montserrat.variable
-      )}
+      className={cn(ptSans.variable)}
     >
-      <body className="font-body antialiased">
+      <body className="antialiased">
         <AppLayoutClient>{children}</AppLayoutClient>
       </body>
     </html>
