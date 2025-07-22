@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -12,7 +11,9 @@ import {
   DrawerContent,
   DrawerTrigger,
   DrawerClose,
+  DrawerHeader,
   DrawerTitle,
+  DrawerFooter,
 } from '@/components/ui/drawer';
 import { ShoppingCart, Trash2 } from 'lucide-react';
 import { useCart } from '@/context/cart-context';
@@ -22,83 +23,130 @@ import { QuantitySelector } from './quantity-selector';
 import type { CartItem } from '@/lib/types';
 import { CheckoutSheet } from './checkout-sheet';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useState } from 'react';
-import { cn } from '@/lib/utils';
+
+function CartItemRow({ item }: { item: CartItem }) {
+  const { addToCart, removeFromCart, clearItemFromCart } = useCart();
+  return (
+    <div className="flex items-center gap-4 p-4">
+      <Image
+        src={item.imageUrl}
+        alt={item.name}
+        width={64}
+        height={64}
+        className="rounded-md object-contain h-16 w-16 border"
+        data-ai-hint="product image"
+      />
+      <div className="flex-1 space-y-1 overflow-hidden">
+        <p className="font-semibold line-clamp-1 truncate">{item.name}</p>
+        <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
+        <p className="font-bold text-sm">
+          INR {(item.price * item.quantity).toFixed(2)}
+        </p>
+      </div>
+      <div className="flex items-center gap-2">
+        <QuantitySelector
+          quantity={item.quantity}
+          onIncrease={() => addToCart(item)}
+          onDecrease={() => removeFromCart(item.id)}
+          size="small"
+        />
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+          onClick={() => clearItemFromCart(item.id)}
+          aria-label="Remove item"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function CartContent() {
-  const { cartItems, cartTotal, cartCount, clearCart, addToCart, removeFromCart, clearItemFromCart } = useCart();
+  const { cartItems, cartTotal, cartCount } = useCart();
 
   return (
-    <>
-      <div className="flex-1 flex flex-col min-h-0">
-        {cartCount === 0 ? (
-          <div className="flex-1 flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
-            <ShoppingCart className="w-16 h-16 mb-4" />
-            <h3 className="text-lg font-semibold text-foreground">Your cart is empty</h3>
-            <p className="text-sm">Add items from the store to see them here.</p>
+    <div className="flex-1 flex flex-col min-h-0">
+      {cartCount === 0 ? (
+        <div className="flex-1 flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
+          <ShoppingCart className="w-16 h-16 mb-4" />
+          <h3 className="text-lg font-semibold text-foreground">
+            Your cart is empty
+          </h3>
+          <p className="text-sm">
+            Add items from the store to see them here.
+          </p>
+        </div>
+      ) : (
+        <ScrollArea className="flex-1">
+          <div className="divide-y pr-4">
+            {cartItems.map((item) => (
+              <CartItemRow key={item.id} item={item} />
+            ))}
           </div>
-        ) : (
-          <ScrollArea className="flex-1">
-            <div className="divide-y pr-4">
-              {cartItems.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 p-4">
-                  <Image
-                    src={item.imageUrl}
-                    alt={item.name}
-                    width={64}
-                    height={64}
-                    className="rounded-md object-contain h-16 w-16 border"
-                    data-ai-hint="product image"
-                  />
-                  <div className="flex-1 space-y-1 overflow-hidden">
-                    <p className="font-semibold line-clamp-1 truncate">{item.name}</p>
-                    <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
-                    <p className="font-bold text-sm">INR {(item.price * item.quantity).toFixed(2)}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <QuantitySelector
-                      quantity={item.quantity}
-                      onIncrease={() => addToCart(item)}
-                      onDecrease={() => removeFromCart(item.id)}
-                      size="small"
-                    />
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                      onClick={() => clearItemFromCart(item.id)}
-                      aria-label="Remove item"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
-        )}
-      </div>
+        </ScrollArea>
+      )}
 
-      <div className="p-4 border-t bg-background shrink-0">
-        {cartCount > 0 ? (
+      {cartCount > 0 && (
+        <div className="p-4 border-t bg-background shrink-0">
           <div className="w-full space-y-4">
             <div className="flex justify-between font-bold text-lg">
               <span>Total</span>
               <span>INR {cartTotal.toFixed(2)}</span>
             </div>
             <CheckoutSheet>
-                <Button className="w-full" size="lg">
-                  Proceed to Checkout
-                </Button>
+              <Button className="w-full" size="lg">
+                Proceed to Checkout
+              </Button>
             </CheckoutSheet>
           </div>
-        ) : (
-            <DrawerClose asChild>
-              <Button className="w-full" variant="outline">Continue Shopping</Button>
-            </DrawerClose>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function DesktopCart({ children }: { children: React.ReactNode }) {
+  const { cartItems, cartTotal } = useCart();
+  return (
+    <Popover>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-96 p-0 flex flex-col" align="end">
+        <div className="p-4 border-b">
+          <h3 className="text-lg font-semibold">Your Cart</h3>
+        </div>
+        <div className="max-h-[60vh] flex flex-col">
+          <CartContent />
+        </div>
+      </PopoverContent>
+    </Popover>
+  );
+}
+
+function MobileCart({ children }: { children: React.ReactNode }) {
+  const { cartCount } = useCart();
+
+  return (
+    <Drawer>
+      <DrawerTrigger asChild>{children}</DrawerTrigger>
+      <DrawerContent className="flex flex-col max-h-[90vh]">
+        <DrawerHeader>
+          <DrawerTitle>Your Cart</DrawerTitle>
+        </DrawerHeader>
+        <div className="flex-1 min-h-0">
+           <CartContent />
+        </div>
+        {cartCount === 0 && (
+            <DrawerFooter>
+                 <DrawerClose asChild>
+                    <Button variant="outline">Continue Shopping</Button>
+                </DrawerClose>
+            </DrawerFooter>
         )}
-      </div>
-    </>
+      </DrawerContent>
+    </Drawer>
   );
 }
 
@@ -109,26 +157,9 @@ export function Cart({ children }: { children: React.ReactNode }) {
     return null; // or a placeholder
   }
 
-  if (isMobile) {
-    return (
-      <Drawer>
-        <DrawerTrigger asChild>{children}</DrawerTrigger>
-        <DrawerContent className="flex flex-col max-h-[90vh]">
-          <DrawerTitle className="sr-only">Your Cart</DrawerTitle>
-          <CartContent />
-        </DrawerContent>
-      </Drawer>
-    );
-  }
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>{children}</PopoverTrigger>
-      <PopoverContent className="w-96 p-0 flex flex-col" align="end">
-         <div className="max-h-[60vh] flex flex-col">
-            <CartContent />
-         </div>
-      </PopoverContent>
-    </Popover>
+  return isMobile ? (
+    <MobileCart>{children}</MobileCart>
+  ) : (
+    <DesktopCart>{children}</DesktopCart>
   );
 }

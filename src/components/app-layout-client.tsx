@@ -4,21 +4,10 @@ import { usePathname } from 'next/navigation';
 import { Toaster } from '@/components/ui/toaster';
 import { CartProvider } from '@/context/cart-context';
 import { DataProvider } from '@/context/data-context';
-import { useEffect } from 'react';
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLoginPage = pathname === '/login';
-
-  useEffect(() => {
-    const handleContextmenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
-    document.addEventListener('contextmenu', handleContextmenu);
-    return () => {
-      document.removeEventListener('contextmenu', handleContextmenu);
-    };
-  }, []);
 
   return (
     <DataProvider>

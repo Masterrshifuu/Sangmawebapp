@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -8,10 +7,12 @@ import {
   Drawer,
   DrawerContent,
   DrawerTrigger,
+  DrawerHeader,
   DrawerTitle,
+  DrawerFooter,
   DrawerClose,
 } from '@/components/ui/drawer';
-import { Sheet, SheetContent, SheetTrigger } from './ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle, SheetFooter } from './ui/sheet';
 import { Button } from '@/components/ui/button';
 import { LogOut, User, MapPin, Phone, Building, Save, Loader2, ShoppingBag, ChevronRight, X, ChevronDown } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -87,7 +88,7 @@ function ProfileContent() {
   const handleSignOut = async () => {
     try {
       await signOut(auth);
-      // The onAuthStateChanged listener will handle routing
+      router.push('/login');
     } catch (error) {
       console.error('Error signing out: ', error);
       toast({ variant: 'destructive', title: 'Sign Out Failed', description: 'Could not sign you out. Please try again.' });
@@ -300,16 +301,16 @@ function ProfileContent() {
           </ScrollArea>
         </TabsContent>
       </Tabs>
-      <div className="p-4 border-t bg-background shrink-0">
+      <DrawerFooter>
         <Button
-          variant="outline"
-          className="w-full"
-          onClick={handleSignOut}
+            variant="outline"
+            className="w-full"
+            onClick={handleSignOut}
         >
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign Out
+            <LogOut className="mr-2 h-4 w-4" />
+            Sign Out
         </Button>
-      </div>
+      </DrawerFooter>
     </>
   )
 }
@@ -336,7 +337,9 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent className="max-h-[90vh] flex flex-col p-0">
-           <DrawerTitle className="sr-only">User Profile</DrawerTitle>
+           <DrawerHeader>
+                <DrawerTitle>My Account</DrawerTitle>
+           </DrawerHeader>
           <div className="flex-1 min-h-0 flex flex-col">
             <ProfileContent />
           </div>
@@ -354,6 +357,9 @@ export function ProfileSheet({ children }: { children: React.ReactNode }) {
         className="w-[400px] flex flex-col p-0"
         showCloseButton={true}
       >
+        <SheetHeader>
+            <SheetTitle>My Account</SheetTitle>
+        </SheetHeader>
         <div className="flex flex-col justify-between flex-1">
           <ProfileContent />
         </div>
