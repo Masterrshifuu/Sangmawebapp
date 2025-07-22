@@ -1,15 +1,15 @@
+
 "use client";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 import DesktopSearch from "./desktop-search";
-import MobileSearch from "./mobile-search";
 import { Search } from "lucide-react";
-import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
-import Link from "next/link";
 
-export function SearchWrapper({ isBottomNav = false }: { isBottomNav?: boolean }) {
+export function SearchWrapper() {
   const isMobile = useIsMobile();
+  const router = useRouter();
 
   if (isMobile === undefined) {
     // Return a placeholder or null to avoid SSR/CSR mismatch
@@ -17,17 +17,17 @@ export function SearchWrapper({ isBottomNav = false }: { isBottomNav?: boolean }
   }
 
   if (isMobile) {
-    // On mobile, the search bar in the header is a link to the search page
+    // On mobile, the search bar in the header is a button to switch to the search tab
     return (
-      <Link
-        href="/search"
+      <button
+        onClick={() => router.push('/?tab=search')}
         className={cn(
           'flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground active:bg-secondary/80'
         )}
       >
         <Search className="h-5 w-5 mr-3" />
         <span>Search for products...</span>
-      </Link>
+      </button>
     );
   }
 

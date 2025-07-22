@@ -1,3 +1,4 @@
+
 'use client';
 
 import CategoryList from "@/components/category-list";

@@ -1,20 +1,18 @@
 
 'use client';
-import { useState, useEffect, Suspense, lazy } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import BottomNavbar from '@/components/bottom-navbar';
+import HomePageContent from './tabs/home-tab';
+import CategoriesPageContent from './tabs/categories-tab';
+import SearchTab from './tabs/search-tab';
+import AiChatTab from './tabs/ai-chat-tab';
+import AccountTab from './tabs/account-tab';
 
 // Define the available tabs
 export type AppTab = 'home' | 'categories' | 'search' | 'ai-chat' | 'account';
 const TABS: AppTab[] = ['home', 'categories', 'search', 'ai-chat', 'account'];
-
-// Lazy load tab components for better initial performance
-const HomePageContent = lazy(() => import('./tabs/home-tab'));
-const CategoriesPageContent = lazy(() => import('./tabs/categories-tab'));
-const SearchTab = lazy(() => import('./tabs/search-tab'));
-const AiChatTab = lazy(() => import('./tabs/ai-chat-tab'));
-const AccountTab = lazy(() => import('./tabs/account-tab'));
 
 const tabComponents: Record<AppTab, React.ElementType> = {
   home: HomePageContent,
