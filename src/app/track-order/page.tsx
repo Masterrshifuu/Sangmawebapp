@@ -71,7 +71,7 @@ export default function TrackOrderPage() {
   return (
     <AuthWrapper>
       <div className="flex flex-col min-h-screen">
-        <Header />
+        <Header isScrolled={true} />
         <main className="flex-1 container mx-auto px-4 py-8">
             <TrackOrderContent />
         </main>

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Search, ShoppingCart, User } from 'lucide-react';
+import { Search, ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import LocationSheet from './location-sheet';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,6 @@ import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
-import { useCart } from '@/context/cart-context';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,10 +25,12 @@ import { useToast } from '@/hooks/use-toast';
 import { SearchWrapper } from './search/search-wrapper';
 import { CartSheet } from './cart-sheet';
 
+interface HeaderProps {
+  isScrolled: boolean;
+}
 
-export default function Header() {
+export default function Header({ isScrolled }: HeaderProps) {
   const [location, setLocation] = useState('Chandmari, South Tura');
-  const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const router = useRouter();
   const pathname = usePathname();
@@ -45,22 +46,6 @@ export default function Header() {
     const unsubscribe = auth.onAuthStateChanged(setUser);
     return () => unsubscribe();
   }, []);
-
-  useEffect(() => {
-    if (!isHomePage) {
-      setIsScrolled(true); // Keep header compact on non-home pages
-      return;
-    }
-
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, [isHomePage]);
 
   const handleSaveLocation = (newLocation: string) => {
     setLocation(newLocation);
@@ -94,7 +79,7 @@ export default function Header() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/profile')}>
+          <DropdownMenuItem onClick={() => router.push('/?tab=account')}>
             Profile
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push('/track-order')}>
@@ -106,7 +91,9 @@ export default function Header() {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-  )
+  );
+
+  const shouldCollapse = !isHomePage || isScrolled;
 
   return (
     <header className="sticky top-0 z-50 w-full bg-primary/80 backdrop-blur-sm border-b text-primary-foreground transition-all duration-300">
@@ -114,7 +101,7 @@ export default function Header() {
         <div
           className={cn(
             'grid transition-all duration-300 ease-in-out',
-            isScrolled || !isHomePage ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
+            shouldCollapse ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
           )}
         >
           <div className="overflow-hidden">

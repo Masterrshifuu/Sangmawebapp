@@ -61,49 +61,58 @@ function ProductPageContent() {
   }
 
   return (
-    <div className="relative">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute top-4 left-4 z-10 bg-background/50 backdrop-blur-sm rounded-full md:hidden"
-        onClick={() => router.back()}
-        aria-label="Go back"
-      >
-        <ArrowLeft className="h-5 w-5" />
-      </Button>
+    <>
+      <Header isScrolled={true} />
+      <main className="flex-1">
+        <div className="relative container mx-auto px-4 py-8">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="absolute top-4 left-4 z-10 bg-background/50 backdrop-blur-sm rounded-full md:hidden"
+            onClick={() => router.back()}
+            aria-label="Go back"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
 
-      <div className="grid md:grid-cols-2 gap-8 mb-16">
-        <div className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
-          <Image
-            src={product.imageUrl}
-            alt={product.name}
-            fill
-            className="object-contain p-4"
-            data-ai-hint="product image"
-          />
-           <Badge
-              variant="secondary"
-              className="absolute top-4 left-4 bg-accent text-accent-foreground"
-            >
-              Instant Delivery
-            </Badge>
-        </div>
+          <div className="grid md:grid-cols-2 gap-8 mb-16">
+            <div className="relative aspect-square rounded-lg overflow-hidden shadow-lg">
+              <Image
+                src={product.imageUrl}
+                alt={product.name}
+                fill
+                className="object-contain p-4"
+                data-ai-hint="product image"
+              />
+              <Badge
+                  variant="secondary"
+                  className="absolute top-4 left-4 bg-accent text-accent-foreground"
+                >
+                  Instant Delivery
+                </Badge>
+            </div>
 
-        <div className="flex flex-col justify-start space-y-6 pt-4 md:pt-0">
-           <h1 className="font-headline text-3xl font-bold">{product.name}</h1>
-          <p className="text-muted-foreground leading-relaxed">
-            {product.description}
-          </p>
-          <div className="flex items-baseline gap-4">
-            <span className="text-3xl font-bold">
-              INR {product.price.toFixed(2)}
-            </span>
+            <div className="flex flex-col justify-start space-y-6 pt-4 md:pt-0">
+              <h1 className="font-headline text-3xl font-bold">{product.name}</h1>
+              <p className="text-muted-foreground leading-relaxed">
+                {product.description}
+              </p>
+              <div className="flex items-baseline gap-4">
+                <span className="text-3xl font-bold">
+                  INR {product.price.toFixed(2)}
+                </span>
+              </div>
+              <AddToCartSection product={product} />
+            </div>
           </div>
-          <AddToCartSection product={product} />
+          <SimilarProducts products={similarProducts} />
         </div>
+      </main>
+      <Footer />
+      <div className="md:hidden">
+        <BottomNavbar />
       </div>
-      <SimilarProducts products={similarProducts} />
-    </div>
+    </>
   );
 }
 
@@ -111,16 +120,7 @@ export default function ProductPage() {
   return (
     <AuthWrapper>
       <div className="flex flex-col min-h-screen">
-        <Header />
-        <main className="flex-1">
-          <div className="container mx-auto px-4 py-8">
-            <ProductPageContent />
-          </div>
-        </main>
-        <Footer />
-        <div className="md:hidden">
-          <BottomNavbar />
-        </div>
+        <ProductPageContent />
       </div>
     </AuthWrapper>
   );
