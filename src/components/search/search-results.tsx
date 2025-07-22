@@ -1,10 +1,10 @@
+
 'use client';
 
 import ProductCard from '@/components/product-card';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Bot } from 'lucide-react';
 import type { useSearch } from '@/hooks/use-search';
-import { AnimatedPlaceholder } from './animated-placeholder';
 
 type SearchResultsProps = Omit<ReturnType<typeof useSearch>, 'query' | 'setQuery'> & {
   query: string;
@@ -42,7 +42,6 @@ export function SearchResults({
               key={product.id}
               product={product}
               size="small"
-              onProductClick={onProductClick}
             />
           ))}
         </div>
@@ -70,7 +69,6 @@ export function SearchResults({
               key={product.id}
               product={product}
               size="small"
-              onProductClick={onProductClick}
             />
           ))}
         </div>

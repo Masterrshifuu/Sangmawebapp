@@ -1,3 +1,4 @@
+
 'use client';
 
 import CategoryCarousel from '@/components/category-carousel';
@@ -37,16 +38,7 @@ export default function HomePageContent() {
       <div className="container mx-auto px-4 py-8">
         <CategoryCarousel categories={categories} products={products} />
         <PromoCarousel />
-
         <ProductGrid title="Bestsellers" products={bestsellers} />
-
-        {categories.map((category) => (
-          <ProductGrid
-            key={category.id}
-            title={category.name}
-            products={products.filter((p) => p.category === category.name)}
-          />
-        ))}
       </div>
        <Footer />
     </div>

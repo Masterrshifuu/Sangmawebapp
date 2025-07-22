@@ -1,3 +1,4 @@
+
 'use client';
 
 import Image from 'next/image';
@@ -20,13 +21,11 @@ import { QuantitySelector } from './quantity-selector';
 type ProductCardProps = {
   product: Product;
   size?: 'default' | 'small';
-  onProductClick?: () => void;
 };
 
 export default function ProductCard({
   product,
   size = 'default',
-  onProductClick,
 }: ProductCardProps) {
   const { addToCart, removeFromCart, getItemQuantity } = useCart();
   const quantity = getItemQuantity(product.id);
@@ -36,7 +35,6 @@ export default function ProductCard({
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
       <Link
         href={`/product/${product.id}`}
-        onClick={onProductClick}
         className="flex flex-col flex-grow"
       >
         <CardHeader className="p-0 relative">
