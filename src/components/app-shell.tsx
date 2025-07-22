@@ -63,7 +63,6 @@ function AppShellContent() {
         {TABS.map((tab) => {
           const TabComponent = tabComponents[tab];
           const tabIndex = getTabIndex(tab);
-          const isActive = tab === activeTab;
           
           return (
             <div
@@ -71,11 +70,9 @@ function AppShellContent() {
               className="absolute inset-0 transition-transform duration-300 ease-in-out"
               style={{
                 transform: `translateX(${(tabIndex - activeTabIndex) * 100}%)`,
-                display: isActive ? 'block' : 'none'
               }}
             >
               <Suspense fallback={<div className="w-full h-full bg-background" />}>
-                 {/* We render all tabs, but only the active one is visible by sliding */}
                  <TabComponent />
               </Suspense>
             </div>
