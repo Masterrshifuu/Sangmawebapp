@@ -1,7 +1,7 @@
 
 'use client';
 import { useState, useEffect, Suspense, lazy } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import BottomNavbar from '@/components/bottom-navbar';
 
@@ -25,6 +25,8 @@ const tabComponents: Record<AppTab, React.ElementType> = {
 };
 
 function AppShellContent() {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const initialTab = (searchParams.get('tab') as AppTab) || 'home';
   const [activeTab, setActiveTab] = useState<AppTab>(initialTab);
@@ -33,6 +35,21 @@ function AppShellContent() {
   useEffect(() => {
     setIsClient(true);
   }, []);
+  
+  // This effect syncs the active tab state with the URL
+  useEffect(() => {
+    const currentTabInUrl = (searchParams.get('tab') as AppTab) || 'home';
+    if (currentTabInUrl !== activeTab) {
+      setActiveTab(currentTabInUrl);
+    }
+  }, [searchParams, activeTab]);
+
+  const handleSetTab = (newTab: AppTab) => {
+    setActiveTab(newTab);
+    const newUrl = `${pathname}?tab=${newTab}`;
+    // Use pushState to avoid re-triggering router logic unecessarily
+    window.history.pushState({ ...window.history.state, as: newUrl, url: newUrl }, '', newUrl);
+  };
 
   const getTabIndex = (tab: AppTab) => TABS.indexOf(tab);
   const activeTabIndex = getTabIndex(activeTab);
@@ -71,7 +88,7 @@ function AppShellContent() {
       {/* Spacer to prevent content from being hidden behind the navbar */}
       <div className="h-14 md:hidden" /> 
       
-      <BottomNavbar activeTab={activeTab} setActiveTab={setActiveTab} />
+      <BottomNavbar activeTab={activeTab} setActiveTab={handleSetTab} />
     </div>
   );
 }

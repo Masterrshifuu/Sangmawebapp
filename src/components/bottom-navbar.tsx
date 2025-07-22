@@ -13,6 +13,7 @@ import type { User as FirebaseUser } from 'firebase/auth';
 import { useCart } from '@/context/cart-context';
 import type { AppTab } from './app-shell';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface BottomNavbarProps {
   activeTab: AppTab;
@@ -22,11 +23,18 @@ interface BottomNavbarProps {
 const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const { cartCount } = useCart();
+  const router = useRouter();
+
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(setUser);
     return () => unsubscribe();
   }, []);
+
+  const handleProfileClick = () => {
+    // For now, the profile is a sheet, not a main tab, so it doesn't use setActiveTab
+    // This can be extended if profile becomes a main tab.
+  }
 
   const navItems: { id: AppTab; icon: React.ElementType }[] = [
     { id: 'home', icon: Home },
@@ -34,7 +42,7 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
     { id: 'search', icon: Search },
     { id: 'ai-chat', icon: Bot },
   ];
-
+  
   const ProfileTrigger = (
     <div className="flex justify-center w-full">
       <Avatar className={cn('h-8 w-8 transition-transform', activeTab === 'account' && 'scale-110 ring-2 ring-primary')}>
@@ -71,7 +79,23 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
         ))}
 
         {user ? (
-          <ProfileSheet>{ProfileTrigger}</ProfileSheet>
+           <Button
+            variant="ghost"
+            className="p-0 h-auto w-full text-current hover:bg-transparent flex justify-center"
+            aria-label="account"
+            onClick={() => setActiveTab('account')}
+          >
+            <Avatar className={cn('h-8 w-8 transition-transform', activeTab === 'account' && 'scale-110 ring-2 ring-primary')}>
+              <AvatarImage
+                src={user?.photoURL || `https://placehold.co/100x100.png`}
+                alt="User Profile"
+                data-ai-hint="user avatar"
+              />
+              <AvatarFallback>
+                <User className="h-5 w-5" />
+              </AvatarFallback>
+            </Avatar>
+          </Button>
         ) : (
           <Link href="/login" aria-label="Profile" className="flex justify-center w-full">
              <Avatar className="h-8 w-8">
