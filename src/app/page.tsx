@@ -8,7 +8,7 @@ import ProductGrid from '@/components/product-grid';
 import { useData } from '@/context/data-context';
 import { Skeleton } from '@/components/ui/skeleton';
 import PromoCarousel from '@/components/promo-carousel';
-
+import BottomNavbar from '@/components/bottom-navbar';
 
 function HomePageContent() {
   const { products, categories, loading } = useData();
@@ -47,6 +47,9 @@ export default function Home() {
           <HomePageContent />
         </main>
         <Footer />
+        <div className="md:hidden">
+          <BottomNavbar />
+        </div>
       </div>
     </AuthWrapper>
   );

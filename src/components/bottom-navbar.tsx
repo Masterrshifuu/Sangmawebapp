@@ -2,17 +2,15 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Search, ShoppingCart, User, LayoutGrid, Bot } from 'lucide-react';
+import { Home, Search, ShoppingCart, User, LayoutGrid } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Cart } from './cart-sheet';
-import { ProfileSheet } from './profile-sheet';
 import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { useCart } from '@/context/cart-context';
-import { SearchWrapper } from './search/search-wrapper';
 
 const BottomNavbar = () => {
   const pathname = usePathname();
@@ -27,26 +25,8 @@ const BottomNavbar = () => {
   const navItems = [
     { href: '/', icon: Home, label: 'Home' },
     { href: '/categories', icon: LayoutGrid, label: 'Categories' },
+    { href: '/search', icon: Search, label: 'Search' },
   ];
-
-  const ProfileTrigger = (
-    <div className="flex justify-center w-full">
-      <Avatar className={cn('h-8 w-8', pathname === '/profile' && 'ring-2 ring-primary')}>
-        <AvatarImage
-          src={user?.photoURL || `https://placehold.co/100x100.png`}
-          alt="User Profile"
-          data-ai-hint="user avatar"
-        />
-        <AvatarFallback>
-          {user ? (
-            user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'
-          ) : (
-            <User className="h-5 w-5" />
-          )}
-        </AvatarFallback>
-      </Avatar>
-    </div>
-  );
 
   return (
     <div className="fixed bottom-0 w-full bg-background border-t z-40 md:hidden text-black dark:text-white">
@@ -62,8 +42,6 @@ const BottomNavbar = () => {
           </Link>
         ))}
         
-        <SearchWrapper isBottomNav={true} />
-        
         <Cart>
           <Button variant="ghost" className="p-0 h-auto text-current relative active:bg-transparent">
             <ShoppingCart className="h-7 w-7" />
@@ -76,15 +54,22 @@ const BottomNavbar = () => {
           </Button>
         </Cart>
 
-        {user ? (
-          <ProfileSheet>{ProfileTrigger}</ProfileSheet>
-        ) : (
-          <Link href="/login" aria-label="Profile" className="flex justify-center w-full">
-             <Avatar className="h-8 w-8">
-              <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
-             </Avatar>
-          </Link>
-        )}
+        <Link href="/profile" aria-label="Profile" className="flex justify-center w-full">
+          <Avatar className={cn('h-8 w-8', pathname === '/profile' && 'ring-2 ring-primary')}>
+            <AvatarImage
+              src={user?.photoURL || `https://placehold.co/100x100.png`}
+              alt="User Profile"
+              data-ai-hint="user avatar"
+            />
+            <AvatarFallback>
+              {user ? (
+                user.displayName?.charAt(0) || user.email?.charAt(0) || 'U'
+              ) : (
+                <User className="h-5 w-5" />
+              )}
+            </AvatarFallback>
+          </Avatar>
+        </Link>
       </div>
     </div>
   );

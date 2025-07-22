@@ -1,5 +1,9 @@
 'use client';
 
+// This component is no longer used in the main application flow
+// but is kept to avoid breaking changes if it were referenced elsewhere.
+// The main profile view is now a dedicated page.
+
 import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import { signOut, type User as FirebaseUser } from 'firebase/auth';
