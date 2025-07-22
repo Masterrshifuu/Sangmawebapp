@@ -9,6 +9,8 @@ import { useAuth } from "@/hooks/use-auth";
 import type { Order } from "@/lib/types";
 import { Loader2, ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import Header from "../header";
+import Footer from "../footer";
 
 function LatestOrder() {
   const { user, loading: authLoading } = useAuth();
@@ -75,8 +77,12 @@ function LatestOrder() {
 
 export default function AccountTab() {
   return (
-      <div className="container mx-auto px-4 py-8 h-full overflow-y-auto">
-        <LatestOrder />
+      <div className="h-full overflow-y-auto">
+        <Header isScrolled={true} />
+        <main className="container mx-auto px-4 py-8">
+          <LatestOrder />
+        </main>
+        <Footer />
       </div>
   );
 }

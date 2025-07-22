@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { signOut } from 'firebase/auth';
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { SearchWrapper } from './search/search-wrapper';
 import { CartSheet } from './cart-sheet';
@@ -33,10 +33,7 @@ export default function Header({ isScrolled }: HeaderProps) {
   const [location, setLocation] = useState('Chandmari, South Tura');
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const router = useRouter();
-  const pathname = usePathname();
   const { toast } = useToast();
-
-  const isHomePage = pathname === '/';
 
   useEffect(() => {
     const savedLocation = localStorage.getItem('userLocation');
@@ -93,15 +90,13 @@ export default function Header({ isScrolled }: HeaderProps) {
       </DropdownMenu>
   );
 
-  const shouldCollapse = !isHomePage || isScrolled;
-
   return (
     <header className="sticky top-0 z-50 w-full bg-primary/80 backdrop-blur-sm border-b text-primary-foreground transition-all duration-300">
       <div className="container mx-auto px-4 py-3">
         <div
           className={cn(
             'grid transition-all duration-300 ease-in-out',
-            shouldCollapse ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
+            isScrolled ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
           )}
         >
           <div className="overflow-hidden">
