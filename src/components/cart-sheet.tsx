@@ -31,30 +31,29 @@ function CartItemRow({ item }: { item: CartItem }) {
         className="rounded-md object-contain h-16 w-16 border flex-shrink-0"
         data-ai-hint="product image"
       />
-      <div className="flex-1 space-y-1 overflow-hidden min-w-0">
+      <div className="flex-1 grid gap-1 min-w-0">
         <p className="font-semibold truncate">{item.name}</p>
-        <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
-        <p className="font-bold text-sm">
-          INR {(item.price * item.quantity).toFixed(2)}
-        </p>
+         <div className="flex items-center justify-between">
+            <QuantitySelector
+              quantity={item.quantity}
+              onIncrease={() => addToCart(item)}
+              onDecrease={() => removeFromCart(item.id)}
+              size="small"
+            />
+            <p className="font-bold text-sm">
+              INR {(item.price * item.quantity).toFixed(2)}
+            </p>
+        </div>
       </div>
-      <div className="flex items-center gap-1">
-        <QuantitySelector
-          quantity={item.quantity}
-          onIncrease={() => addToCart(item)}
-          onDecrease={() => removeFromCart(item.id)}
-          size="small"
-        />
-        <Button
+      <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
           onClick={() => clearItemFromCart(item.id)}
           aria-label="Remove item"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
-      </div>
     </div>
   );
 }
