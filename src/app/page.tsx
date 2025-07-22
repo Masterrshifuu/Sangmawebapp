@@ -1,3 +1,4 @@
+
 'use client';
 
 import AuthWrapper from '@/components/auth/auth-wrapper';
@@ -34,6 +35,21 @@ function HomePageContent() {
       <CategoryCarousel categories={categories} products={products} />
       <PromoCarousel />
       <ProductGrid title="Bestsellers" products={bestsellers} />
+      {categories.map((category) => {
+        const categoryProducts = products.filter(
+          (p) => p.category === category.name
+        );
+        if (categoryProducts.length > 0) {
+          return (
+            <ProductGrid
+              key={category.id}
+              title={category.name}
+              products={categoryProducts}
+            />
+          );
+        }
+        return null;
+      })}
     </div>
   );
 }
