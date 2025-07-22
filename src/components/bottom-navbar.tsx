@@ -28,10 +28,8 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
   
   const handleNav = (tab: AppTab) => {
     if (setActiveTab) {
-      // If used within AppShell, just switch the tab state
       setActiveTab(tab);
     } else {
-      // If used on a standalone page, navigate to the homepage with the correct tab
       router.push(`/?tab=${tab}`);
     }
   }
