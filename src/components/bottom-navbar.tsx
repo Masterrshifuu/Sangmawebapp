@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -35,7 +36,7 @@ const BottomNavbar = () => {
           <Link href={href} key={label} aria-label={label} className="flex justify-center w-full">
             <Icon
               className={cn(
-                'h-7 w-7 transition-transform',
+                'h-6 w-6 transition-transform',
                 pathname === href && 'text-primary scale-110'
               )}
             />
@@ -44,7 +45,7 @@ const BottomNavbar = () => {
         
         <Cart>
           <Button variant="ghost" className="p-0 h-auto text-current relative active:bg-transparent">
-            <ShoppingCart className="h-7 w-7" />
+            <ShoppingCart className="h-6 w-6" />
             {cartCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
                 {cartCount}
@@ -55,7 +56,7 @@ const BottomNavbar = () => {
         </Cart>
 
         <Link href="/profile" aria-label="Profile" className="flex justify-center w-full">
-          <Avatar className={cn('h-8 w-8', pathname === '/profile' && 'ring-2 ring-primary')}>
+          <Avatar className={cn('h-7 w-7', pathname === '/profile' && 'ring-2 ring-primary')}>
             <AvatarImage
               src={user?.photoURL || `https://placehold.co/100x100.png`}
               alt="User Profile"
