@@ -1,10 +1,8 @@
 
 'use client';
 
-import Link from 'next/link';
-import { Home, Search, ShoppingCart, User, LayoutGrid } from 'lucide-react';
+import { Home, Search, ShoppingCart, User, LayoutGrid, Bot } from 'lucide-react';
 import { Button } from './ui/button';
-import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Cart } from './cart-sheet';
@@ -13,10 +11,15 @@ import { useEffect, useState } from 'react';
 import { auth } from '@/lib/firebase';
 import type { User as FirebaseUser } from 'firebase/auth';
 import { useCart } from '@/context/cart-context';
-import { SearchWrapper } from './search/search-wrapper';
+import type { AppTab } from './app-shell';
+import Link from 'next/link';
 
-const BottomNavbar = () => {
-  const pathname = usePathname();
+interface BottomNavbarProps {
+  activeTab: AppTab;
+  setActiveTab: (tab: AppTab) => void;
+}
+
+const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const { cartCount } = useCart();
 
@@ -25,69 +28,59 @@ const BottomNavbar = () => {
     return () => unsubscribe();
   }, []);
 
+  const navItems: { id: AppTab; icon: React.ElementType }[] = [
+    { id: 'home', icon: Home },
+    { id: 'categories', icon: LayoutGrid },
+    { id: 'search', icon: Search },
+    { id: 'ai-chat', icon: Bot },
+  ];
+
   const ProfileTrigger = (
-    <Avatar className={cn('h-8 w-8 transition-transform')}>
-      <AvatarImage
-        src={user?.photoURL || `https://placehold.co/100x100.png`}
-        alt="User Profile"
-        data-ai-hint="user avatar"
-      />
-      <AvatarFallback>
-        <User className="h-5 w-5" />
-      </AvatarFallback>
-    </Avatar>
+    <div className="flex justify-center w-full">
+      <Avatar className={cn('h-8 w-8 transition-transform', activeTab === 'account' && 'scale-110 ring-2 ring-primary')}>
+        <AvatarImage
+          src={user?.photoURL || `https://placehold.co/100x100.png`}
+          alt="User Profile"
+          data-ai-hint="user avatar"
+        />
+        <AvatarFallback>
+          <User className="h-5 w-5" />
+        </AvatarFallback>
+      </Avatar>
+    </div>
   );
 
   return (
-    <footer className="fixed bottom-0 w-full bg-background border-t z-40 md:hidden text-black dark:text-white">
+    <div className="fixed bottom-0 w-full bg-background border-t z-40 md:hidden text-black dark:text-white">
       <div className="grid grid-cols-5 justify-items-center items-center h-14 px-2">
-        <Link href="/" aria-label="Home" className="flex justify-center w-full">
-          <Home
-            className={cn(
-              'h-7 w-7 transition-transform',
-              pathname === '/' && 'scale-110'
-            )}
-          />
-        </Link>
-        
-        <Link href="/categories" aria-label="Categories" className="flex justify-center w-full">
-          <LayoutGrid
-            className={cn(
-              'h-7 w-7 transition-transform',
-              pathname === '/categories' && 'scale-110'
-            )}
-          />
-        </Link>
-
-        <SearchWrapper isBottomNav={true} />
-
-        <Cart>
+        {navItems.map(({ id, icon: Icon }) => (
           <Button
+            key={id}
             variant="ghost"
-            className="p-0 h-auto text-current hover:bg-transparent relative"
-            aria-label="Cart"
+            className="p-0 h-auto w-full text-current hover:bg-transparent flex justify-center"
+            aria-label={id}
+            onClick={() => setActiveTab(id)}
           >
-            <ShoppingCart className="h-7 w-7" />
-            {cartCount > 0 && (
-              <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
-            <span className="sr-only">Cart</span>
+            <Icon
+              className={cn(
+                'h-7 w-7 transition-transform',
+                activeTab === id && 'scale-110 text-primary'
+              )}
+            />
           </Button>
-        </Cart>
+        ))}
 
         {user ? (
-          <div className="flex justify-center w-full">
-            <ProfileSheet>{ProfileTrigger}</ProfileSheet>
-          </div>
+          <ProfileSheet>{ProfileTrigger}</ProfileSheet>
         ) : (
           <Link href="/login" aria-label="Profile" className="flex justify-center w-full">
-            {ProfileTrigger}
+             <Avatar className="h-8 w-8">
+              <AvatarFallback><User className="h-5 w-5" /></AvatarFallback>
+             </Avatar>
           </Link>
         )}
       </div>
-    </footer>
+    </div>
   );
 };
 

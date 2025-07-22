@@ -19,6 +19,7 @@ const montserrat = Montserrat({
 export const metadata: Metadata = {
   title: 'Sangma Megha Mart',
   description: 'Your friendly neighborhood online market.',
+  viewport: 'width=device-width, initial-scale=1, user-scalable=no',
   openGraph: {
     title: 'Sangma Megha Mart',
     description: 'Your friendly neighborhood online market.',
