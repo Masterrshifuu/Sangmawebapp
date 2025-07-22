@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useCart } from '@/context/data-context';
+import { useCart } from '@/context/cart-context';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import BottomNavbar from '@/components/bottom-navbar';
