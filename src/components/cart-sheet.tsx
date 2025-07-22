@@ -31,14 +31,14 @@ function CartItemRow({ item }: { item: CartItem }) {
         className="rounded-md object-contain h-16 w-16 border flex-shrink-0"
         data-ai-hint="product image"
       />
-      <div className="flex-1 space-y-1 overflow-hidden">
+      <div className="flex-1 space-y-1 overflow-hidden min-w-0">
         <p className="font-semibold truncate">{item.name}</p>
         <p className="text-muted-foreground">INR {item.price.toFixed(2)}</p>
         <p className="font-bold text-sm">
           INR {(item.price * item.quantity).toFixed(2)}
         </p>
       </div>
-      <div className="flex items-center gap-1 flex-shrink-0">
+      <div className="flex items-center gap-1">
         <QuantitySelector
           quantity={item.quantity}
           onIncrease={() => addToCart(item)}
@@ -89,7 +89,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
       </SheetTrigger>
       <SheetContent
         side="right"
-        className="w-[300px] sm:w-[400px] flex flex-col p-0"
+        className="w-full max-w-sm flex flex-col p-0"
       >
         <SheetHeader className="p-4 border-b">
           <SheetTitle>Your Cart ({cartCount})</SheetTitle>
