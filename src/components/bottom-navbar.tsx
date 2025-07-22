@@ -8,6 +8,7 @@ import { useCart } from '@/context/cart-context';
 import type { AppTab } from './app-shell';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { CartSheet } from './cart-sheet';
 
 interface BottomNavbarProps {
   activeTab?: AppTab;
@@ -15,7 +16,6 @@ interface BottomNavbarProps {
 }
 
 const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
-  const { cartCount } = useCart();
   const router = useRouter();
 
   const navItems: { tab: AppTab; icon: React.ElementType; label: string }[] = [
@@ -54,14 +54,12 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
           </Button>
         ))}
         
-        <Link href="/cart" aria-label="Cart" className="flex justify-center items-center w-full h-full relative">
-            <ShoppingCart className={cn('h-6 w-6')} />
-            {cartCount > 0 && (
-                <span className="absolute -top-1 right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                {cartCount}
-                </span>
-            )}
-        </Link>
+        <CartSheet>
+            <Button variant="ghost" className="flex flex-col items-center justify-center w-full h-full p-0 relative">
+                <ShoppingCart className="h-6 w-6" />
+                <span className="sr-only">Cart</span>
+            </Button>
+        </CartSheet>
       </div>
     </div>
   );

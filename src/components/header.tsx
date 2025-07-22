@@ -24,13 +24,13 @@ import { signOut } from 'firebase/auth';
 import { useRouter, usePathname } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { SearchWrapper } from './search/search-wrapper';
+import { CartSheet } from './cart-sheet';
 
 
 export default function Header() {
   const [location, setLocation] = useState('Chandmari, South Tura');
   const [isScrolled, setIsScrolled] = useState(false);
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const { cartCount } = useCart();
   const router = useRouter();
   const pathname = usePathname();
   const { toast } = useToast();
@@ -134,17 +134,14 @@ export default function Header() {
             <SearchWrapper />
           </div>
           <div className="hidden md:flex items-center gap-2">
-             <Button asChild variant="ghost" size="icon" className="relative">
-                <Link href="/cart">
-                    <ShoppingCart className="w-5 h-5" />
-                    {cartCount > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-destructive text-destructive-foreground text-xs font-bold rounded-full h-4 w-4 flex items-center justify-center">
-                        {cartCount}
+            <CartSheet>
+                <Button asChild variant="ghost" size="icon">
+                    <span>
+                        <ShoppingCart className="w-5 h-5" />
+                        <span className="sr-only">Shopping Cart</span>
                     </span>
-                    )}
-                    <span className="sr-only">Shopping Cart</span>
-                </Link>
-            </Button>
+                </Button>
+            </CartSheet>
             {user ? (
                 ProfileDropdown
             ) : (
