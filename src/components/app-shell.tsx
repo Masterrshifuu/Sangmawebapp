@@ -20,7 +20,7 @@ const tabComponents: Record<AppTab, React.ElementType> = {
   home: HomePageContent,
   categories: CategoriesPageContent,
   search: SearchTab,
-  ai: AiChatTab,
+  'ai-chat': AiChatTab,
   account: AccountTab,
 };
 
