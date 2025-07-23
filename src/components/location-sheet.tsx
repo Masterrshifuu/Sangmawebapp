@@ -8,6 +8,7 @@ import {
   DrawerDescription,
   DrawerFooter,
   DrawerHeader,
+  DrawerTitle,
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -54,6 +55,7 @@ export default function LocationSheet({ open, onOpenChange, location, onSave }: 
         className="h-auto flex flex-col p-0 rounded-t-2xl"
       >
         <DrawerHeader className="p-4 pt-0 text-center">
+          <DrawerTitle className="sr-only">Enter your location</DrawerTitle>
         </DrawerHeader>
         <div className="grid gap-4 p-4">
           <div className="space-y-1">

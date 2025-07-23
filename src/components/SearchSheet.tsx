@@ -6,6 +6,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTrigger,
+  DrawerTitle,
 } from '@/components/ui/drawer';
 import { Input } from './ui/input';
 import { Search } from 'lucide-react';
@@ -59,6 +60,7 @@ export function SearchSheet({ children }: { children: React.ReactNode }) {
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent className="h-full flex flex-col p-0">
         <DrawerHeader className="p-4 border-b">
+          <DrawerTitle className="sr-only">Search Products</DrawerTitle>
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
