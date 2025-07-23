@@ -2,9 +2,7 @@
 'use client';
 
 import ProductCard from '@/components/product-card';
-import { Badge } from '@/components/ui/badge';
-import { Bot } from 'lucide-react';
-import type { useSearch } from '@/hooks/use-search';
+import { useSearch } from '@/hooks/use-search';
 import Logo from '../logo';
 
 type SearchResultsProps = Omit<ReturnType<typeof useSearch>, 'query' | 'setQuery'> & {
@@ -15,7 +13,6 @@ type SearchResultsProps = Omit<ReturnType<typeof useSearch>, 'query' | 'setQuery
 export function SearchResults({
   results,
   isLoading,
-  searchSource,
   hasFetchedInitial,
   query,
   onProductClick,
@@ -29,7 +26,7 @@ export function SearchResults({
   }
 
   // Show initial products (bestsellers) when query is empty
-  if (!query.trim() && searchSource === 'direct' && results.length > 0) {
+  if (!query.trim() && results.length > 0) {
      return (
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
@@ -50,19 +47,13 @@ export function SearchResults({
     );
   }
 
-  if (!isLoading && results.length > 0) {
+  if (results.length > 0) {
     return (
       <div className="p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold font-headline">
             {query.trim() ? 'Search Results' : 'Featured Products'}
           </h3>
-          {searchSource === 'ai' && (
-            <Badge variant="secondary">
-              <Bot className="w-4 h-4 mr-2" />
-              AI-powered
-            </Badge>
-          )}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {results.map((product) => (
