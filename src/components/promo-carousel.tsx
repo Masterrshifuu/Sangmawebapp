@@ -1,30 +1,59 @@
+
 'use client';
 
+import * as React from 'react';
+import useEmblaCarousel from 'embla-carousel-react';
+import Autoplay from 'embla-carousel-autoplay';
 import { Card, CardContent } from '@/components/ui/card';
+import Image from 'next/image';
 
-const promoMessages = [
-  'Free delivery on orders over INR 1000 in South Tura',
-  'Free delivery on orders over INR 1000 in North Tura',
-  'Free delivery on orders over INR 3000 in Tura NEHU',
-  'Free delivery on orders over INR 1000 in South Tura', // Repeat first for smooth loop
+const promos = [
+  {
+    text: 'Free delivery on orders over INR 1000 in South Tura',
+    imageUrl: 'https://placehold.co/800x400.png',
+    dataAiHint: 'delivery box'
+  },
+  {
+    text: 'Fresh Vegetables Delivered Fast!',
+    imageUrl: 'https://placehold.co/800x400.png',
+    dataAiHint: 'fresh vegetables'
+  },
+  {
+    text: 'Save Big on Household Essentials',
+    imageUrl: 'https://placehold.co/800x400.png',
+    dataAiHint: 'shopping cart'
+  },
 ];
 
 export default function PromoCarousel() {
+  const [emblaRef] = useEmblaCarousel({ loop: true }, [
+    Autoplay({ delay: 4000, stopOnInteraction: false }),
+  ]);
+
   return (
     <section className="mb-12">
-      <Card className="bg-[#f97272] border-none shadow-none">
-        <CardContent className="flex items-center justify-center p-6 h-16 md:h-auto overflow-hidden">
-           <div className="h-5 overflow-hidden relative w-full text-center">
-             <div className="animate-slide-up absolute inset-0 flex flex-col justify-around">
-               {promoMessages.map((message, index) => (
-                <span key={index} className="text-sm md:text-base font-bold text-white">
-                  {message}
-                </span>
-              ))}
+      <div className="overflow-hidden" ref={emblaRef}>
+        <div className="flex">
+          {promos.map((promo, index) => (
+            <div className="flex-grow-0 flex-shrink-0 w-full" key={index}>
+              <Card className="overflow-hidden relative aspect-[2/1] md:aspect-[3/1] rounded-xl shadow-lg">
+                <Image
+                  src={promo.imageUrl}
+                  alt="Promotional banner"
+                  fill
+                  className="object-cover"
+                  data-ai-hint={promo.dataAiHint}
+                />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center p-4">
+                  <h3 className="text-white text-2xl md:text-4xl font-extrabold font-headline text-center drop-shadow-lg">
+                    {promo.text}
+                  </h3>
+                </div>
+              </Card>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          ))}
+        </div>
+      </div>
     </section>
   );
 }

@@ -68,20 +68,6 @@ body {
 }
 
 @layer utilities {
-  @keyframes slide-up {
-    0% { transform: translateY(0); }
-    28% { transform: translateY(0); }
-    33% { transform: translateY(-100%); }
-    61% { transform: translateY(-100%); }
-    66% { transform: translateY(-200%); }
-    94% { transform: translateY(-200%); }
-    100% { transform: translateY(-300%); }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 12s linear infinite;
-  }
-  
   @keyframes pulse {
     50% {
       opacity: .5;
