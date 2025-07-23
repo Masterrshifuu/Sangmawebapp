@@ -3,7 +3,6 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import BottomNavbar from './bottom-navbar';
-import HomePageContent from './tabs/home-tab';
 import CategoriesPageContent from './tabs/categories-tab';
 import SearchTab from './tabs/search-tab';
 import AiChatTab from './tabs/ai-chat-tab';
@@ -15,7 +14,7 @@ export type AppTab = 'home' | 'categories' | 'search' | 'ai-chat' | 'account';
 const TABS: AppTab[] = ['categories', 'search', 'ai-chat', 'account'];
 
 const tabComponents: Record<AppTab, React.ElementType> = {
-  home: HomePageContent,
+  home: () => null, // Home is now a separate page
   categories: CategoriesPageContent,
   search: SearchTab,
   'ai-chat': AiChatTab,
@@ -56,11 +55,6 @@ function AppShellContent() {
     );
   }
   
-  // If no tab is specified in the URL, don't render the shell. This is for the homepage.
-  if (!searchParams.get('tab')) {
-    return <HomePageContent />;
-  }
-
   return (
     <div className="relative h-screen flex flex-col overflow-hidden">
       <div className="flex-1 relative overflow-hidden">
@@ -95,6 +89,12 @@ function AppShellContent() {
 }
 
 export function AppShell() {
+    const searchParams = useSearchParams();
+    // If we're on the root path without a tab, we're on the homepage, so don't render the shell.
+    if (!searchParams.get('tab')) {
+        return null;
+    }
+
     return (
         <Suspense fallback={
           <div className="h-full flex flex-col items-center justify-center">

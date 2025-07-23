@@ -1,8 +1,11 @@
+
 import type { Metadata } from 'next';
 import './globals.css';
 import AppLayoutClient from '@/components/app-layout-client';
 import { PT_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
+import { AppShell } from '@/components/app-shell';
+import { Suspense } from 'react';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -43,7 +46,12 @@ export default function RootLayout({
       className={cn(ptSans.variable)}
     >
       <body className="antialiased">
-        <AppLayoutClient>{children}</AppLayoutClient>
+        <AppLayoutClient>
+            {children}
+            <Suspense>
+              <AppShell />
+            </Suspense>
+        </AppLayoutClient>
       </body>
     </html>
   );

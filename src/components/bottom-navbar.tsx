@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 import type { AppTab } from './app-shell';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { CartSheet } from './cart-sheet';
-import Link from 'next/link';
 
 interface BottomNavbarProps {
   activeTab?: AppTab;
@@ -22,20 +21,16 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
   const currentTab = searchParams.get('tab') as AppTab | null;
   const isHomePage = pathname === '/' && !currentTab;
 
-  const navItems: { tab: AppTab; icon: React.ElementType; label: string }[] = [
-    { tab: 'home', icon: Home, label: 'Home' },
-    { tab: 'categories', icon: LayoutGrid, label: 'Categories' },
-    { tab: 'search', icon: Search, label: 'Search' },
-    { tab: 'ai-chat', icon: Bot, label: 'AI Chat' },
-    { tab: 'account', icon: User, label: 'Account' },
+  const navItems: { path: string; tab: AppTab; icon: React.ElementType; label: string }[] = [
+    { path: '/', tab: 'home', icon: Home, label: 'Home' },
+    { path: '/?tab=categories', tab: 'categories', icon: LayoutGrid, label: 'Categories' },
+    { path: '/?tab=search', tab: 'search', icon: Search, label: 'Search' },
+    { path: '/?tab=ai-chat', tab: 'ai-chat', icon: Bot, label: 'AI Chat' },
+    { path: '/?tab=account', tab: 'account', icon: User, label: 'Account' },
   ];
   
-  const handleNav = (tab: AppTab) => {
-    if (tab === 'home') {
-      router.push('/');
-    } else {
-      router.push(`/?tab=${tab}`);
-    }
+  const handleNav = (path: string) => {
+      router.push(path);
   }
   
   const getIsActive = (tab: AppTab): boolean => {
@@ -48,12 +43,12 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
   return (
     <div className="fixed bottom-0 w-full bg-background border-t z-40 md:hidden text-black dark:text-white">
       <div className="grid grid-cols-6 justify-items-center items-center h-14 px-2">
-        {navItems.map(({ tab, icon: Icon, label }) => (
+        {navItems.map(({ path, tab, icon: Icon, label }) => (
           <Button
             key={tab}
             variant="ghost"
             className="flex flex-col items-center justify-center w-full h-full p-0"
-            onClick={() => handleNav(tab)}
+            onClick={() => handleNav(path)}
             aria-label={label}
           >
             <Icon

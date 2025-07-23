@@ -61,4 +61,3 @@ export function getHomePageData(products: Product[], allCategories: Category[]) 
 
     return { productsByCategory, showcaseCategories, bestsellerCategories: shuffle(bestsellerCategories) };
 }
-
