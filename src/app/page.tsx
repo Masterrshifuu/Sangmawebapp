@@ -9,6 +9,7 @@ import { ProductGrid } from '@/components/product-grid';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import Footer from '@/components/footer';
 import { useProducts } from '@/hooks/use-products';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
@@ -31,11 +32,42 @@ function shuffle<T>(array: T[]): T[] {
 const HomePageSkeleton = () => (
     <>
         <Header />
-        <main className="flex-1 flex flex-col items-center justify-center text-center">
-            <div className="p-4 text-center text-muted-foreground">
-                <h2 className="text-2xl font-bold text-foreground mb-2">Loading Products...</h2>
-                <p>Please wait a moment.</p>
-            </div>
+        <main className="flex-1 pb-16 md:pb-0 px-4 py-6 space-y-8">
+            {/* Category Showcase Skeleton */}
+            <section>
+                <Skeleton className="h-8 w-48 mb-4" />
+                <div className="flex gap-4 overflow-x-auto pb-4">
+                    {[...Array(6)].map((_, i) => (
+                        <div key={i} className="flex flex-col items-center space-y-2 flex-shrink-0">
+                            <Skeleton className="w-20 h-20 rounded-lg" />
+                            <Skeleton className="h-4 w-16" />
+                        </div>
+                    ))}
+                </div>
+            </section>
+
+            {/* Bestsellers Skeleton */}
+            <section>
+                <Skeleton className="h-8 w-40 mb-4" />
+                <div className="grid grid-cols-2 gap-4">
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                    <Skeleton className="w-full aspect-square rounded-lg" />
+                </div>
+            </section>
+
+             {/* Product Grid Skeleton */}
+            <section>
+                <Skeleton className="h-8 w-32 mb-4" />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="space-y-2">
+                           <Skeleton className="w-full aspect-square rounded-lg" />
+                           <Skeleton className="h-4 w-3/4" />
+                           <Skeleton className="h-4 w-1/2" />
+                        </div>
+                    ))}
+                </div>
+            </section>
         </main>
         <Footer />
     </>
