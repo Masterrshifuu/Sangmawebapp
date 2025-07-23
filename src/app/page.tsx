@@ -133,8 +133,8 @@ export default function Home() {
         {showcaseCategories.length > 0 && (
             <section className="py-6">
                  <div className="px-4 mb-4 flex justify-between items-center">
-                    <h2 className="text-2xl font-bold font-headline">Categories</h2>
-                    <Link href="/categories" className="text-sm font-medium text-accent-foreground hover:underline">
+                    <h2 className="text-2xl font-bold font-headline">Shop by Category</h2>
+                     <Link href="/categories" className="text-sm font-medium text-accent-foreground hover:underline">
                       View All &gt;
                     </Link>
                  </div>
