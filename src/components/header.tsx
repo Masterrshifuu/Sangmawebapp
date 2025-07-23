@@ -42,7 +42,7 @@ export default function Header() {
                     height={60}
                     priority
                   />
-                  <div className="flex flex-col justify-center">
+                  <div className="flex flex-col justify-center pt-2">
                     <span className="font-headline text-base font-bold leading-none">
                         Sangma Megha Mart
                     </span>
