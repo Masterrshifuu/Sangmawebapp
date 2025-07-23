@@ -10,7 +10,7 @@ export function CartItemCard({ item }: { item: CartItem }) {
     <div className="flex items-center gap-4">
       <div className="relative w-20 h-20 rounded-md overflow-hidden bg-muted/40">
         <Image
-          src={item.product.image}
+          src={item.product.imageUrl}
           alt={item.product.name}
           fill
           className="object-contain"

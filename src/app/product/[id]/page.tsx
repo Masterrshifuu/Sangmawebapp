@@ -93,7 +93,7 @@ export default function ProductPage() {
         }
         
         setProduct(currentProduct);
-        setSelectedImage(currentProduct.image);
+        setSelectedImage(currentProduct.imageUrl);
         
         const currentSimilarProducts = allProducts
           .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
@@ -132,7 +132,7 @@ export default function ProductPage() {
   }
 
   const cartItem = cart.find(item => item.product.id === product.id);
-  const allImages = [product.image, ...product.additionalImages].filter(Boolean);
+  const allImages = [product.imageUrl, ...product.additionalImages].filter(Boolean);
 
   return (
     <>

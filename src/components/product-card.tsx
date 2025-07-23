@@ -18,7 +18,7 @@ export function ProductCard({ product }: { product: Product }) {
             <Link href={`/product/${product.id}`} className="block">
                 <div className="relative w-full aspect-square bg-muted/30">
                     <Image
-                        src={product.image || `https://placehold.co/400x400.png`}
+                        src={product.imageUrl || `https://placehold.co/400x400.png`}
                         alt={product.name}
                         fill
                         className="object-contain group-hover:scale-105 transition-transform duration-300"

@@ -16,7 +16,7 @@ export function getHomePageData(products: Product[]) {
     
     // Capture the first image for each category to use as a showcase image
     if (!categoryImages[product.category]) {
-        categoryImages[product.category] = product.image;
+        categoryImages[product.category] = product.imageUrl;
     }
   }
 
@@ -46,7 +46,7 @@ export function getHomePageData(products: Product[]) {
     if (categoryProducts.length > 0) {
       bestsellerCategories.push({
         name: categoryName,
-        images: categoryProducts.slice(0, 4).map(p => ({ src: p.image, alt: p.name })),
+        images: categoryProducts.slice(0, 4).map(p => ({ src: p.imageUrl, alt: p.name })),
       });
     }
   }
