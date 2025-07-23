@@ -20,10 +20,15 @@ export default function HomePageContent({ }: HomePageProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
     const scrollableElement = scrollRef.current;
-    if (!scrollableElement) return;
+    if (!scrollableElement || !isClient) return;
 
     const handleScroll = () => {
       setIsScrolled(scrollableElement.scrollTop > 10);
@@ -33,7 +38,7 @@ export default function HomePageContent({ }: HomePageProps) {
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [isClient]);
 
   useEffect(() => {
     if (!loading && products.length > 0) {
@@ -57,7 +62,7 @@ export default function HomePageContent({ }: HomePageProps) {
     }));
   }, [loading, products, categories, recommendedProducts]);
 
-  if (loading) {
+  if (loading || !isClient) {
     return (
        <div className="h-full flex flex-col items-center justify-center">
         <Logo className="animate-logo-pulse" />

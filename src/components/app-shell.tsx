@@ -9,7 +9,6 @@ import SearchTab from './tabs/search-tab';
 import AiChatTab from './tabs/ai-chat-tab';
 import AccountTab from './tabs/account-tab';
 import Logo from './logo';
-import Header from './header';
 
 // Define the available tabs
 export type AppTab = 'home' | 'categories' | 'search' | 'ai-chat' | 'account';
@@ -34,13 +33,15 @@ function AppShellContent() {
 
   // This effect ensures the tab stays in sync with the URL search parameters
   useEffect(() => {
-    const tabFromUrl = (searchParams.get('tab') as AppTab) || 'home';
-    if (TABS.includes(tabFromUrl)) {
-      setActiveTab(tabFromUrl);
-    } else {
-      setActiveTab('home');
+    if (isClient) {
+      const tabFromUrl = (searchParams.get('tab') as AppTab) || 'home';
+      if (TABS.includes(tabFromUrl)) {
+        setActiveTab(tabFromUrl);
+      } else {
+        setActiveTab('home');
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, isClient]);
 
   const getTabIndex = (tab: AppTab) => TABS.indexOf(tab);
   const activeTabIndex = getTabIndex(activeTab);
