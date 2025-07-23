@@ -6,7 +6,7 @@ import { useSearchParams } from 'next/navigation';
 import { useData } from '@/context/data-context';
 import Footer from "../footer";
 import Logo from "../logo";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 interface CategoriesTabProps {
 }

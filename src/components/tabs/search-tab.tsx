@@ -1,13 +1,12 @@
 
 'use client';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSearch } from '@/hooks/use-search';
 import { SearchResults } from '@/components/search/search-results';
 import Footer from '../footer';
 import { Input } from '../ui/input';
 import { Search } from 'lucide-react';
 import { useSearchContext } from '@/context/search-context';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 
 interface SearchTabProps {
 }

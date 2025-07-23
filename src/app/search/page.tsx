@@ -1,16 +1,14 @@
 
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { AppShell } from '@/components/app-shell';
+import AuthWrapper from '@/components/auth/auth-wrapper';
 
-// This page now redirects to the home page with the correct tab selected.
-export default function SearchRedirectPage() {
-  const router = useRouter();
-
-  useEffect(() => {
-    router.replace('/?tab=search');
-  }, [router]);
-
-  return null; // Render nothing while redirecting
+// This page now renders the AppShell, which will handle the tab logic
+export default function SearchPage() {
+  return (
+    <AuthWrapper>
+      <AppShell />
+    </AuthWrapper>
+  );
 }

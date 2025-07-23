@@ -5,8 +5,9 @@ import { Home, Search, ShoppingCart, User, LayoutGrid, Bot } from 'lucide-react'
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import type { AppTab } from './app-shell';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { CartSheet } from './cart-sheet';
+import Link from 'next/link';
 
 interface BottomNavbarProps {
   activeTab?: AppTab;
@@ -15,6 +16,11 @@ interface BottomNavbarProps {
 
 const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  
+  const currentTab = searchParams.get('tab') as AppTab | null;
+  const isHomePage = pathname === '/' && !currentTab;
 
   const navItems: { tab: AppTab; icon: React.ElementType; label: string }[] = [
     { tab: 'home', icon: Home, label: 'Home' },
@@ -25,11 +31,18 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
   ];
   
   const handleNav = (tab: AppTab) => {
-    if (setActiveTab) {
-      setActiveTab(tab);
+    if (tab === 'home') {
+      router.push('/');
     } else {
       router.push(`/?tab=${tab}`);
     }
+  }
+  
+  const getIsActive = (tab: AppTab): boolean => {
+    if (tab === 'home') {
+      return isHomePage;
+    }
+    return activeTab === tab;
   }
 
   return (
@@ -46,7 +59,7 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
             <Icon
               className={cn(
                 'h-6 w-6 transition-transform text-muted-foreground',
-                activeTab === tab && 'text-primary scale-110'
+                getIsActive(tab) && 'text-primary scale-110'
               )}
             />
           </Button>

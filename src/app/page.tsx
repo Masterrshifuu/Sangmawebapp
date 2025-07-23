@@ -2,12 +2,12 @@
 'use client';
 
 import AuthWrapper from '@/components/auth/auth-wrapper';
-import { AppShell } from '@/components/app-shell';
+import HomePageContent from '@/components/tabs/home-tab';
 
 export default function Home() {
   return (
     <AuthWrapper>
-      <AppShell />
+      <HomePageContent />
     </AuthWrapper>
   );
 }

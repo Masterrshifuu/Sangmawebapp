@@ -2,7 +2,7 @@
 'use client';
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import BottomNavbar from '@/components/bottom-navbar';
+import BottomNavbar from './bottom-navbar';
 import HomePageContent from './tabs/home-tab';
 import CategoriesPageContent from './tabs/categories-tab';
 import SearchTab from './tabs/search-tab';
@@ -12,7 +12,7 @@ import Logo from './logo';
 
 // Define the available tabs
 export type AppTab = 'home' | 'categories' | 'search' | 'ai-chat' | 'account';
-const TABS: AppTab[] = ['home', 'categories', 'search', 'ai-chat', 'account'];
+const TABS: AppTab[] = ['categories', 'search', 'ai-chat', 'account'];
 
 const tabComponents: Record<AppTab, React.ElementType> = {
   home: HomePageContent,
@@ -24,7 +24,7 @@ const tabComponents: Record<AppTab, React.ElementType> = {
 
 function AppShellContent() {
   const searchParams = useSearchParams();
-  const [activeTab, setActiveTab] = useState<AppTab>('home');
+  const [activeTab, setActiveTab] = useState<AppTab>('categories');
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -34,11 +34,12 @@ function AppShellContent() {
   // This effect ensures the tab stays in sync with the URL search parameters
   useEffect(() => {
     if (isClient) {
-      const tabFromUrl = (searchParams.get('tab') as AppTab) || 'home';
+      const tabFromUrl = (searchParams.get('tab') as AppTab) || 'categories';
       if (TABS.includes(tabFromUrl)) {
         setActiveTab(tabFromUrl);
       } else {
-        setActiveTab('home');
+        // If an invalid tab is in the URL, default to the first valid tab
+        setActiveTab(TABS[0]);
       }
     }
   }, [searchParams, isClient]);
@@ -53,6 +54,11 @@ function AppShellContent() {
         <Logo className="animate-logo-pulse" />
       </div>
     );
+  }
+  
+  // If no tab is specified in the URL, don't render the shell. This is for the homepage.
+  if (!searchParams.get('tab')) {
+    return <HomePageContent />;
   }
 
   return (
@@ -69,7 +75,6 @@ function AppShellContent() {
               className="absolute inset-0 transition-transform duration-300 ease-in-out"
               style={{
                 transform: `translateX(${(tabIndex - activeTabIndex) * 100}%)`,
-                // Ensure inactive tabs are still interactable for preloading but not visible
                 pointerEvents: isActive ? 'auto' : 'none',
                 visibility: isActive ? 'visible' : 'hidden',
               }}
@@ -82,7 +87,6 @@ function AppShellContent() {
         })}
       </div>
       
-      {/* Spacer to prevent content from being hidden behind the navbar */}
       <div className="h-14 md:hidden" /> 
       
       <BottomNavbar activeTab={activeTab} setActiveTab={setActiveTab} />

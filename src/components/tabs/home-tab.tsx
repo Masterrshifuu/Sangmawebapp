@@ -27,13 +27,13 @@ export default function HomePageContent({}: HomePageProps) {
 
   useEffect(() => {
     const scrollableElement = scrollRef.current;
-    if (!scrollableElement || !isClient) return;
+    if (!scrollableElement) return;
 
     const handleScroll = () => {
       setIsScrolled(scrollableElement.scrollTop > 10);
     };
 
-    scrollableElement.addEventListener('scroll', handleScroll);
+    scrollableElement.addEventListener('scroll', handleScroll, { passive: true });
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll);
     };
@@ -68,7 +68,7 @@ export default function HomePageContent({}: HomePageProps) {
   }
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto">
+    <div ref={scrollRef} className="h-screen overflow-y-auto">
       <Header isScrolled={isScrolled} />
       <div className="container mx-auto px-4 py-8">
         <PromoCarousel />
