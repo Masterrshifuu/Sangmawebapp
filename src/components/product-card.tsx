@@ -29,7 +29,7 @@ export function ProductCard({ product }: { product: Product }) {
             </Link>
             <div className="p-3 flex flex-col flex-grow">
                 <Link href={`/product/${product.id}`} className="block">
-                    <h3 className="font-semibold text-sm leading-tight truncate group-hover:underline">{product.name}</h3>
+                    <h3 className="font-semibold text-sm leading-tight truncate">{product.name}</h3>
                     <p className="text-xs text-muted-foreground mt-1 truncate">{product.description}</p>
                 </Link>
                 
