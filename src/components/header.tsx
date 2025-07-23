@@ -26,14 +26,25 @@ import { SearchWrapper } from './search/search-wrapper';
 import { CartSheet } from './cart-sheet';
 
 interface HeaderProps {
-  isScrolled: boolean;
 }
 
-export default function Header({ isScrolled }: HeaderProps) {
+export default function Header({}: HeaderProps) {
   const [location, setLocation] = useState('Chandmari, South Tura');
   const [user, setUser] = useState<FirebaseUser | null>(null);
+  const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const offset = window.scrollY;
+      setIsScrolled(offset > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   useEffect(() => {
     const savedLocation = localStorage.getItem('userLocation');
@@ -95,11 +106,11 @@ export default function Header({ isScrolled }: HeaderProps) {
       <div className="container mx-auto px-4 py-3">
         <div
           className={cn(
-            'grid transition-all duration-300 ease-in-out',
+            'grid transition-all duration-300 ease-in-out overflow-hidden',
             isScrolled ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
           )}
         >
-          <div className="overflow-hidden">
+          <div className="min-h-0">
             <div className="flex justify-between items-start mb-4">
               <div>
                 <Link href="/">

@@ -71,7 +71,7 @@ export default function Home({}: HomePageProps) {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header isScrolled={isScrolled} />
+      <Header />
       <div ref={scrollRef} className="flex-1 overflow-y-auto">
         <main className="container mx-auto px-4 py-8">
             <PromoCarousel />
