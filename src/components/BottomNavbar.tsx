@@ -9,14 +9,18 @@ import { cn } from '@/lib/utils';
 import { AiChatSheet } from './AiChatSheet';
 import { CartSheet } from './CartSheet';
 import { useCart } from '@/hooks/use-cart';
+import { TrackingSheet } from './TrackingSheet';
+import { CategorySheet } from './CategorySheet';
+import { AccountSheet } from './AccountSheet';
+
 
 const navItems = [
   { href: '/', label: 'Home', icon: Home },
-  { href: '/categories', label: 'Categories', icon: LayoutGrid },
-  { href: '/track-order', label: 'Tracking', icon: PackageSearch },
+  { label: 'Categories', icon: LayoutGrid, component: CategorySheet },
+  { label: 'Tracking', icon: PackageSearch, component: TrackingSheet },
   { label: 'AI Chat', icon: Sparkles, component: AiChatSheet },
   { label: 'Cart', icon: ShoppingCart, component: CartSheet },
-  { href: '/account', label: 'Account', icon: User },
+  { label: 'Account', icon: User, component: AccountSheet },
 ];
 
 export function BottomNavbar() {
