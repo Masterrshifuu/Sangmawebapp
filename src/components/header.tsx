@@ -3,7 +3,6 @@
 
 import { ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import LocationSheet from './location-sheet';
 import Logo from './logo';
 import Link from 'next/link';
 import { Button } from './ui/button';
@@ -23,29 +22,20 @@ import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { SearchWrapper } from './search/search-wrapper';
 import { CartSheet } from './cart-sheet';
+import { LocationPicker } from './location-picker';
 
 interface HeaderProps {}
 
 export default function Header({}: HeaderProps) {
-  const [location, setLocation] = useState('Chandmari, South Tura');
   const [user, setUser] = useState<FirebaseUser | null>(null);
   const router = useRouter();
   const { toast } = useToast();
 
   useEffect(() => {
-    const savedLocation = localStorage.getItem('userLocation');
-    if (savedLocation) {
-      setLocation(savedLocation);
-    }
     const unsubscribe = auth.onAuthStateChanged(setUser);
     return () => unsubscribe();
   }, []);
 
-  const handleSaveLocation = (newLocation: string) => {
-    setLocation(newLocation);
-    localStorage.setItem('userLocation', newLocation);
-  };
-  
   const handleSignOut = async () => {
     try {
       await signOut(auth);
@@ -92,7 +82,7 @@ export default function Header({}: HeaderProps) {
                 <Link href="/">
                   <Logo />
                 </Link>
-                <LocationSheet location={location} onSave={handleSaveLocation} />
+                <LocationPicker />
             </div>
             <div className="hidden md:flex items-center gap-2">
                 <CartSheet>
