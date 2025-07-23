@@ -2,7 +2,13 @@
 'use client';
 import { Bot } from 'lucide-react';
 
-export default function AiChatTab() {
+interface AiChatTabProps {
+  setIsScrolled: (isScrolled: boolean) => void;
+}
+
+
+export default function AiChatTab({ setIsScrolled }: AiChatTabProps) {
+  // This tab doesn't scroll, but we accept the prop for consistency
   return (
     <div className="h-full flex flex-col items-center justify-center text-center p-4 bg-background">
       <Bot className="w-24 h-24 mb-6 text-muted-foreground" />

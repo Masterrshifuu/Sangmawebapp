@@ -6,15 +6,17 @@ import CategoryCarousel from '@/components/category-carousel';
 import ProductGrid from '@/components/product-grid';
 import { useData } from '@/context/data-context';
 import PromoCarousel from '@/components/promo-carousel';
-import Header from '@/components/header';
 import Footer from '@/components/footer';
 import Logo from '../logo';
 import { getPersonalizedRecommendations } from '@/lib/personalization';
 import type { Product } from '@/lib/types';
 
-export default function HomePageContent() {
+interface HomePageProps {
+  setIsScrolled: (isScrolled: boolean) => void;
+}
+
+export default function HomePageContent({ setIsScrolled }: HomePageProps) {
   const { products, categories, loading } = useData();
-  const [isScrolled, setIsScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
 
@@ -30,7 +32,7 @@ export default function HomePageContent() {
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [setIsScrolled]);
 
   useEffect(() => {
     if (!loading && products.length > 0) {
@@ -63,8 +65,7 @@ export default function HomePageContent() {
   }
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto">
-      <Header isScrolled={isScrolled} />
+    <div ref={scrollRef} className="h-full overflow-y-auto pt-4">
       <div className="container mx-auto px-4 py-8">
         <CategoryCarousel categories={categories} products={products} />
         <PromoCarousel />

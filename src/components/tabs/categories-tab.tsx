@@ -4,16 +4,18 @@
 import CategoryList from "@/components/category-list";
 import { useSearchParams } from 'next/navigation';
 import { useData } from '@/context/data-context';
-import Header from "../header";
 import Footer from "../footer";
 import Logo from "../logo";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
-export default function CategoriesTabContent() {
+interface CategoriesTabProps {
+  setIsScrolled: (isScrolled: boolean) => void;
+}
+
+export default function CategoriesTabContent({ setIsScrolled }: CategoriesTabProps) {
   const searchParams = useSearchParams();
   const { categories, products, loading } = useData();
   const openCategoryId = searchParams.get('open');
-  const [isScrolled, setIsScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,7 +30,7 @@ export default function CategoriesTabContent() {
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [setIsScrolled]);
 
   const content = loading ? (
     <div className="flex-1 flex justify-center items-center">
@@ -42,8 +44,7 @@ export default function CategoriesTabContent() {
   );
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto flex flex-col">
-      <Header isScrolled={isScrolled} />
+    <div ref={scrollRef} className="h-full overflow-y-auto flex flex-col pt-4">
       <main className="container mx-auto px-4 py-8 flex-1">
         {content}
       </main>

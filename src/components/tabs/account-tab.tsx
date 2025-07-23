@@ -9,9 +9,12 @@ import { useAuth } from "@/hooks/use-auth";
 import type { Order } from "@/lib/types";
 import { ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import Header from "../header";
 import Footer from "../footer";
 import Logo from "../logo";
+
+interface AccountTabProps {
+  setIsScrolled: (isScrolled: boolean) => void;
+}
 
 function LatestOrder() {
   const { user, loading: authLoading } = useAuth();
@@ -76,8 +79,7 @@ function LatestOrder() {
 }
 
 
-export default function AccountTab() {
-  const [isScrolled, setIsScrolled] = useState(false);
+export default function AccountTab({ setIsScrolled }: AccountTabProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -92,11 +94,10 @@ export default function AccountTab() {
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [setIsScrolled]);
 
   return (
-      <div ref={scrollRef} className="h-full overflow-y-auto">
-        <Header isScrolled={isScrolled} />
+      <div ref={scrollRef} className="h-full overflow-y-auto pt-4">
         <main className="container mx-auto px-4 py-8">
           <LatestOrder />
         </main>

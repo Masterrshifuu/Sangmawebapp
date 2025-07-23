@@ -7,13 +7,15 @@ import Footer from '../footer';
 import { Input } from '../ui/input';
 import { Search } from 'lucide-react';
 import { useSearchContext } from '@/context/search-context';
-import { useEffect, useRef, useState } from 'react';
-import Header from '../header';
+import { useEffect, useRef } from 'react';
 
-export default function SearchTab() {
+interface SearchTabProps {
+  setIsScrolled: (isScrolled: boolean) => void;
+}
+
+export default function SearchTab({ setIsScrolled }: SearchTabProps) {
   const { query, setQuery } = useSearchContext();
   const { results, isLoading, hasFetchedInitial } = useSearch({ open: true });
-  const [isScrolled, setIsScrolled] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -28,12 +30,11 @@ export default function SearchTab() {
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll);
     };
-  }, []);
+  }, [setIsScrolled]);
 
   return (
-    <div ref={scrollRef} className="flex flex-col h-full bg-background overflow-y-auto">
-       <Header isScrolled={isScrolled} />
-      <div className="p-4 border-b sticky top-[75px] bg-background z-10">
+    <div ref={scrollRef} className="flex flex-col h-full bg-background overflow-y-auto pt-4">
+      <div className="p-4 border-b sticky top-0 bg-background z-10">
         <div className="relative w-full max-w-lg mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
           <Input

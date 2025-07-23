@@ -9,6 +9,7 @@ import SearchTab from './tabs/search-tab';
 import AiChatTab from './tabs/ai-chat-tab';
 import AccountTab from './tabs/account-tab';
 import Logo from './logo';
+import Header from './header';
 
 // Define the available tabs
 export type AppTab = 'home' | 'categories' | 'search' | 'ai-chat' | 'account';
@@ -26,6 +27,7 @@ function AppShellContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [isClient, setIsClient] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -55,6 +57,7 @@ function AppShellContent() {
 
   return (
     <div className="relative h-screen flex flex-col overflow-hidden">
+      <Header isScrolled={isScrolled} />
       <div className="flex-1 relative overflow-hidden">
         {TABS.map((tab) => {
           const TabComponent = tabComponents[tab];
@@ -73,7 +76,7 @@ function AppShellContent() {
               }}
             >
               <Suspense fallback={<div className="w-full h-full bg-background" />}>
-                 <TabComponent />
+                 <TabComponent setIsScrolled={setIsScrolled} />
               </Suspense>
             </div>
           );
