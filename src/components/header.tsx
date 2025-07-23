@@ -1,7 +1,7 @@
 
 'use client';
 
-import { Search, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import LocationSheet from './location-sheet';
 import { cn } from '@/lib/utils';
@@ -91,7 +91,7 @@ export default function Header({ isScrolled }: HeaderProps) {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-primary/80 backdrop-blur-sm border-b text-primary-foreground transition-all duration-300">
+    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b text-foreground transition-all duration-300">
       <div className="container mx-auto px-4 py-3">
         <div
           className={cn(
