@@ -77,12 +77,15 @@ export default function Header({}: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm text-foreground">
       <div className="container mx-auto px-4 py-3 space-y-4">
+        {/* Top Row: Logo and Location */}
         <div className="flex justify-between items-center">
-            <div>
+            <div className='flex items-center'>
                 <Link href="/">
                   <Logo />
                 </Link>
-                <LocationPicker />
+                <div className="hidden md:block">
+                    <LocationPicker />
+                </div>
             </div>
             <div className="hidden md:flex items-center gap-2">
                 <CartSheet>
@@ -103,6 +106,7 @@ export default function Header({}: HeaderProps) {
             </div>
         </div>
 
+        {/* Bottom Row: Search */}
         <div className="flex items-center gap-4">
           <div className="flex-grow">
             <SearchWrapper />
