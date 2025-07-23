@@ -3,40 +3,34 @@
 
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useSearchContext } from "@/context/search-context";
-import { Input } from "../ui/input";
+import { cn } from "@/lib/utils";
 
 export function SearchWrapper() {
   const router = useRouter();
-  const { query, setQuery } = useSearchContext();
 
-  const navigateToSearch = () => {
-    // Check if we're already on the search tab to avoid unnecessary pushes
-    if (window.location.search.indexOf('tab=search') === -1) {
-       router.push('/?tab=search');
-    }
-  }
-
-  const handleFocus = () => {
-    navigateToSearch();
+  const handleClick = () => {
+    router.push('/?tab=search');
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    navigateToSearch();
-    setQuery(e.target.value);
-  }
-
   return (
-    <div className="relative w-full">
-       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none" />
-        <Input
-            type="text"
-            placeholder="Search for products..."
-            className="bg-background pl-10 shadow-sm"
-            value={query}
-            onChange={handleChange}
-            onFocus={handleFocus}
-        />
+    <div
+      className="relative w-full cursor-pointer"
+      onClick={handleClick}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          handleClick();
+        }
+      }}
+    >
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none" />
+      <div className={cn(
+          "flex h-10 w-full items-center rounded-md border border-input bg-background px-3 py-2 pl-10 text-base text-muted-foreground ring-offset-background shadow-sm",
+          "md:text-sm"
+      )}>
+        Search for products...
+      </div>
     </div>
   );
 }
