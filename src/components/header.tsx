@@ -4,7 +4,6 @@
 import { ShoppingCart } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import LocationSheet from './location-sheet';
-import { cn } from '@/lib/utils';
 import Logo from './logo';
 import Link from 'next/link';
 import { Button } from './ui/button';
@@ -25,26 +24,13 @@ import { useToast } from '@/hooks/use-toast';
 import { SearchWrapper } from './search/search-wrapper';
 import { CartSheet } from './cart-sheet';
 
-interface HeaderProps {
-}
+interface HeaderProps {}
 
 export default function Header({}: HeaderProps) {
   const [location, setLocation] = useState('Chandmari, South Tura');
   const [user, setUser] = useState<FirebaseUser | null>(null);
-  const [isScrolled, setIsScrolled] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      const offset = window.scrollY;
-      setIsScrolled(offset > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     const savedLocation = localStorage.getItem('userLocation');
@@ -87,9 +73,6 @@ export default function Header({}: HeaderProps) {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/?tab=account')}>
-            Profile
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push('/track-order')}>
             Track Orders
           </DropdownMenuItem>
@@ -102,46 +85,37 @@ export default function Header({}: HeaderProps) {
   );
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-background/80 backdrop-blur-sm border-b text-foreground transition-all duration-300">
-      <div className="container mx-auto px-4 py-3">
-        <div
-          className={cn(
-            'grid transition-all duration-300 ease-in-out overflow-hidden',
-            isScrolled ? 'grid-rows-[0fr]' : 'grid-rows-[1fr]'
-          )}
-        >
-          <div className="min-h-0">
-            <div className="flex justify-between items-start mb-4">
-              <div>
+    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur-sm text-foreground">
+      <div className="container mx-auto px-4 py-3 space-y-4">
+        <div className="flex justify-between items-center">
+            <div>
                 <Link href="/">
                   <Logo />
                 </Link>
                 <LocationSheet location={location} onSave={handleSaveLocation} />
-              </div>
             </div>
-          </div>
+            <div className="hidden md:flex items-center gap-2">
+                <CartSheet>
+                    <Button asChild variant="ghost" size="icon">
+                        <span>
+                            <ShoppingCart className="w-5 h-5" />
+                            <span className="sr-only">Shopping Cart</span>
+                        </span>
+                    </Button>
+                </CartSheet>
+                {user ? (
+                    ProfileDropdown
+                ) : (
+                    <Button asChild variant="secondary">
+                        <Link href="/login">Login</Link>
+                    </Button>
+                )}
+            </div>
         </div>
 
         <div className="flex items-center gap-4">
           <div className="flex-grow">
             <SearchWrapper />
-          </div>
-          <div className="hidden md:flex items-center gap-2">
-            <CartSheet>
-                <Button asChild variant="ghost" size="icon">
-                    <span>
-                        <ShoppingCart className="w-5 h-5" />
-                        <span className="sr-only">Shopping Cart</span>
-                    </span>
-                </Button>
-            </CartSheet>
-            {user ? (
-                ProfileDropdown
-            ) : (
-                <Button asChild variant="secondary">
-                    <Link href="/login">Login</Link>
-                </Button>
-            )}
           </div>
         </div>
       </div>
