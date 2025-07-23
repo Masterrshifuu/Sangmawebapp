@@ -7,7 +7,6 @@ import { BestsellerCard } from '@/components/BestsellerCard';
 import { getHomePageData } from '@/lib/home';
 import { ProductGrid } from '@/components/product-grid';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
-import Footer from '@/components/footer';
 import { useProducts } from '@/hooks/use-products';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -69,7 +68,6 @@ const HomePageSkeleton = () => (
                 </div>
             </section>
         </main>
-        <Footer />
     </>
 );
 
@@ -117,7 +115,6 @@ export default function Home() {
              <p className="mt-4 text-xs">If you have already configured your Firebase project, please add some products to the 'products' collection in Firestore.</p>
           </div>
         </main>
-        <Footer />
       </>
     )
   }
@@ -163,7 +160,6 @@ export default function Home() {
         ))}
 
       </main>
-      <Footer />
     </>
   );
 }

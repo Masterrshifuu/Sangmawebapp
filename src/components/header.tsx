@@ -4,7 +4,6 @@
 import { Search } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
-import { SearchSheet } from './SearchSheet';
 import { cn } from '@/lib/utils';
 import { LocationPicker } from './location-picker';
 
@@ -52,13 +51,11 @@ export default function Header() {
           </div>
         </div>
         
-        <div className="py-3">
-          <SearchSheet>
-              <button className="flex items-center w-full h-11 rounded-lg bg-muted/60 px-4 text-left text-sm text-muted-foreground hover:bg-muted/100 transition-colors">
-                  <Search className="h-5 w-5 mr-3" />
-                  <span>Search for products...</span>
-              </button>
-          </SearchSheet>
+        <div className="py-3 hidden md:block">
+          <button className="flex items-center w-full h-11 rounded-lg bg-muted/60 px-4 text-left text-sm text-muted-foreground hover:bg-muted/100 transition-colors">
+              <Search className="h-5 w-5 mr-3" />
+              <span>Search for products...</span>
+          </button>
         </div>
       </div>
     </header>

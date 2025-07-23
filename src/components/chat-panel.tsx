@@ -2,8 +2,9 @@
 'use client';
 
 import { useState } from 'react';
-import { useUIState, useActions } from 'ai/rsc';
 import type { AIState } from '@/lib/types';
+import { getChatResponse } from '@/app/actions';
+
 import { Input } from './ui/input';
 import { Button } from './ui/button';
 import { ArrowUp } from 'lucide-react';
@@ -12,26 +13,25 @@ import { ProductCard } from './product-card';
 
 export function ChatPanel() {
   const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useUIState<AIState>();
-  const { getChatResponse } = useActions();
+  const [messages, setMessages] = useState<AIState>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    setMessages(currentMessages => [
-      ...currentMessages,
+    const newMessages: AIState = [
+      ...messages,
       {
         id: Date.now().toString(),
         role: 'user',
         content: inputValue,
       },
-    ]);
-
-    const responseMessage = await getChatResponse(messages);
-    setMessages(currentMessages => [...currentMessages, responseMessage]);
-
+    ];
+    setMessages(newMessages);
     setInputValue('');
+
+    const responseMessage = await getChatResponse(newMessages);
+    setMessages(currentMessages => [...currentMessages, responseMessage]);
   };
 
   return (

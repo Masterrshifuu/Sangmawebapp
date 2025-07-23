@@ -17,7 +17,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Star, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CartQuantityControl } from '@/components/cart/CartQuantityControl';
-import Footer from '@/components/footer';
 import { useProducts } from '@/hooks/use-products';
 
 // Helper component for star ratings
@@ -58,7 +57,6 @@ const ProductPageSkeleton = () => (
                 </div>
             </div>
         </main>
-        <Footer />
     </>
 );
 
@@ -110,7 +108,6 @@ export default function ProductPage() {
                 <h2 className="text-xl font-bold mb-2">Error</h2>
                 <p>{productsError}</p>
             </div>
-            <Footer />
       </div>
     );
   }
@@ -229,7 +226,6 @@ export default function ProductPage() {
                 <SimilarProducts products={similarProducts} />
             </div>
         </main>
-        <Footer />
     </>
   );
 }

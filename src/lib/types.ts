@@ -14,6 +14,7 @@ export interface Product {
     tags?: string[];
     isBestseller?: boolean;
     instantDelivery?: boolean;
+    stock: number;
 }
 
 export interface CartItem {
@@ -33,12 +34,12 @@ export interface BestsellerCategory {
 
 export interface ShowcaseCategory {
     name: string;
-    image: string;
+    imageUrl: string;
 }
 
-export interface AIState {
+export type AIState = {
     id: string;
     role: 'user' | 'assistant';
     content: string;
     products?: Product[];
-}
+}[];

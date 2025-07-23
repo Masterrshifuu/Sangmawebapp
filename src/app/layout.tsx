@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
 import { ProductsProvider } from '@/hooks/use-products';
+import { BottomNavbar } from '@/components/BottomNavbar';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function RootLayout({
           <ProductsProvider>
             {children}
             <Toaster />
+            <BottomNavbar />
           </ProductsProvider>
         </AuthWrapper>
       </body>
