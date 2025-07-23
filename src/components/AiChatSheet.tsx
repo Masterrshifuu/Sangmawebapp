@@ -2,31 +2,26 @@
 'use client';
 
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { ChatPanel } from './chat-panel';
 
 export function AiChatSheet({ children }: { children: React.ReactNode }) {
   return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent
-        side="bottom"
+    <Drawer>
+      <DrawerTrigger asChild>{children}</DrawerTrigger>
+      <DrawerContent
         className="h-full flex flex-col p-0"
-        showCloseButton={false}
       >
-        <div className="flex justify-center py-3">
-            <div className="w-12 h-1.5 rounded-full bg-muted" />
-        </div>
-        <SheetHeader className="p-4 pt-0 text-center">
-          <SheetTitle>AI Shopping Assistant</SheetTitle>
-        </SheetHeader>
+        <DrawerHeader className="p-4 pt-0 text-center">
+          <DrawerTitle>AI Shopping Assistant</DrawerTitle>
+        </DrawerHeader>
         <ChatPanel />
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }

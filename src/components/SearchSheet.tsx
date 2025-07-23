@@ -2,12 +2,11 @@
 'use client';
 
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTrigger,
+} from '@/components/ui/drawer';
 import { Input } from './ui/input';
 import { Search } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
@@ -56,10 +55,10 @@ export function SearchSheet({ children }: { children: React.ReactNode }) {
     }, [query, fuse]);
 
   return (
-    <Sheet>
-      <SheetTrigger asChild>{children}</SheetTrigger>
-      <SheetContent side="bottom" className="h-full flex flex-col p-0">
-        <SheetHeader className="p-4 border-b">
+    <Drawer>
+      <DrawerTrigger asChild>{children}</DrawerTrigger>
+      <DrawerContent className="h-full flex flex-col p-0">
+        <DrawerHeader className="p-4 border-b">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
@@ -69,7 +68,7 @@ export function SearchSheet({ children }: { children: React.ReactNode }) {
               onChange={(e) => setQuery(e.target.value)}
             />
           </div>
-        </SheetHeader>
+        </DrawerHeader>
         <ScrollArea className="flex-1">
             {isLoading ? (
                  <div className="p-4 text-center text-muted-foreground">Loading products...</div>
@@ -88,7 +87,7 @@ export function SearchSheet({ children }: { children: React.ReactNode }) {
                 </div>
             )}
         </ScrollArea>
-      </SheetContent>
-    </Sheet>
+      </DrawerContent>
+    </Drawer>
   );
 }

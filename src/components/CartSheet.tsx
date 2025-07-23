@@ -3,14 +3,14 @@
 
 import { Button } from '@/components/ui/button';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-  SheetFooter,
-  SheetClose,
-} from '@/components/ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+  DrawerFooter,
+  DrawerClose,
+} from '@/components/ui/drawer';
 import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from './ui/scroll-area';
@@ -28,21 +28,14 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Sheet>
-        <SheetTrigger asChild>{children}</SheetTrigger>
-        <SheetContent
-          side="bottom"
+      <Drawer>
+        <DrawerTrigger asChild>{children}</DrawerTrigger>
+        <DrawerContent
           className="h-3/4 flex flex-col p-0 rounded-t-2xl"
-          showCloseButton={false}
         >
-          <div className="flex justify-center py-3">
-            <SheetClose>
-              <div className="w-12 h-1.5 rounded-full bg-muted" />
-            </SheetClose>
-          </div>
-          <SheetHeader className="p-4 pt-0 border-b">
-            <SheetTitle className="text-center">Your Cart ({totalItems})</SheetTitle>
-          </SheetHeader>
+          <DrawerHeader className="p-4 pt-0 border-b">
+            <DrawerTitle className="text-center">Your Cart ({totalItems})</DrawerTitle>
+          </DrawerHeader>
 
           {cart.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center p-4 text-muted-foreground">
@@ -63,26 +56,26 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                   ))}
                 </div>
               </ScrollArea>
-              <SheetFooter className="p-4 border-t bg-background mt-auto">
+              <DrawerFooter className="p-4 border-t bg-background mt-auto">
                 <div className="w-full space-y-4">
                   <div className="flex justify-between font-bold text-lg">
                     <span>Subtotal</span>
                     <span>₹{totalPrice.toFixed(2)}</span>
                   </div>
-                  <SheetClose asChild>
+                  <DrawerClose asChild>
                     <Button className="w-full" onClick={handleCheckout}>
                       Proceed to Checkout
                     </Button>
-                  </SheetClose>
+                  </DrawerClose>
                   <Button variant="outline" className="w-full" onClick={clearCart}>
                     Clear Cart
                   </Button>
                 </div>
-              </SheetFooter>
+              </DrawerFooter>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DrawerContent>
+      </Drawer>
       <CheckoutDialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen} />
     </>
   );

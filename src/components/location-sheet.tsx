@@ -3,13 +3,13 @@
 
 import { useState, useEffect } from 'react';
 import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetFooter,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet';
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -50,22 +50,17 @@ export default function LocationSheet({ open, onOpenChange, location, onSave }: 
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        side="bottom"
+    <Drawer open={open} onOpenChange={onOpenChange}>
+      <DrawerContent
         className="h-auto flex flex-col p-0 rounded-t-2xl"
-        showCloseButton={false}
       >
-        <div className="flex justify-center py-3" onClick={() => onOpenChange(false)}>
-            <div className="w-12 h-1.5 rounded-full bg-muted" />
-        </div>
-        <SheetHeader className="p-4 pt-0 text-center">
-          <SheetTitle>Enter your location</SheetTitle>
-          <SheetDescription>
+        <DrawerHeader className="p-4 pt-0 text-center">
+          <DrawerTitle>Enter your location</DrawerTitle>
+          <DrawerDescription>
             Provide your area and add landmark to get accurate
             delivery times.
-          </SheetDescription>
-        </SheetHeader>
+          </DrawerDescription>
+        </DrawerHeader>
         <div className="grid gap-4 p-4">
           <div className="space-y-1">
             <Label htmlFor="area">Area</Label>
@@ -99,7 +94,7 @@ export default function LocationSheet({ open, onOpenChange, location, onSave }: 
             </Select>
           </div>
         </div>
-        <SheetFooter className="p-4 border-t bg-background mt-auto">
+        <DrawerFooter className="p-4 border-t bg-background mt-auto">
           <Button
             type="button"
             onClick={handleSave}
@@ -107,8 +102,8 @@ export default function LocationSheet({ open, onOpenChange, location, onSave }: 
           >
             Save location
           </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   );
 }
