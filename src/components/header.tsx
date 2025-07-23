@@ -25,7 +25,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#fdffbd] border-b">
+    <header className="sticky top-0 z-50 bg-[#fdffbd]/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4">
         <div
           className={cn(
