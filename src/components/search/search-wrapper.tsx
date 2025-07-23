@@ -10,15 +10,19 @@ export function SearchWrapper() {
   const router = useRouter();
   const { query, setQuery } = useSearchContext();
 
-  const handleFocus = () => {
-    router.push('/?tab=search');
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // When typing, ensure we are on the search tab
+  const navigateToSearch = () => {
+    // Check if we're already on the search tab to avoid unnecessary pushes
     if (window.location.search.indexOf('tab=search') === -1) {
        router.push('/?tab=search');
     }
+  }
+
+  const handleFocus = () => {
+    navigateToSearch();
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    navigateToSearch();
     setQuery(e.target.value);
   }
 
