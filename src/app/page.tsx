@@ -10,6 +10,8 @@ import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { useProducts } from '@/hooks/use-products';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
+import { HorizontalScroller } from '@/components/horizontal-scroller';
+import { ProductCard } from '@/components/product-card';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
@@ -130,29 +132,35 @@ export default function Home() {
     <>
       <Header />
       <main className="flex-1 pb-16 md:pb-0">
-        {showcaseCategories.length > 0 && (
-            <section className="py-6">
-                 <div className="px-4 mb-4 flex justify-between items-center">
-                    <h2 className="text-2xl font-bold font-headline">Shop by Category</h2>
-                     <Link href="/categories" className="text-sm font-medium text-accent-foreground hover:underline">
-                      View All &gt;
-                    </Link>
-                 </div>
+         <section className="py-6">
+            <div className="px-4 mb-4 flex justify-between items-center">
+                <h2 className="text-2xl font-bold font-headline">Shop by Category</h2>
+                <Link href="/categories" className="text-sm font-medium text-accent-foreground hover:underline">
+                    View All &gt;
+                </Link>
+            </div>
+            {showcaseCategories.length > 0 && (
                 <CategoryShowcase 
                     showcaseCategories={showcaseCategories} 
                     productsByCategory={productsByCategory}
                 />
-            </section>
-        )}
+            )}
+        </section>
 
         {bestsellerCategories.length > 0 && (
           <section className="py-4">
-            <h2 className="text-2xl font-bold mb-4 px-4">Bestsellers</h2>
-            <div className="grid grid-cols-2 gap-4 px-4">
-              {bestsellerCategories.map((category) => (
-                <BestsellerCard key={category.name} category={category} />
-              ))}
-            </div>
+             <div className="px-4 mb-4 flex justify-between items-center">
+                <h2 className="text-2xl font-bold font-headline">Bestsellers</h2>
+             </div>
+             <HorizontalScroller>
+                <div className="flex gap-4">
+                {bestsellerCategories.map((category) => (
+                    <div key={category.name} className="w-64 flex-shrink-0">
+                        <BestsellerCard category={category} />
+                    </div>
+                ))}
+                </div>
+             </HorizontalScroller>
           </section>
         )}
 
