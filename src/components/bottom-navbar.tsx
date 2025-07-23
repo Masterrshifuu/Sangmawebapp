@@ -4,9 +4,7 @@
 import { Home, Search, ShoppingCart, User, LayoutGrid, Bot } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { useCart } from '@/context/cart-context';
 import type { AppTab } from './app-shell';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CartSheet } from './cart-sheet';
 
@@ -47,7 +45,7 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
           >
             <Icon
               className={cn(
-                'h-6 w-6 transition-transform',
+                'h-6 w-6 transition-transform text-muted-foreground',
                 activeTab === tab && 'text-primary scale-110'
               )}
             />
@@ -56,7 +54,7 @@ const BottomNavbar = ({ activeTab, setActiveTab }: BottomNavbarProps) => {
         
         <CartSheet>
             <Button variant="ghost" className="flex flex-col items-center justify-center w-full h-full p-0 relative">
-                <ShoppingCart className="h-6 w-6" />
+                <ShoppingCart className="h-6 w-6 text-muted-foreground" />
                 <span className="sr-only">Cart</span>
             </Button>
         </CartSheet>

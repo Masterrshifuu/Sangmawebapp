@@ -54,6 +54,7 @@ function AppShellContent() {
         {TABS.map((tab) => {
           const TabComponent = tabComponents[tab];
           const tabIndex = getTabIndex(tab);
+          const isActive = activeTab === tab;
           
           return (
             <div
@@ -61,6 +62,9 @@ function AppShellContent() {
               className="absolute inset-0 transition-transform duration-300 ease-in-out"
               style={{
                 transform: `translateX(${(tabIndex - activeTabIndex) * 100}%)`,
+                // Ensure inactive tabs are still interactable for preloading but not visible
+                pointerEvents: isActive ? 'auto' : 'none',
+                visibility: isActive ? 'visible' : 'hidden',
               }}
             >
               <Suspense fallback={<div className="w-full h-full bg-background" />}>
