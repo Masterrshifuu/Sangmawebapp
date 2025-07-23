@@ -7,14 +7,33 @@ import Footer from '../footer';
 import { Input } from '../ui/input';
 import { Search } from 'lucide-react';
 import { useSearchContext } from '@/context/search-context';
+import { useEffect, useRef, useState } from 'react';
+import Header from '../header';
 
 export default function SearchTab() {
   const { query, setQuery } = useSearchContext();
   const { results, isLoading, hasFetchedInitial } = useSearch({ open: true });
+  const [isScrolled, setIsScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollableElement = scrollRef.current;
+    if (!scrollableElement) return;
+
+    const handleScroll = () => {
+      setIsScrolled(scrollableElement.scrollTop > 10);
+    };
+
+    scrollableElement.addEventListener('scroll', handleScroll);
+    return () => {
+      scrollableElement.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      <div className="p-4 border-b">
+    <div ref={scrollRef} className="flex flex-col h-full bg-background overflow-y-auto">
+       <Header isScrolled={isScrolled} />
+      <div className="p-4 border-b sticky top-[75px] bg-background z-10">
         <div className="relative w-full max-w-lg mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
           <Input
@@ -27,9 +46,9 @@ export default function SearchTab() {
           />
         </div>
       </div>
-      <ScrollArea className="flex-1 min-h-0">
+      <div className="flex-1">
         <SearchResults results={results} isLoading={isLoading} hasFetchedInitial={hasFetchedInitial} query={query} onProductClick={() => {}} />
-      </ScrollArea>
+      </div>
        <Footer />
     </div>
   );

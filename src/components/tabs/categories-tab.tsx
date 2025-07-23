@@ -7,11 +7,28 @@ import { useData } from '@/context/data-context';
 import Header from "../header";
 import Footer from "../footer";
 import Logo from "../logo";
+import { useEffect, useRef, useState } from "react";
 
 export default function CategoriesTabContent() {
   const searchParams = useSearchParams();
   const { categories, products, loading } = useData();
   const openCategoryId = searchParams.get('open');
+  const [isScrolled, setIsScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollableElement = scrollRef.current;
+    if (!scrollableElement) return;
+
+    const handleScroll = () => {
+      setIsScrolled(scrollableElement.scrollTop > 10);
+    };
+
+    scrollableElement.addEventListener('scroll', handleScroll);
+    return () => {
+      scrollableElement.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const content = loading ? (
     <div className="flex-1 flex justify-center items-center">
@@ -25,8 +42,8 @@ export default function CategoriesTabContent() {
   );
 
   return (
-    <div className="h-full overflow-y-auto flex flex-col">
-      <Header isScrolled={true} />
+    <div ref={scrollRef} className="h-full overflow-y-auto flex flex-col">
+      <Header isScrolled={isScrolled} />
       <main className="container mx-auto px-4 py-8 flex-1">
         {content}
       </main>

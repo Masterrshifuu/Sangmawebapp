@@ -3,7 +3,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import OrderStatusTracker from "@/components/order-status-tracker";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { listenToUserOrders } from "@/lib/data-realtime";
 import { useAuth } from "@/hooks/use-auth";
 import type { Order } from "@/lib/types";
@@ -77,9 +77,26 @@ function LatestOrder() {
 
 
 export default function AccountTab() {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const scrollableElement = scrollRef.current;
+    if (!scrollableElement) return;
+
+    const handleScroll = () => {
+      setIsScrolled(scrollableElement.scrollTop > 10);
+    };
+
+    scrollableElement.addEventListener('scroll', handleScroll);
+    return () => {
+      scrollableElement.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-      <div className="h-full overflow-y-auto">
-        <Header isScrolled={true} />
+      <div ref={scrollRef} className="h-full overflow-y-auto">
+        <Header isScrolled={isScrolled} />
         <main className="container mx-auto px-4 py-8">
           <LatestOrder />
         </main>
