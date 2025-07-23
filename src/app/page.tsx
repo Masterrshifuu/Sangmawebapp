@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/header';
 import { BestsellerCard } from '@/components/BestsellerCard';
 import { getHomePageData } from '@/lib/home';
-import { ProductGrid } from '@/components/product-grid';
+import { ProductCarousel } from '@/components/product-carousel';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { useProducts } from '@/hooks/use-products';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -32,11 +32,11 @@ function shuffle<T>(array: T[]): T[] {
 const HomePageSkeleton = () => (
     <>
         <Header />
-        <main className="flex-1 pb-16 md:pb-0 px-4 py-6 space-y-8">
+        <main className="flex-1 pb-16 md:pb-0 py-6 space-y-8">
             {/* Category Showcase Skeleton */}
             <section>
-                <Skeleton className="h-8 w-48 mb-4" />
-                <div className="flex gap-4 overflow-x-auto pb-4">
+                <Skeleton className="h-8 w-48 mb-4 ml-4" />
+                <div className="flex gap-4 overflow-x-auto pb-4 px-4">
                     {[...Array(6)].map((_, i) => (
                         <div key={i} className="flex flex-col items-center space-y-2 flex-shrink-0">
                             <Skeleton className="w-20 h-20 rounded-lg" />
@@ -48,8 +48,8 @@ const HomePageSkeleton = () => (
 
             {/* Bestsellers Skeleton */}
             <section>
-                <Skeleton className="h-8 w-40 mb-4" />
-                <div className="grid grid-cols-2 gap-4">
+                <Skeleton className="h-8 w-40 mb-4 ml-4" />
+                <div className="grid grid-cols-2 gap-4 px-4">
                     <Skeleton className="w-full aspect-square rounded-lg" />
                     <Skeleton className="w-full aspect-square rounded-lg" />
                 </div>
@@ -57,10 +57,10 @@ const HomePageSkeleton = () => (
 
              {/* Product Grid Skeleton */}
             <section>
-                <Skeleton className="h-8 w-32 mb-4" />
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <Skeleton className="h-8 w-32 mb-4 ml-4" />
+                <div className="flex gap-4 px-4">
                     {[...Array(4)].map((_, i) => (
-                        <div key={i} className="space-y-2">
+                        <div key={i} className="space-y-2 w-40 flex-shrink-0">
                            <Skeleton className="w-full aspect-square rounded-lg" />
                            <Skeleton className="h-4 w-3/4" />
                            <Skeleton className="h-4 w-1/2" />
@@ -146,9 +146,9 @@ export default function Home() {
         )}
 
         {bestsellerCategories.length > 0 && (
-          <section className="px-4 py-4">
-            <h2 className="text-2xl font-bold mb-4">Bestsellers</h2>
-            <div className="grid grid-cols-2 gap-4">
+          <section className="py-4">
+            <h2 className="text-2xl font-bold mb-4 px-4">Bestsellers</h2>
+            <div className="grid grid-cols-2 gap-4 px-4">
               {bestsellerCategories.map((category) => (
                 <BestsellerCard key={category.name} category={category} />
               ))}
@@ -157,9 +157,14 @@ export default function Home() {
         )}
 
         {shuffledCategoryEntries.map(([categoryName, productsInSection]) => (
-          <section key={categoryName} className="px-4 py-4">
-            <h2 className="text-2xl font-bold mb-4">{categoryName}</h2>
-            <ProductGrid products={productsInSection} allProducts={products} />
+          <section key={categoryName} className="py-4">
+            <div className="px-4 mb-4 flex justify-between items-center">
+                <h2 className="text-2xl font-bold font-headline">{categoryName}</h2>
+                <Link href={`/category/${categoryName.toLowerCase()}`} className="text-sm font-medium text-accent-foreground hover:underline">
+                    View All &gt;
+                </Link>
+            </div>
+            <ProductCarousel products={productsInSection} />
           </section>
         ))}
 
