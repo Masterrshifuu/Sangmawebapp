@@ -215,9 +215,8 @@ export default function ProductPage() {
 
                     <div className="flex items-center justify-between p-4 border-t border-b rounded-lg bg-muted/30 mt-4">
                         <div>
-                            <p className="text-2xl font-bold">₹{product.price.toFixed(2)}</p>
-                            {product.mrp && product.mrp > product.price && (
-                                <span className="text-sm text-muted-foreground line-through">MRP ₹{product.mrp.toFixed(2)}</span>
+                            {product.mrp && (
+                                <p className="text-2xl font-bold">INR {product.mrp.toFixed(2)}</p>
                             )}
                         </div>
                         <div className="w-36">
