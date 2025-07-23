@@ -23,13 +23,22 @@ const tabComponents: Record<AppTab, React.ElementType> = {
 
 function AppShellContent() {
   const searchParams = useSearchParams();
-  const initialTab = (searchParams.get('tab') as AppTab) || 'home';
-  const [activeTab, setActiveTab] = useState<AppTab>(initialTab);
+  const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // This effect ensures the tab stays in sync with the URL search parameters
+  useEffect(() => {
+    const tabFromUrl = (searchParams.get('tab') as AppTab) || 'home';
+    if (TABS.includes(tabFromUrl)) {
+      setActiveTab(tabFromUrl);
+    } else {
+      setActiveTab('home');
+    }
+  }, [searchParams]);
 
   const getTabIndex = (tab: AppTab) => TABS.indexOf(tab);
   const activeTabIndex = getTabIndex(activeTab);
