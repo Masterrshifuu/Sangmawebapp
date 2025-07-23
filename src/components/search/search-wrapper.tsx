@@ -15,8 +15,11 @@ export function SearchWrapper() {
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // When typing, ensure we are on the search tab
+    if (window.location.search.indexOf('tab=search') === -1) {
+       router.push('/?tab=search');
+    }
     setQuery(e.target.value);
-    router.push('/?tab=search');
   }
 
   return (
