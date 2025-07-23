@@ -54,7 +54,7 @@ export default function Header() {
         
         <div className="py-3">
             <SearchSheet>
-                <button className="flex items-center w-full h-11 rounded-lg bg-background/60 px-4 text-left text-sm text-muted-foreground hover:bg-background/100 transition-colors">
+                <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors">
                     <Search className="h-5 w-5 mr-3" />
                     <span>Search for products...</span>
                 </button>
