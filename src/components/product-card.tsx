@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
     const cartItem = cart.find(item => item.product.id === product.id);
 
     return (
-        <div className="bg-card rounded-lg overflow-hidden shadow-sm flex flex-col h-full group transition-shadow duration-300 hover:shadow-lg">
+        <div className="bg-card rounded-lg overflow-hidden shadow-md flex flex-col h-full group transition-shadow duration-300 hover:shadow-xl">
             <Link href={`/product/${product.id}`} className="block">
                 <div className="relative w-full aspect-square bg-muted/30">
                     <Image
