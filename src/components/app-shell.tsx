@@ -8,6 +8,7 @@ import CategoriesPageContent from './tabs/categories-tab';
 import SearchTab from './tabs/search-tab';
 import AiChatTab from './tabs/ai-chat-tab';
 import AccountTab from './tabs/account-tab';
+import Logo from './logo';
 
 // Define the available tabs
 export type AppTab = 'home' | 'categories' | 'search' | 'ai-chat' | 'account';
@@ -45,7 +46,11 @@ function AppShellContent() {
 
   if (!isClient) {
     // Render a skeleton or loading state on the server
-    return <div className="w-full h-screen bg-background" />;
+    return (
+      <div className="h-full flex flex-col items-center justify-center">
+        <Logo className="animate-logo-pulse" />
+      </div>
+    );
   }
 
   return (
@@ -85,7 +90,11 @@ function AppShellContent() {
 
 export function AppShell() {
     return (
-        <Suspense fallback={<div className="w-full h-screen bg-background" />}>
+        <Suspense fallback={
+          <div className="h-full flex flex-col items-center justify-center">
+            <Logo className="animate-logo-pulse" />
+          </div>
+        }>
             <AppShellContent />
         </Suspense>
     )
