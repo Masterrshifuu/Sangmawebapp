@@ -36,7 +36,7 @@ export default function Header() {
           )}
         >
           <div className="overflow-hidden">
-            <div className="flex justify-between items-center py-2">
+            <div className="flex flex-col items-start py-2">
                 <Logo />
                 <LocationPicker />
             </div>
