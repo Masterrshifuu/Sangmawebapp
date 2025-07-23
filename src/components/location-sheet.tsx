@@ -55,7 +55,6 @@ export default function LocationSheet({ open, onOpenChange, location, onSave }: 
         className="h-auto flex flex-col p-0 rounded-t-2xl"
       >
         <DrawerHeader className="p-4 pt-0 text-center">
-          <DrawerTitle>Enter your location</DrawerTitle>
           <DrawerDescription>
             Provide your area and add landmark to get accurate
             delivery times.
