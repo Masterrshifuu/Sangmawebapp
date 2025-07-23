@@ -18,7 +18,7 @@ export function ProductCard({ product }: { product: Product }) {
             <Link href={`/product/${product.id}`} className="block">
                 <div className="relative w-full aspect-square bg-muted/30">
                     <Image
-                        src={product.image}
+                        src={product.image || `https://placehold.co/400x400.png`}
                         alt={product.name}
                         fill
                         className="object-contain group-hover:scale-105 transition-transform duration-300"
@@ -40,7 +40,7 @@ export function ProductCard({ product }: { product: Product }) {
                         {typeof product.price === 'number' && (
                             <p className="font-bold text-base">₹{product.price.toFixed(2)}</p>
                         )}
-                        {product.mrp && product.mrp > product.price && (
+                        {product.mrp && typeof product.mrp === 'number' && product.mrp > product.price && (
                             <span className="text-xs text-muted-foreground line-through">₹{product.mrp.toFixed(2)}</span>
                         )}
                     </div>

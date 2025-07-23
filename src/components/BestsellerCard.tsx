@@ -12,7 +12,7 @@ export function BestsellerCard({ category }: { category: BestsellerCategory }) {
         {category.images.slice(0, 4).map((img, index) => (
           <div key={index} className="relative aspect-square">
             <Image
-              src={img.src}
+              src={img.src || `https://placehold.co/400x400.png`}
               alt={img.alt}
               fill
               className="object-cover"
