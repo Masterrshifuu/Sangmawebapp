@@ -32,19 +32,22 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
         if (snapshot.empty) {
             setProducts([]);
         } else {
-            const productsList = snapshot.docs.map(doc => {
-                const data = doc.data();
-                // Convert Firestore Timestamps to serializable ISO strings
-                for (const key in data) {
-                    if (isTimestamp(data[key])) {
-                        data[key] = data[key].toDate().toISOString();
+            const productsList = snapshot.docs
+                .map(doc => {
+                    const data = doc.data();
+                    // Convert Firestore Timestamps to serializable ISO strings
+                    for (const key in data) {
+                        if (isTimestamp(data[key])) {
+                            data[key] = data[key].toDate().toISOString();
+                        }
                     }
-                }
-                return {
-                    id: doc.id,
-                    ...data
-                } as Product;
-            });
+                    return {
+                        id: doc.id,
+                        ...data
+                    } as Product;
+                })
+                .filter(product => product.stock > 0); // Filter out products with stock <= 0
+            
             setProducts(productsList);
         }
         setLoading(false);
