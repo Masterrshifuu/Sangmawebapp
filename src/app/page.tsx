@@ -31,7 +31,8 @@ export default function Home({}: HomePageProps) {
     if (!scrollableElement) return;
 
     const handleScroll = () => {
-      setIsScrolled(scrollableElement.scrollTop > 10);
+      const isNowScrolled = scrollableElement.scrollTop > 10;
+      setIsScrolled(prev => prev !== isNowScrolled ? isNowScrolled : prev);
     };
 
     scrollableElement.addEventListener('scroll', handleScroll, { passive: true });

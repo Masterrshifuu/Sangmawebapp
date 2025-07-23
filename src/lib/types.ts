@@ -1,3 +1,4 @@
+
 import type { Timestamp } from "firebase/firestore";
 
 export type Product = {
@@ -55,3 +56,15 @@ export type UserProfileData = {
   landmark?: string;
   region?: string;
 };
+
+export interface BestsellerImage {
+  productId: string;
+  imageUrl: string;
+}
+
+export interface BestsellerCategory {
+  id: string;
+  name: string;
+  images: BestsellerImage[];
+  productCount: number;
+}
