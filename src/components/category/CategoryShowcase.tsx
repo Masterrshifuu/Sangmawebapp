@@ -2,7 +2,6 @@
 'use client';
 
 import type { Product, ShowcaseCategory } from '@/lib/types';
-import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
   CarouselContent,
@@ -23,12 +22,6 @@ export function CategoryShowcase({
             loop: true,
             align: "start",
         }}
-        plugins={[
-            Autoplay({
-              delay: 4000,
-              stopOnInteraction: true,
-            }),
-        ]}
         className="px-4"
     >
       <CarouselContent className="-ml-4">
