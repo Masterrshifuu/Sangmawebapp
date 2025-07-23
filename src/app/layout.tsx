@@ -4,8 +4,8 @@ import './globals.css';
 import AppLayoutClient from '@/components/app-layout-client';
 import { PT_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
-import { AppShell } from '@/components/app-shell';
 import { Suspense } from 'react';
+import SearchSheet from '@/components/tabs/search-tab';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -49,7 +49,7 @@ export default function RootLayout({
         <AppLayoutClient>
             {children}
             <Suspense>
-              <AppShell />
+              <SearchSheet />
             </Suspense>
         </AppLayoutClient>
       </body>

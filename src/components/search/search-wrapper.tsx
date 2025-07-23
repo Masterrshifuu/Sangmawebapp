@@ -2,14 +2,14 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useSearchContext } from "@/context/search-context";
 
 export function SearchWrapper() {
-  const router = useRouter();
+  const { setOpen } = useSearchContext();
 
   const handleClick = () => {
-    router.push('/?tab=search');
+    setOpen(true);
   };
 
   return (

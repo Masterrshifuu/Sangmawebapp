@@ -21,22 +21,31 @@ import { QuantitySelector } from './quantity-selector';
 type ProductCardProps = {
   product: Product;
   size?: 'default' | 'small';
+  onClick?: () => void;
 };
 
 export default function ProductCard({
   product,
   size = 'default',
+  onClick
 }: ProductCardProps) {
   const { addToCart, removeFromCart, getItemQuantity } = useCart();
   const quantity = getItemQuantity(product.id);
   const isSmall = size === 'small';
 
+  const CardLink = ({ children }: { children: React.ReactNode }) => (
+    <Link
+      href={`/product/${product.id}`}
+      className="flex flex-col flex-grow"
+      onClick={onClick}
+    >
+      {children}
+    </Link>
+  );
+
   return (
     <Card className="flex flex-col h-full overflow-hidden transition-transform transform hover:-translate-y-1 hover:shadow-xl">
-      <Link
-        href={`/product/${product.id}`}
-        className="flex flex-col flex-grow"
-      >
+      <CardLink>
         <CardHeader className="p-0 relative">
           <div className="aspect-square w-full relative">
             <Image
@@ -68,7 +77,7 @@ export default function ProductCard({
             {product.description}
           </CardDescription>
         </CardContent>
-      </Link>
+      </CardLink>
       <CardFooter
         className={cn(
           'flex justify-between items-center pt-0 mt-auto',

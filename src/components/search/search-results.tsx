@@ -5,18 +5,17 @@ import ProductCard from '@/components/product-card';
 import { useSearch } from '@/hooks/use-search';
 import Logo from '../logo';
 
-type SearchResultsProps = Omit<ReturnType<typeof useSearch>, 'query' | 'setQuery'> & {
+type SearchResultsProps = {
   query: string;
   onProductClick: () => void;
 };
 
 export function SearchResults({
-  results,
-  isLoading,
-  hasFetchedInitial,
   query,
   onProductClick,
 }: SearchResultsProps) {
+  const { results, isLoading, hasFetchedInitial } = useSearch({ open: true });
+
   if (isLoading && results.length === 0) {
     return (
       <div className="flex justify-center items-center py-10">
@@ -25,7 +24,6 @@ export function SearchResults({
     );
   }
 
-  // Show initial products (bestsellers) when query is empty
   if (!query.trim() && results.length > 0) {
      return (
       <div className="p-4">
@@ -40,6 +38,7 @@ export function SearchResults({
               key={product.id}
               product={product}
               size="small"
+              onClick={onProductClick}
             />
           ))}
         </div>
@@ -61,6 +60,7 @@ export function SearchResults({
               key={product.id}
               product={product}
               size="small"
+              onClick={onProductClick}
             />
           ))}
         </div>
@@ -68,7 +68,6 @@ export function SearchResults({
     );
   }
   
-
   if (!isLoading && results.length === 0 && (query || hasFetchedInitial)) {
     return (
       <div className="text-center py-10 text-muted-foreground">
