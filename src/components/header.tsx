@@ -25,7 +25,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#fdffbd]/80 backdrop-blur-sm border-b">
+    <header className="sticky top-0 z-50 bg-[#fdffbd] border-b">
       <div className="container mx-auto px-4">
         <div
           className={cn(
@@ -42,8 +42,8 @@ export default function Header() {
                     height={60}
                     priority
                   />
-                  <div className="flex flex-col">
-                    <span className="font-headline text-base font-bold">
+                  <div className="flex flex-col justify-center">
+                    <span className="font-headline text-base font-bold leading-none">
                         Sangma Megha Mart
                     </span>
                     <LocationPicker />
@@ -54,7 +54,7 @@ export default function Header() {
         
         <div className="py-3">
             <SearchSheet>
-                <button className="flex items-center w-full h-11 rounded-lg bg-muted/60 px-4 text-left text-sm text-muted-foreground hover:bg-muted/100 transition-colors">
+                <button className="flex items-center w-full h-11 rounded-lg bg-background/60 px-4 text-left text-sm text-muted-foreground hover:bg-background/100 transition-colors">
                     <Search className="h-5 w-5 mr-3" />
                     <span>Search for products...</span>
                 </button>

@@ -24,7 +24,7 @@ export function LocationPicker() {
 
     return (
         <>
-            <button onClick={() => setIsLocationSheetOpen(true)} className="flex items-center mt-1 max-w-[250px] h-8 bg-transparent p-0">
+            <button onClick={() => setIsLocationSheetOpen(true)} className="flex items-center mt-1 max-w-[250px] h-auto bg-transparent p-0">
                 <MapPin className="ml-0 w-4 h-4 text-muted-foreground pointer-events-none flex-shrink-0" />
                 <span className="bg-transparent border-none focus:ring-0 w-full text-sm text-muted-foreground truncate px-2 outline-none text-left">
                     {location}
