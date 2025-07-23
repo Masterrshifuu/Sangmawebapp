@@ -6,8 +6,8 @@ import { Search } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSearch } from '@/hooks/use-search';
 import { SearchResults } from '@/components/search/search-results';
-import Header from '../header';
 import Footer from '../footer';
+import Header from '../header';
 
 export default function SearchTab() {
   const { query, setQuery, ...searchResultProps } = useSearch({ open: true }); // Always open in tab context
