@@ -12,10 +12,9 @@ import { getPersonalizedRecommendations } from '@/lib/personalization';
 import type { Product } from '@/lib/types';
 import Header from '../header';
 
-interface HomePageProps {
-}
+interface HomePageProps {}
 
-export default function HomePageContent({ }: HomePageProps) {
+export default function HomePageContent({}: HomePageProps) {
   const { products, categories, loading } = useData();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
@@ -49,20 +48,20 @@ export default function HomePageContent({ }: HomePageProps) {
 
   const otherCategoryProducts = useMemo(() => {
     if (loading) return [];
-    
-    const recommendedIds = new Set(recommendedProducts.map(p => p.id));
-    
-    const remainingProducts = products.filter(p => !recommendedIds.has(p.id));
 
-    return categories.map(category => ({
+    const recommendedIds = new Set(recommendedProducts.map((p) => p.id));
+
+    const remainingProducts = products.filter((p) => !recommendedIds.has(p.id));
+
+    return categories.map((category) => ({
       ...category,
-      products: remainingProducts.filter(p => p.category === category.name),
+      products: remainingProducts.filter((p) => p.category === category.name),
     }));
   }, [loading, products, categories, recommendedProducts]);
 
   if (loading || !isClient) {
     return (
-       <div className="h-full flex flex-col items-center justify-center">
+      <div className="h-full flex flex-col items-center justify-center">
         <Logo className="animate-logo-pulse" />
       </div>
     );
@@ -75,15 +74,15 @@ export default function HomePageContent({ }: HomePageProps) {
         <PromoCarousel />
         <CategoryCarousel categories={categories} products={products} />
         <ProductGrid title="Recommended for You" products={recommendedProducts} />
-        {otherCategoryProducts.map(category => (
-            <ProductGrid 
-                key={category.id}
-                title={category.name}
-                products={category.products}
-            />
+        {otherCategoryProducts.map((category) => (
+          <ProductGrid
+            key={category.id}
+            title={category.name}
+            products={category.products}
+          />
         ))}
       </div>
-       <Footer />
+      <Footer />
     </div>
   );
 }
