@@ -1,7 +1,12 @@
 
 import { db } from './firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, type Timestamp } from 'firebase/firestore';
 import type { Product } from './types';
+
+// Helper function to check if a value is a Firestore Timestamp
+function isTimestamp(value: any): value is Timestamp {
+    return value && typeof value.toDate === 'function';
+}
 
 // This function is designed to run on the server
 export async function getProducts(): Promise<{ products: Product[], error: string | null }> {
@@ -13,10 +18,19 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
       return { products: [], error: null };
     }
 
-    const productsList = productsSnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as Product));
+    const productsList = productsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      // Convert any Firestore Timestamps to serializable ISO strings
+      for (const key in data) {
+        if (isTimestamp(data[key])) {
+          data[key] = data[key].toDate().toISOString();
+        }
+      }
+      return {
+        id: doc.id,
+        ...data
+      } as Product;
+    });
 
     return { products: productsList, error: null };
   } catch (error: any) {
