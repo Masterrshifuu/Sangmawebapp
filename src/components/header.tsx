@@ -2,13 +2,11 @@
 'use client';
 
 import { Search } from 'lucide-react';
-import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { SearchSheet } from './SearchSheet';
 import { cn } from '@/lib/utils';
 import { LocationPicker } from './location-picker';
-import Logo from './logo';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -36,9 +34,20 @@ export default function Header() {
           )}
         >
           <div className="overflow-hidden">
-            <div className="flex flex-col items-start py-2">
-                <Logo />
-                <LocationPicker />
+            <div className="flex items-center gap-3 py-2">
+                 <Image
+                    src="/logo.png"
+                    alt="Sangma Megha Mart Logo"
+                    width={60}
+                    height={60}
+                    priority
+                  />
+                  <div className="flex flex-col">
+                    <span className="font-headline text-base font-bold">
+                        Sangma Megha Mart
+                    </span>
+                    <LocationPicker />
+                  </div>
             </div>
           </div>
         </div>
