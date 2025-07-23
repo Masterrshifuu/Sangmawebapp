@@ -9,10 +9,9 @@ import { trackSearch } from '@/lib/activity-tracker';
 
 interface UseSearchProps {
   open: boolean;
-  isDesktop?: boolean;
 }
 
-export function useSearch({ open, isDesktop = false }: UseSearchProps) {
+export function useSearch({ open }: UseSearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [initialProducts, setInitialProducts] = useState<Product[]>([]);
@@ -47,10 +46,10 @@ export function useSearch({ open, isDesktop = false }: UseSearchProps) {
 
   useEffect(() => {
     // Fetch initial products once data is loaded and the search component is active
-    if (!dataLoading && (open || isDesktop) && !hasFetchedInitial) {
+    if (!dataLoading && open && !hasFetchedInitial) {
       fetchInitialProducts();
     }
-  }, [open, isDesktop, hasFetchedInitial, dataLoading, fetchInitialProducts]);
+  }, [open, hasFetchedInitial, dataLoading, fetchInitialProducts]);
 
 
   useEffect(() => {
