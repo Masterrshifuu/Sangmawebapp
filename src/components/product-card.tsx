@@ -14,7 +14,7 @@ export function ProductCard({ product }: { product: Product }) {
     const cartItem = cart.find(item => item.product.id === product.id);
 
     return (
-        <div className="bg-card rounded-lg overflow-hidden shadow-sm flex flex-col h-full group">
+        <div className="bg-card rounded-lg overflow-hidden shadow-sm flex flex-col h-full group transition-shadow duration-300 hover:shadow-lg">
             <Link href={`/product/${product.id}`} className="block">
                 <div className="relative w-full aspect-square bg-muted/30">
                     <Image
@@ -25,7 +25,7 @@ export function ProductCard({ product }: { product: Product }) {
                         sizes="(max-width: 768px) 50vw, 25vw"
                     />
                     {product.instantDelivery && (
-                         <Badge className="absolute top-2 left-2 bg-accent text-accent-foreground">Instant Delivery</Badge>
+                         <Badge className="absolute top-2 left-2 bg-accent text-accent-foreground border-transparent font-semibold">Instant Delivery</Badge>
                     )}
                 </div>
             </Link>
@@ -46,7 +46,7 @@ export function ProductCard({ product }: { product: Product }) {
                         {cartItem ? (
                            <CartQuantityControl product={product} />
                         ) : (
-                            <Button variant="outline" size="sm" className="w-full" onClick={() => addItem(product)}>
+                            <Button variant="secondary" size="sm" className="w-full bg-accent hover:bg-accent/80 text-accent-foreground border-transparent" onClick={() => addItem(product)}>
                                 <Plus className="h-4 w-4 mr-1" />
                                 Add
                             </Button>
