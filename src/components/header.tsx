@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { LocationPicker } from './location-picker';
+import { SearchSheet } from './SearchSheet';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -51,11 +52,13 @@ export default function Header() {
           </div>
         </div>
         
-        <div className="py-3 hidden md:block">
-          <button className="flex items-center w-full h-11 rounded-lg bg-muted/60 px-4 text-left text-sm text-muted-foreground hover:bg-muted/100 transition-colors">
-              <Search className="h-5 w-5 mr-3" />
-              <span>Search for products...</span>
-          </button>
+        <div className="py-3">
+            <SearchSheet>
+                <button className="flex items-center w-full h-11 rounded-lg bg-muted/60 px-4 text-left text-sm text-muted-foreground hover:bg-muted/100 transition-colors">
+                    <Search className="h-5 w-5 mr-3" />
+                    <span>Search for products...</span>
+                </button>
+            </SearchSheet>
         </div>
       </div>
     </header>

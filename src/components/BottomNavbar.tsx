@@ -1,11 +1,11 @@
+
 'use client';
 
 import Link from 'next/link';
-import { Home, Search, Sparkles, ShoppingCart } from 'lucide-react';
+import { Home, Sparkles, ShoppingCart } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
 import { cn } from '@/lib/utils';
-import { SearchSheet } from './SearchSheet';
 import { AiChatSheet } from './AiChatSheet';
 import { CartSheet } from './CartSheet';
 import { useCart } from '@/hooks/use-cart';
@@ -15,11 +15,6 @@ const navItems = [
     href: '/',
     label: 'Home',
     icon: Home,
-  },
-  {
-    label: 'Search',
-    icon: Search,
-    component: SearchSheet,
   },
   {
     label: 'AI Chat',
@@ -39,7 +34,7 @@ export function BottomNavbar() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-background border-t z-50 md:hidden">
-      <div className="grid h-full grid-cols-4">
+      <div className="grid h-full grid-cols-3">
         {navItems.map((item) => {
           const isActive = item.href === pathname;
           const Icon = item.icon;
