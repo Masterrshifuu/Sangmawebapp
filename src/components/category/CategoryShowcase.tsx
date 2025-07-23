@@ -7,8 +7,6 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import { CategoryPill } from './CategoryPill';
 
@@ -31,10 +29,11 @@ export function CategoryShowcase({
               stopOnInteraction: true,
             }),
         ]}
+        className="px-4"
     >
-      <CarouselContent className="-ml-2">
+      <CarouselContent className="-ml-4">
         {showcaseCategories.map(category => (
-          <CarouselItem key={category.name} className="pl-4 basis-1/3 md:basis-1/5 lg:basis-1/6">
+          <CarouselItem key={category.name} className="pl-4 basis-1/2 md:basis-1/3 lg:basis-1/5">
               <CategoryPill category={category} />
           </CarouselItem>
         ))}

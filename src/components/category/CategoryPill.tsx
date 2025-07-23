@@ -2,20 +2,27 @@
 import type { ShowcaseCategory } from '@/lib/types';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Card, CardContent } from '@/components/ui/card';
 
 export function CategoryPill({ category }: { category: ShowcaseCategory }) {
   return (
-    <Link href={`/category/${category.name.toLowerCase()}`} className="group flex flex-col items-center space-y-2">
-      <div className="w-20 h-20 relative rounded-lg overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors duration-300">
-        <Image
-          src={category.imageUrl || 'https://placehold.co/80x80.png'}
-          alt={category.name}
-          fill
-          className="object-cover"
-          sizes="10vw"
-        />
-      </div>
-      <span className="text-sm font-medium text-center truncate w-full">{category.name}</span>
+    <Link href={`/category/${category.name.toLowerCase()}`} className="group block">
+      <Card className="overflow-hidden transition-shadow hover:shadow-md">
+        <CardContent className="p-0">
+          <div className="aspect-[4/3] relative w-full">
+            <Image
+              src={category.imageUrl || 'https://placehold.co/400x300.png'}
+              alt={category.name}
+              fill
+              className="object-cover transition-transform group-hover:scale-105"
+              sizes="(max-width: 768px) 33vw, 20vw"
+            />
+          </div>
+          <div className="p-3">
+             <h3 className="text-sm font-semibold text-center truncate">{category.name}</h3>
+          </div>
+        </CardContent>
+      </Card>
     </Link>
   );
 }

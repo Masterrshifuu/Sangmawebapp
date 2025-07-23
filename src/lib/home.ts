@@ -25,7 +25,7 @@ export function getHomePageData(products: Product[]) {
     if (categoryImages[categoryName]) {
         showcaseCategories.push({
             name: categoryName,
-            image: categoryImages[categoryName],
+            imageUrl: categoryImages[categoryName],
         });
     }
   }

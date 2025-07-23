@@ -13,7 +13,6 @@ export interface Product {
     reviewCount?: number;
     tags?: string[];
     isBestseller?: boolean;
-    instantDelivery?: boolean;
     stock: number;
 }
 

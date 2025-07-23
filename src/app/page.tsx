@@ -9,6 +9,7 @@ import { ProductGrid } from '@/components/product-grid';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { useProducts } from '@/hooks/use-products';
 import { Skeleton } from '@/components/ui/skeleton';
+import Link from 'next/link';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
@@ -131,8 +132,11 @@ export default function Home() {
       <main className="flex-1 pb-16 md:pb-0">
         {showcaseCategories.length > 0 && (
             <section className="py-6">
-                 <div className="px-4 mb-4">
-                    <h2 className="text-2xl font-bold">Shop by Category</h2>
+                 <div className="px-4 mb-4 flex justify-between items-center">
+                    <h2 className="text-2xl font-bold font-headline">Categories</h2>
+                    <Link href="/categories" className="text-sm font-medium text-accent-foreground hover:underline">
+                      View All &gt;
+                    </Link>
                  </div>
                 <CategoryShowcase 
                     showcaseCategories={showcaseCategories} 
