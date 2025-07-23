@@ -20,6 +20,7 @@ export function CategoryShowcase({
     <Carousel
         opts={{
             align: "start",
+            dragFree: true,
         }}
         className="px-4"
     >
