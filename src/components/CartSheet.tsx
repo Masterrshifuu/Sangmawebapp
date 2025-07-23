@@ -31,7 +31,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent
-          className="h-3/4 flex flex-col p-0 rounded-t-2xl"
+          className="h-full flex flex-col p-0"
         >
           <DrawerHeader className="p-4 pt-0 border-b">
             <DrawerTitle className="text-center">Your Cart ({totalItems})</DrawerTitle>
