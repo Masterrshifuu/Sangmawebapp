@@ -13,6 +13,7 @@ import { auth } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { createUserProfileDocument } from '@/lib/user';
+import Logo from '@/components/logo';
 
 export default function AuthPage() {
   const router = useRouter();
@@ -87,7 +88,7 @@ export default function AuthPage() {
   if (authCheckLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <Loader2 className="h-12 w-12 animate-spin" />
+        <Logo className="animate-logo-pulse" />
       </div>
     );
   }

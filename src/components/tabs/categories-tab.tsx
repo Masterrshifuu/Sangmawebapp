@@ -4,9 +4,9 @@
 import CategoryList from "@/components/category-list";
 import { useSearchParams } from 'next/navigation';
 import { useData } from '@/context/data-context';
-import { Skeleton } from '@/components/ui/skeleton';
 import Header from "../header";
 import Footer from "../footer";
+import Logo from "../logo";
 
 export default function CategoriesTabContent() {
   const searchParams = useSearchParams();
@@ -14,14 +14,9 @@ export default function CategoriesTabContent() {
   const openCategoryId = searchParams.get('open');
 
   const content = loading ? (
-    <>
-      <Skeleton className="h-10 w-64 mb-8" />
-      <div className="space-y-4">
-        {Array.from({ length: 5 }).map((_, i) => (
-           <Skeleton key={i} className="h-12 w-full" />
-        ))}
-      </div>
-    </>
+    <div className="flex-1 flex justify-center items-center">
+        <Logo className="animate-logo-pulse" />
+    </div>
   ) : (
     <>
       <h1 className="text-3xl font-bold font-headline mb-8">All Categories</h1>
@@ -30,9 +25,9 @@ export default function CategoriesTabContent() {
   );
 
   return (
-    <div className="h-full overflow-y-auto">
+    <div className="h-full overflow-y-auto flex flex-col">
       <Header isScrolled={true} />
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 flex-1">
         {content}
       </main>
       <Footer />

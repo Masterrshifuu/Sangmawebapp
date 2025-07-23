@@ -7,10 +7,11 @@ import { useEffect, useState } from "react";
 import { listenToUserOrders } from "@/lib/data-realtime";
 import { useAuth } from "@/hooks/use-auth";
 import type { Order } from "@/lib/types";
-import { Loader2, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Header from "../header";
 import Footer from "../footer";
+import Logo from "../logo";
 
 function LatestOrder() {
   const { user, loading: authLoading } = useAuth();
@@ -36,7 +37,7 @@ function LatestOrder() {
   if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center h-full py-10">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Logo className="animate-logo-pulse" />
       </div>
     );
   }

@@ -6,11 +6,11 @@ import Footer from '@/components/footer';
 import { listenToUserOrders } from '@/lib/data-realtime';
 import { useAuth } from '@/hooks/use-auth';
 import type { Order } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import OrderStatusTracker from '@/components/order-status-tracker';
 import AuthWrapper from '@/components/auth/auth-wrapper';
 import BottomNavbar from '@/components/bottom-navbar';
+import Logo from '@/components/logo';
 
 function TrackOrderContent() {
   const { user, loading: authLoading } = useAuth();
@@ -36,7 +36,7 @@ function TrackOrderContent() {
   if (loading || authLoading) {
     return (
       <div className="flex justify-center items-center h-full py-10">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Logo className="animate-logo-pulse" />
       </div>
     );
   }

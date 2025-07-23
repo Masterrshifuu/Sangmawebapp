@@ -3,8 +3,9 @@
 
 import ProductCard from '@/components/product-card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Bot } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import type { useSearch } from '@/hooks/use-search';
+import Logo from '../logo';
 
 type SearchResultsProps = Omit<ReturnType<typeof useSearch>, 'query' | 'setQuery'> & {
   query: string;
@@ -22,7 +23,7 @@ export function SearchResults({
   if (isLoading && results.length === 0) {
     return (
       <div className="flex justify-center items-center py-10">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <Logo className="animate-logo-pulse" />
       </div>
     );
   }

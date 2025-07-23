@@ -8,13 +8,14 @@ import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
 import { AddToCartSection } from '@/components/add-to-cart-section';
 import SimilarProducts from '@/components/similar-products';
-import { Loader2, ArrowLeft } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import AuthWrapper from '@/components/auth/auth-wrapper';
 import { Button } from '@/components/ui/button';
 import { useData } from '@/context/data-context';
 import Header from '@/components/header';
 import Footer from '@/components/footer';
 import BottomNavbar from '@/components/bottom-navbar';
+import Logo from '@/components/logo';
 
 function ProductPageContent() {
   const params = useParams();
@@ -55,7 +56,7 @@ function ProductPageContent() {
   if (isDataLoading || !product) {
     return (
       <div className="flex justify-center items-center min-h-[calc(100vh-200px)]">
-        <Loader2 className="h-12 w-12 animate-spin" />
+        <Logo className="animate-logo-pulse" />
       </div>
     );
   }
