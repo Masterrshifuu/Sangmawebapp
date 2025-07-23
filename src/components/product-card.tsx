@@ -44,7 +44,7 @@ export function ProductCard({ product }: { product: Product }) {
                         {cartItem ? (
                            <CartQuantityControl product={product} />
                         ) : (
-                            <Button variant="secondary" size="sm" className="w-full bg-accent hover:bg-accent/80 text-accent-foreground border-transparent" onClick={() => addItem(product)}>
+                            <Button variant="secondary" size="sm" className="w-full bg-accent hover:bg-accent/80 text-accent-foreground border-transparent shadow-md active:scale-95 transition-transform duration-75" onClick={() => addItem(product)}>
                                 <Plus className="h-4 w-4 mr-1" />
                                 Add
                             </Button>
