@@ -50,10 +50,8 @@ export default function HomePageContent({ }: HomePageProps) {
   const otherCategoryProducts = useMemo(() => {
     if (loading) return [];
     
-    // Get a set of recommended product IDs for quick lookup
     const recommendedIds = new Set(recommendedProducts.map(p => p.id));
     
-    // Filter out products that are already in the recommended list
     const remainingProducts = products.filter(p => !recommendedIds.has(p.id));
 
     return categories.map(category => ({
@@ -74,8 +72,8 @@ export default function HomePageContent({ }: HomePageProps) {
     <div ref={scrollRef} className="h-full overflow-y-auto">
       <Header isScrolled={isScrolled} />
       <div className="container mx-auto px-4 py-8">
-        <CategoryCarousel categories={categories} products={products} />
         <PromoCarousel />
+        <CategoryCarousel categories={categories} products={products} />
         <ProductGrid title="Recommended for You" products={recommendedProducts} />
         {otherCategoryProducts.map(category => (
             <ProductGrid 
