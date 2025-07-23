@@ -39,6 +39,21 @@ export default function HomePageContent() {
     }
   }, [loading, products]);
 
+  const otherCategoryProducts = useMemo(() => {
+    if (loading) return [];
+    
+    // Get a set of recommended product IDs for quick lookup
+    const recommendedIds = new Set(recommendedProducts.map(p => p.id));
+    
+    // Filter out products that are already in the recommended list
+    const remainingProducts = products.filter(p => !recommendedIds.has(p.id));
+
+    return categories.map(category => ({
+      ...category,
+      products: remainingProducts.filter(p => p.category === category.name),
+    }));
+  }, [loading, products, categories, recommendedProducts]);
+
   if (loading) {
     return (
        <div className="h-full flex flex-col items-center justify-center">
@@ -54,6 +69,13 @@ export default function HomePageContent() {
         <CategoryCarousel categories={categories} products={products} />
         <PromoCarousel />
         <ProductGrid title="Recommended for You" products={recommendedProducts} />
+        {otherCategoryProducts.map(category => (
+            <ProductGrid 
+                key={category.id}
+                title={category.name}
+                products={category.products}
+            />
+        ))}
       </div>
        <Footer />
     </div>
