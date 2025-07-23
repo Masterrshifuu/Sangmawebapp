@@ -1,11 +1,12 @@
 
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import type { Product } from '@/lib/types';
 import { useData } from '@/context/data-context';
 import Fuse from 'fuse.js';
 import { trackSearch } from '@/lib/activity-tracker';
+import { useSearchContext } from '@/context/search-context';
 
 interface UseSearchProps {
   open: boolean;
@@ -15,16 +16,16 @@ export function useSearch({ open }: UseSearchProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [results, setResults] = useState<Product[]>([]);
   const [initialProducts, setInitialProducts] = useState<Product[]>([]);
-  const [query, setQuery] = useState('');
   const [hasFetchedInitial, setHasFetchedInitial] = useState(false);
 
+  const { query } = useSearchContext();
   const { products: allProducts, loading: dataLoading } = useData();
 
   const fuse = useMemo(() => {
     if (allProducts.length > 0) {
       return new Fuse(allProducts, {
         keys: ['name', 'category', 'description'],
-        threshold: 0.3, // Adjust for more or less strict matching
+        threshold: 0.3,
         includeScore: true,
       });
     }
@@ -38,14 +39,15 @@ export function useSearch({ open }: UseSearchProps) {
     const initialDisplay = bestsellers.length > 0 ? bestsellers : allProducts.slice(0, 15);
 
     setInitialProducts(initialDisplay);
-    setResults(initialDisplay);
+    if (query.trim() === '') {
+      setResults(initialDisplay);
+    }
     setHasFetchedInitial(true);
     
-  }, [allProducts, dataLoading]);
+  }, [allProducts, dataLoading, query]);
 
 
   useEffect(() => {
-    // Fetch initial products once data is loaded and the search component is active
     if (!dataLoading && open && !hasFetchedInitial) {
       fetchInitialProducts();
     }
@@ -55,7 +57,6 @@ export function useSearch({ open }: UseSearchProps) {
   useEffect(() => {
     if (!hasFetchedInitial) return;
 
-    // If query is cleared, show initial products again
     if (query.trim() === '') {
       setResults(initialProducts);
       return;
@@ -64,7 +65,6 @@ export function useSearch({ open }: UseSearchProps) {
     if (!fuse) return;
 
     setIsLoading(true);
-    // Debounce tracking to avoid logging every keystroke
     const handler = setTimeout(() => {
       trackSearch(query);
     }, 500);
@@ -79,5 +79,5 @@ export function useSearch({ open }: UseSearchProps) {
 
   }, [query, fuse, hasFetchedInitial, initialProducts]);
   
-  return { query, setQuery, results, isLoading, hasFetchedInitial };
+  return { results, isLoading, hasFetchedInitial };
 }

@@ -6,9 +6,11 @@ import { SearchResults } from '@/components/search/search-results';
 import Footer from '../footer';
 import { Input } from '../ui/input';
 import { Search } from 'lucide-react';
+import { useSearchContext } from '@/context/search-context';
 
 export default function SearchTab() {
-  const { query, setQuery, ...searchResultProps } = useSearch({ open: true }); // Always open in tab context
+  const { query, setQuery } = useSearchContext();
+  const { results, isLoading, hasFetchedInitial } = useSearch({ open: true });
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -26,7 +28,7 @@ export default function SearchTab() {
         </div>
       </div>
       <ScrollArea className="flex-1 min-h-0">
-        <SearchResults {...searchResultProps} query={query} onProductClick={() => {}} />
+        <SearchResults results={results} isLoading={isLoading} hasFetchedInitial={hasFetchedInitial} query={query} onProductClick={() => {}} />
       </ScrollArea>
        <Footer />
     </div>

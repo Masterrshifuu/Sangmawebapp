@@ -1,30 +1,35 @@
 
 "use client";
 
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Search } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
+import { useSearchContext } from "@/context/search-context";
+import { Input } from "../ui/input";
 
 export function SearchWrapper() {
-  const isMobile = useIsMobile();
   const router = useRouter();
+  const { query, setQuery } = useSearchContext();
 
-  if (isMobile === undefined) {
-    // Return a placeholder or null to avoid SSR/CSR mismatch
-    return <div className="h-11 w-full bg-background rounded-lg" />;
+  const handleFocus = () => {
+    router.push('/?tab=search');
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(e.target.value);
+    router.push('/?tab=search');
   }
 
-  // On both mobile and desktop, the search bar in the header is a button to switch to the search tab
   return (
-    <button
-      onClick={() => router.push('/?tab=search')}
-      className={cn(
-        'flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground active:bg-secondary/80'
-      )}
-    >
-      <Search className="h-5 w-5 mr-3" />
-      <span>Search for products...</span>
-    </button>
+    <div className="relative w-full">
+       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10 pointer-events-none" />
+        <Input
+            type="text"
+            placeholder="Search for products..."
+            className="bg-background pl-10 shadow-sm"
+            value={query}
+            onChange={handleChange}
+            onFocus={handleFocus}
+        />
+    </div>
   );
 }
