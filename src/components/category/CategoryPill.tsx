@@ -8,7 +8,7 @@ export function CategoryPill({ category }: { category: ShowcaseCategory }) {
     <Link href={`/category/${category.name.toLowerCase()}`} className="group flex flex-col items-center space-y-2">
       <div className="w-20 h-20 relative rounded-lg overflow-hidden border-2 border-transparent group-hover:border-primary transition-colors duration-300">
         <Image
-          src={category.imageUrl}
+          src={category.imageUrl || 'https://placehold.co/80x80.png'}
           alt={category.name}
           fill
           className="object-cover"
