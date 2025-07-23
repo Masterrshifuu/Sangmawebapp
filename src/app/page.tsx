@@ -1,13 +1,14 @@
 
-import Image from 'next/image';
+'use client';
+
+import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/header';
 import { BestsellerCard } from '@/components/BestsellerCard';
-import { getProducts } from '@/lib/products';
 import { getHomePageData } from '@/lib/home';
-import type { Product, BestsellerCategory, BestsellerImage } from '@/lib/types';
 import { ProductGrid } from '@/components/product-grid';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import Footer from '@/components/footer';
+import { useProducts } from '@/hooks/use-products';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
@@ -27,9 +28,40 @@ function shuffle<T>(array: T[]): T[] {
   return newArray;
 }
 
+const HomePageSkeleton = () => (
+    <>
+        <Header />
+        <main className="flex-1 flex flex-col items-center justify-center text-center">
+            <div className="p-4 text-center text-muted-foreground">
+                <h2 className="text-2xl font-bold text-foreground mb-2">Loading Products...</h2>
+                <p>Please wait a moment.</p>
+            </div>
+        </main>
+        <Footer />
+    </>
+);
 
-export default async function Home() {
-  const { products, error } = await getProducts();
+
+export default function Home() {
+  const { products, error, loading } = useProducts();
+  const [shuffledCategoryEntries, setShuffledCategoryEntries] = useState<[string, any[]][]>([]);
+
+  const homePageData = useMemo(() => {
+    if (products.length > 0) {
+      return getHomePageData(products);
+    }
+    return null;
+  }, [products]);
+
+  useEffect(() => {
+    if (homePageData) {
+      setShuffledCategoryEntries(shuffle(Object.entries(homePageData.productsByCategory)));
+    }
+  }, [homePageData]);
+
+  if (loading) {
+    return <HomePageSkeleton />;
+  }
 
   if (error) {
     return (
@@ -42,7 +74,7 @@ export default async function Home() {
     );
   }
 
-  if (products.length === 0) {
+  if (products.length === 0 && !loading) {
     return (
       <>
         <Header />
@@ -58,8 +90,11 @@ export default async function Home() {
     )
   }
 
-  const { productsByCategory, showcaseCategories, bestsellerCategories } = getHomePageData(products);
-  const shuffledCategoryEntries = shuffle(Object.entries(productsByCategory));
+  if (!homePageData) {
+    return <HomePageSkeleton />;
+  }
+  
+  const { productsByCategory, showcaseCategories, bestsellerCategories } = homePageData;
 
   return (
     <>

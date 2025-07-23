@@ -13,7 +13,7 @@ import { Search } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { useState, useEffect, useMemo } from 'react';
 import { Product } from '@/lib/types';
-import { getProducts } from '@/lib/products';
+import { useProducts } from '@/hooks/use-products';
 import { ProductCard } from './product-card';
 import Fuse from 'fuse.js';
 
@@ -36,21 +36,10 @@ const RecommendedProducts = ({ products }: { products: Product[] }) => {
 }
 
 export function SearchSheet({ children }: { children: React.ReactNode }) {
-    const [allProducts, setAllProducts] = useState<Product[]>([]);
+    const { products: allProducts, loading: isLoading } = useProducts();
     const [searchResults, setSearchResults] = useState<Product[]>([]);
     const [query, setQuery] = useState('');
-    const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        const fetchAllProducts = async () => {
-            setIsLoading(true);
-            const { products } = await getProducts();
-            setAllProducts(products);
-            setIsLoading(false);
-        };
-        fetchAllProducts();
-    }, []);
-    
     const fuse = useMemo(() => new Fuse(allProducts, {
         keys: ['name', 'category', 'description'],
         threshold: 0.3,

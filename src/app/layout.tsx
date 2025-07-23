@@ -5,6 +5,7 @@ import { PT_Sans, Poppins } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
+import { ProductsProvider } from '@/hooks/use-products';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -36,8 +37,10 @@ export default function RootLayout({
     >
       <body className="antialiased">
         <AuthWrapper>
+          <ProductsProvider>
             {children}
             <Toaster />
+          </ProductsProvider>
         </AuthWrapper>
       </body>
     </html>

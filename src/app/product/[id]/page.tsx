@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 
-import { getProducts } from '@/lib/products';
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/use-cart';
@@ -19,6 +18,7 @@ import { Star, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CartQuantityControl } from '@/components/cart/CartQuantityControl';
 import Footer from '@/components/footer';
+import { useProducts } from '@/hooks/use-products';
 
 // Helper component for star ratings
 const StarRating = ({ rating = 4.5, reviewCount = 0 }: { rating?: number; reviewCount?: number }) => (
@@ -67,72 +67,60 @@ export default function ProductPage() {
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   
   const { cart, addItem } = useCart();
+  const { products, loading: productsLoading, error: productsError } = useProducts();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string>('');
-
+  
   useEffect(() => {
-    if (!id) return;
+    if (!id || products.length === 0) return;
 
-    const fetchProductData = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { products: allProducts, error: fetchError } = await getProducts();
-        if (fetchError) {
-          throw new Error(fetchError);
-        }
+    const currentProduct = products.find(p => p.id === id);
 
-        const currentProduct = allProducts.find(p => p.id === id);
-
-        if (!currentProduct) {
-          throw new Error("Product not found");
-        }
-        
+    if (currentProduct) {
         setProduct(currentProduct);
         setSelectedImage(currentProduct.imageUrl);
         
-        const currentSimilarProducts = allProducts
+        const currentSimilarProducts = products
           .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
           .slice(0, 10);
         setSimilarProducts(currentSimilarProducts);
-
-      } catch (err: any) {
-        setError(err.message || 'Failed to load product.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProductData();
-  }, [id]);
+    } else {
+        // Handle case where product is not found after loading
+        if (!productsLoading) {
+            setProduct(null);
+        }
+    }
+  }, [id, products, productsLoading]);
   
-  if (loading) {
+  if (productsLoading) {
     return <ProductPageSkeleton />;
   }
   
-  if (error === "Product not found") {
+  if (!product && !productsLoading) {
       notFound();
   }
 
-  if (error || !product) {
+  if (productsError) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center">
             <Header />
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md max-w-2xl">
                 <h2 className="text-xl font-bold mb-2">Error</h2>
-                <p>{error || 'Could not load product details.'}</p>
+                <p>{productsError}</p>
             </div>
             <Footer />
       </div>
     );
   }
 
+  if (!product) {
+    return <ProductPageSkeleton />;
+  }
+
   const cartItem = cart.find(item => item.product.id === product.id);
-  const allImages = [product.imageUrl, ...product.additionalImages].filter(Boolean);
+  const allImages = [product.imageUrl, ...(product.additionalImages || [])].filter(Boolean);
 
   return (
     <>
@@ -144,7 +132,7 @@ export default function ProductPage() {
                     <div className="aspect-square relative w-full bg-muted/30 rounded-lg overflow-hidden">
                         <Image
                             key={selectedImage}
-                            src={selectedImage}
+                            src={selectedImage || 'https://placehold.co/600x600.png'}
                             alt={product.name}
                             fill
                             className="object-contain"
@@ -215,7 +203,7 @@ export default function ProductPage() {
 
                     <div className="flex items-center justify-between p-4 border-t border-b rounded-lg bg-muted/30 mt-4">
                         <div>
-                            {product.mrp && (
+                            {typeof product.mrp === 'number' && (
                                 <p className="text-2xl font-bold">INR {product.mrp.toFixed(2)}</p>
                             )}
                         </div>

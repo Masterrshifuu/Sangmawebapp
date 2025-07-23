@@ -8,7 +8,7 @@ function isTimestamp(value: any): value is Timestamp {
     return value && typeof value.toDate === 'function';
 }
 
-// This function is designed to run on the server
+// This function is designed for one-time data fetching, primarily on the server
 export async function getProducts(): Promise<{ products: Product[], error: string | null }> {
   try {
     const productsCollection = collection(db, 'products');
