@@ -9,28 +9,14 @@ import Logo from "../logo";
 import { useEffect, useRef } from "react";
 
 interface CategoriesTabProps {
-  setIsScrolled: (isScrolled: boolean) => void;
 }
 
-export default function CategoriesTabContent({ setIsScrolled }: CategoriesTabProps) {
+export default function CategoriesTabContent({ }: CategoriesTabProps) {
   const searchParams = useSearchParams();
   const { categories, products, loading } = useData();
   const openCategoryId = searchParams.get('open');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const scrollableElement = scrollRef.current;
-    if (!scrollableElement) return;
-
-    const handleScroll = () => {
-      setIsScrolled(scrollableElement.scrollTop > 10);
-    };
-
-    scrollableElement.addEventListener('scroll', handleScroll);
-    return () => {
-      scrollableElement.removeEventListener('scroll', handleScroll);
-    };
-  }, [setIsScrolled]);
 
   const content = loading ? (
     <div className="flex-1 flex justify-center items-center">
@@ -44,7 +30,7 @@ export default function CategoriesTabContent({ setIsScrolled }: CategoriesTabPro
   );
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto flex flex-col pt-4">
+    <div ref={scrollRef} className="h-full overflow-y-auto flex flex-col">
       <main className="container mx-auto px-4 py-8 flex-1">
         {content}
       </main>

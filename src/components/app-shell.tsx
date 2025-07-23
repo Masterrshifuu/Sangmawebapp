@@ -27,7 +27,6 @@ function AppShellContent() {
   const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<AppTab>('home');
   const [isClient, setIsClient] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -57,7 +56,6 @@ function AppShellContent() {
 
   return (
     <div className="relative h-screen flex flex-col overflow-hidden">
-      <Header isScrolled={isScrolled} />
       <div className="flex-1 relative overflow-hidden">
         {TABS.map((tab) => {
           const TabComponent = tabComponents[tab];
@@ -76,7 +74,7 @@ function AppShellContent() {
               }}
             >
               <Suspense fallback={<div className="w-full h-full bg-background" />}>
-                 <TabComponent setIsScrolled={setIsScrolled} />
+                 <TabComponent />
               </Suspense>
             </div>
           );

@@ -10,30 +10,15 @@ import { useSearchContext } from '@/context/search-context';
 import { useEffect, useRef } from 'react';
 
 interface SearchTabProps {
-  setIsScrolled: (isScrolled: boolean) => void;
 }
 
-export default function SearchTab({ setIsScrolled }: SearchTabProps) {
+export default function SearchTab({ }: SearchTabProps) {
   const { query, setQuery } = useSearchContext();
   const { results, isLoading, hasFetchedInitial } = useSearch({ open: true });
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const scrollableElement = scrollRef.current;
-    if (!scrollableElement) return;
-
-    const handleScroll = () => {
-      setIsScrolled(scrollableElement.scrollTop > 10);
-    };
-
-    scrollableElement.addEventListener('scroll', handleScroll);
-    return () => {
-      scrollableElement.removeEventListener('scroll', handleScroll);
-    };
-  }, [setIsScrolled]);
-
   return (
-    <div ref={scrollRef} className="flex flex-col h-full bg-background overflow-y-auto pt-4">
+    <div ref={scrollRef} className="flex flex-col h-full bg-background overflow-y-auto">
       <div className="p-4 border-b sticky top-0 bg-background z-10">
         <div className="relative w-full max-w-lg mx-auto">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />

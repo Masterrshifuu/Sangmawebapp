@@ -10,15 +10,16 @@ import Footer from '@/components/footer';
 import Logo from '../logo';
 import { getPersonalizedRecommendations } from '@/lib/personalization';
 import type { Product } from '@/lib/types';
+import Header from '../header';
 
 interface HomePageProps {
-  setIsScrolled: (isScrolled: boolean) => void;
 }
 
-export default function HomePageContent({ setIsScrolled }: HomePageProps) {
+export default function HomePageContent({ }: HomePageProps) {
   const { products, categories, loading } = useData();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [recommendedProducts, setRecommendedProducts] = useState<Product[]>([]);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     const scrollableElement = scrollRef.current;
@@ -32,7 +33,7 @@ export default function HomePageContent({ setIsScrolled }: HomePageProps) {
     return () => {
       scrollableElement.removeEventListener('scroll', handleScroll);
     };
-  }, [setIsScrolled]);
+  }, []);
 
   useEffect(() => {
     if (!loading && products.length > 0) {
@@ -65,7 +66,8 @@ export default function HomePageContent({ setIsScrolled }: HomePageProps) {
   }
 
   return (
-    <div ref={scrollRef} className="h-full overflow-y-auto pt-4">
+    <div ref={scrollRef} className="h-full overflow-y-auto">
+      <Header isScrolled={isScrolled} />
       <div className="container mx-auto px-4 py-8">
         <CategoryCarousel categories={categories} products={products} />
         <PromoCarousel />

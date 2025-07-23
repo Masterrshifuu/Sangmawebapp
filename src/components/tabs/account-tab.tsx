@@ -13,7 +13,6 @@ import Footer from "../footer";
 import Logo from "../logo";
 
 interface AccountTabProps {
-  setIsScrolled: (isScrolled: boolean) => void;
 }
 
 function LatestOrder() {
@@ -79,25 +78,11 @@ function LatestOrder() {
 }
 
 
-export default function AccountTab({ setIsScrolled }: AccountTabProps) {
+export default function AccountTab({ }: AccountTabProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const scrollableElement = scrollRef.current;
-    if (!scrollableElement) return;
-
-    const handleScroll = () => {
-      setIsScrolled(scrollableElement.scrollTop > 10);
-    };
-
-    scrollableElement.addEventListener('scroll', handleScroll);
-    return () => {
-      scrollableElement.removeEventListener('scroll', handleScroll);
-    };
-  }, [setIsScrolled]);
-
   return (
-      <div ref={scrollRef} className="h-full overflow-y-auto pt-4">
+      <div ref={scrollRef} className="h-full overflow-y-auto">
         <main className="container mx-auto px-4 py-8">
           <LatestOrder />
         </main>
