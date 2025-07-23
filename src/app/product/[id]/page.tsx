@@ -16,6 +16,7 @@ import Header from '@/components/header';
 import Footer from '@/components/footer';
 import BottomNavbar from '@/components/bottom-navbar';
 import Logo from '@/components/logo';
+import { trackProductView } from '@/lib/activity-tracker';
 
 function ProductPageContent() {
   const params = useParams();
@@ -40,6 +41,12 @@ function ProductPageContent() {
     
     return { product: currentProduct, similarProducts: relatedProducts };
   }, [productId, products, isDataLoading]);
+
+  useEffect(() => {
+    if (product) {
+      trackProductView(product.id, product.category);
+    }
+  }, [product]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

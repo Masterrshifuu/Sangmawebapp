@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { Product } from '@/lib/types';
 import { useData } from '@/context/data-context';
 import Fuse from 'fuse.js';
+import { trackSearch } from '@/lib/activity-tracker';
 
 interface UseSearchProps {
   open: boolean;
@@ -64,9 +65,18 @@ export function useSearch({ open, isDesktop = false }: UseSearchProps) {
     if (!fuse) return;
 
     setIsLoading(true);
+    // Debounce tracking to avoid logging every keystroke
+    const handler = setTimeout(() => {
+      trackSearch(query);
+    }, 500);
+
     const searchResults = fuse.search(query).map(result => result.item);
     setResults(searchResults);
     setIsLoading(false);
+
+    return () => {
+      clearTimeout(handler);
+    };
 
   }, [query, fuse, hasFetchedInitial, initialProducts]);
   
