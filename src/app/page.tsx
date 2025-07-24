@@ -5,7 +5,6 @@ import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/header';
 import { BestsellerCard } from '@/components/BestsellerCard';
 import { getHomePageData } from '@/lib/home';
-import { ProductCarousel } from '@/components/product-carousel';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { useProducts } from '@/hooks/use-products';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -172,7 +171,15 @@ export default function Home() {
                     View All &gt;
                 </Link>
             </div>
-            <ProductCarousel products={productsInSection} />
+            <HorizontalScroller>
+              <div className="flex gap-4">
+                {productsInSection.map((product) => (
+                  <div key={product.id} className="w-40 flex-shrink-0">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
+            </HorizontalScroller>
           </section>
         ))}
 
