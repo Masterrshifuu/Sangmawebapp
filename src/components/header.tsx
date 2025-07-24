@@ -71,7 +71,7 @@ export default function Header() {
           isScrolled ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
       >
-          <div className="overflow-hidden bg-background/0">
+          <div className="overflow-hidden bg-background/20 backdrop-blur-sm">
             <div className="container mx-auto px-4">
               <DesktopNav />
             </div>
