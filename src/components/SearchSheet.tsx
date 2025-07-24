@@ -26,7 +26,7 @@ const RecommendedProducts = ({ products }: { products: Product[] }) => {
     return (
         <div className="py-4">
             <h3 className="px-4 text-lg font-semibold mb-2">Recommended</h3>
-            <div className="grid grid-cols-2 gap-4 px-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 px-4">
                 {recommended.map(product => (
                     <ProductCard key={product.id} product={product} />
                 ))}
@@ -77,7 +77,7 @@ export function SearchSheet({ children }: { children: React.ReactNode }) {
             ) : query.trim() === '' ? (
                 <RecommendedProducts products={allProducts} />
             ) : searchResults.length > 0 ? (
-                <div className="grid grid-cols-2 gap-4 p-4">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
                     {searchResults.map(product => (
                         <ProductCard key={product.id} product={product} />
                     ))}
