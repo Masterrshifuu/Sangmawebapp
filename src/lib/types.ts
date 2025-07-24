@@ -34,7 +34,7 @@ export interface BestsellerCategory {
 
 export interface ShowcaseCategory {
     name: string;
-    imageUrl: string;
+    imageUrls: string[];
 }
 
 export type AIState = {

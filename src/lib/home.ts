@@ -6,32 +6,26 @@ export function getHomePageData(products: Product[]) {
   const showcaseCategories: ShowcaseCategory[] = [];
   const bestsellerCategories: BestsellerCategory[] = [];
   const previewCategories: BestsellerCategory[] = [];
-  const categoryImages: Record<string, string> = {};
-
+  
   // First, group products by category
   for (const product of products) {
     if (!productsByCategory[product.category]) {
       productsByCategory[product.category] = [];
     }
     productsByCategory[product.category].push(product);
-    
-    // Capture the first image for each category to use as a showcase image
-    if (!categoryImages[product.category]) {
-        categoryImages[product.category] = product.imageUrl;
-    }
   }
 
-  // Create showcase categories from all available categories
+  // Create showcase and preview categories from all available categories
   for (const categoryName in productsByCategory) {
-    if (categoryImages[categoryName]) {
+    const categoryProducts = productsByCategory[categoryName];
+    if (categoryProducts.length > 0) {
         showcaseCategories.push({
             name: categoryName,
-            imageUrl: categoryImages[categoryName],
+            imageUrls: categoryProducts.slice(0, 5).map(p => p.imageUrl), // Get up to 5 images
         });
     }
 
     // Create preview categories for all categories with at least 4 products
-    const categoryProducts = productsByCategory[categoryName];
     if (categoryProducts.length >= 4) {
       previewCategories.push({
         name: categoryName,
