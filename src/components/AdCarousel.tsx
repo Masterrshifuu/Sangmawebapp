@@ -44,14 +44,14 @@ export function AdCarousel() {
           muted
           loop
           playsInline
-          className="w-full h-full object-cover"
+          className="w-full h-full object-contain"
         />
       ) : (
         <Image
           src={ad.mediaUrl}
           alt={ad.title || 'Advertisement'}
           fill
-          className="object-cover"
+          className="object-contain"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
       );
@@ -81,7 +81,7 @@ export function AdCarousel() {
           <CarouselContent className='-ml-0'>
             {ads.map((ad) => (
               <CarouselItem key={ad.id} className="pl-0">
-                 <div className="relative aspect-[2/1] md:aspect-[3/1] w-full overflow-hidden rounded-lg">
+                 <div className="relative aspect-[2/1] md:aspect-[3/1] w-full overflow-hidden rounded-lg bg-muted/20">
                    {renderMedia(ad)}
                  </div>
               </CarouselItem>
