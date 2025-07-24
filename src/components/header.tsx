@@ -101,7 +101,7 @@ export default function Header() {
           <div className="absolute top-full left-0 right-0 z-40">
              <div className="container mx-auto px-4">
                 <div 
-                    className="bg-background rounded-b-lg shadow-2xl border-x border-b"
+                    className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b"
                     onClick={() => setIsSearchFocused(false)}
                 >
                     <SearchDialog.Content query={query} onProductClick={() => setIsSearchFocused(false)} />
