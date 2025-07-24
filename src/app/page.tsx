@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { ProductCard } from '@/components/product-card';
 import { CarouselItem } from '@/components/ui/carousel';
+import { AdCarousel } from '@/components/AdCarousel';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
@@ -146,6 +147,8 @@ export default function Home() {
                 />
             )}
         </section>
+
+        <AdCarousel />
 
         {bestsellerCategories.length > 0 && (
           <section className="py-4">

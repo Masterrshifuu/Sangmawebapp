@@ -7,6 +7,7 @@ import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
 import { ProductsProvider } from '@/hooks/use-products';
 import { BottomNavbar } from '@/components/BottomNavbar';
+import { AdsProvider } from '@/hooks/use-ads';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -39,9 +40,11 @@ export default function RootLayout({
       <body className="antialiased">
         <AuthWrapper>
           <ProductsProvider>
-            {children}
-            <Toaster />
-            <BottomNavbar />
+            <AdsProvider>
+              {children}
+              <Toaster />
+              <BottomNavbar />
+            </AdsProvider>
           </ProductsProvider>
         </AuthWrapper>
       </body>
