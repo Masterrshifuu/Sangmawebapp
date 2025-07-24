@@ -61,7 +61,17 @@ export default function Header() {
                 </button>
             </SearchSheet>
         </div>
-        <DesktopNav />
+        
+        <div 
+          className={cn(
+            "grid transition-all duration-300 ease-in-out",
+            isScrolled ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+          )}
+        >
+            <div className="overflow-hidden">
+                <DesktopNav />
+            </div>
+        </div>
       </div>
     </header>
   );
