@@ -11,7 +11,7 @@ import {
   DrawerFooter,
   DrawerClose,
 } from '@/components/ui/drawer';
-import { ShoppingCart } from 'lucide-react';
+import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from './ui/scroll-area';
 import { useState } from 'react';
@@ -31,10 +31,17 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
       <Drawer>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent
-          className="h-full flex flex-col p-0"
+          className="h-full md:h-[80vh] flex flex-col p-0"
         >
-          <DrawerHeader className="p-4 pt-0 border-b">
-            <DrawerTitle className="text-center">Your Cart ({totalItems})</DrawerTitle>
+          <DrawerHeader className="p-4 pt-4 border-b flex items-center justify-between">
+            <DrawerClose asChild>
+                <Button variant="ghost" size="icon" className="md:flex hidden">
+                    <ChevronLeft />
+                    <span className="sr-only">Back</span>
+                </Button>
+            </DrawerClose>
+            <DrawerTitle className="flex-1 text-center">Your Cart ({totalItems})</DrawerTitle>
+            <div className="w-10 md:block hidden" />
           </DrawerHeader>
 
           {cart.length === 0 ? (
