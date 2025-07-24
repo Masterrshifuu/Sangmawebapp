@@ -18,7 +18,15 @@ export function HorizontalScroller({ children }: { children: React.ReactNode }) 
       opts={{
         align: 'start',
         dragFree: true,
+        loop: true,
       }}
+      plugins={[
+        Autoplay({
+          delay: 4000,
+          stopOnInteraction: false,
+          stopOnMouseEnter: true,
+        }),
+      ]}
       className="w-full"
     >
       <CarouselContent className="-ml-4 pl-4">

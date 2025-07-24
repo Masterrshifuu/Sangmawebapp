@@ -10,6 +10,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { CategoryPill } from './CategoryPill';
+import Autoplay from 'embla-carousel-autoplay';
 
 export function CategoryShowcase({
   showcaseCategories,
@@ -23,7 +24,15 @@ export function CategoryShowcase({
         opts={{
             align: "start",
             dragFree: true,
+            loop: true,
         }}
+        plugins={[
+            Autoplay({
+              delay: 5000,
+              stopOnInteraction: false,
+              stopOnMouseEnter: true,
+            }),
+        ]}
         className="px-4"
     >
       <CarouselContent className="-ml-4">
