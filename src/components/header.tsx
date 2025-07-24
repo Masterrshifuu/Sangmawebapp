@@ -67,7 +67,7 @@ export default function Header() {
       
       <div 
         className={cn(
-          "grid transition-all duration-300 ease-in-out bg-background/70 backdrop-blur-sm",
+          "grid transition-all duration-300 ease-in-out",
           isScrolled ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
       >
