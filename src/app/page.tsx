@@ -12,7 +12,9 @@ import Link from 'next/link';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { ProductCard } from '@/components/product-card';
 import { CarouselItem } from '@/components/ui/carousel';
-import { AdCarousel } from '@/components/AdCarousel';
+import { useAds } from '@/hooks/use-ads';
+import { AdCard } from '@/components/AdCard';
+import type { Ad } from '@/lib/types';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
@@ -78,7 +80,9 @@ const HomePageSkeleton = () => (
 
 export default function Home() {
   const { products, error, loading } = useProducts();
+  const { ads, loading: adsLoading } = useAds();
   const [shuffledCategoryEntries, setShuffledCategoryEntries] = useState<[string, any[]][]>([]);
+  const [shuffledAds, setShuffledAds] = useState<Ad[]>([]);
 
   const homePageData = useMemo(() => {
     if (products.length > 0) {
@@ -91,9 +95,12 @@ export default function Home() {
     if (homePageData) {
       setShuffledCategoryEntries(shuffle(Object.entries(homePageData.productsByCategory)));
     }
-  }, [homePageData]);
+    if (ads.length > 0) {
+        setShuffledAds(shuffle(ads));
+    }
+  }, [homePageData, ads]);
 
-  if (loading) {
+  if (loading || adsLoading) {
     return <HomePageSkeleton />;
   }
 
@@ -128,6 +135,18 @@ export default function Home() {
   }
   
   const { productsByCategory, showcaseCategories, bestsellerCategories } = homePageData;
+  
+  const interleavedContent = [];
+  let adIndex = 0;
+  shuffledCategoryEntries.forEach((entry, index) => {
+      interleavedContent.push(entry);
+      // Insert an ad after every 2nd category, if ads are available
+      if ((index + 1) % 2 === 0 && adIndex < shuffledAds.length) {
+          interleavedContent.push(shuffledAds[adIndex]);
+          adIndex++;
+      }
+  });
+
 
   return (
     <>
@@ -148,8 +167,6 @@ export default function Home() {
             )}
         </section>
 
-        <AdCarousel />
-
         {bestsellerCategories.length > 0 && (
           <section className="py-4">
              <div className="px-4 mb-4 flex justify-between items-center">
@@ -165,23 +182,30 @@ export default function Home() {
           </section>
         )}
 
-        {shuffledCategoryEntries.map(([categoryName, productsInSection]) => (
-          <section key={categoryName} className="py-4">
-            <div className="px-4 mb-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold font-headline">{categoryName}</h2>
-                <Link href={`/category/${categoryName.toLowerCase()}`} className="text-sm font-medium text-accent-foreground hover:underline">
-                    View All &gt;
-                </Link>
-            </div>
-            <HorizontalScroller>
-                {productsInSection.map((product) => (
-                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
-                    <ProductCard product={product} />
-                  </CarouselItem>
-                ))}
-            </HorizontalScroller>
-          </section>
-        ))}
+        {interleavedContent.map((item, index) => {
+            if (Array.isArray(item)) { // It's a category section
+                const [categoryName, productsInSection] = item;
+                return (
+                    <section key={categoryName} className="py-4">
+                        <div className="px-4 mb-4 flex justify-between items-center">
+                            <h2 className="text-2xl font-bold font-headline">{categoryName}</h2>
+                            <Link href={`/category/${categoryName.toLowerCase()}`} className="text-sm font-medium text-accent-foreground hover:underline">
+                                View All &gt;
+                            </Link>
+                        </div>
+                        <HorizontalScroller>
+                            {productsInSection.map((product) => (
+                            <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
+                                <ProductCard product={product} />
+                            </CarouselItem>
+                            ))}
+                        </HorizontalScroller>
+                    </section>
+                )
+            } else { // It's an ad
+                return <AdCard key={(item as Ad).id || `ad-${index}`} ad={item as Ad} />
+            }
+        })}
 
       </main>
     </>
