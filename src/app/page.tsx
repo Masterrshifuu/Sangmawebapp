@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { ProductCard } from '@/components/product-card';
+import { CarouselItem } from '@/components/ui/carousel';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
@@ -152,13 +153,11 @@ export default function Home() {
                 <h2 className="text-2xl font-bold font-headline">Bestsellers</h2>
              </div>
              <HorizontalScroller>
-                <div className="flex gap-4">
                 {bestsellerCategories.map((category) => (
-                    <div key={category.name} className="w-64 flex-shrink-0">
+                    <CarouselItem key={category.name} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                         <BestsellerCard category={category} />
-                    </div>
+                    </CarouselItem>
                 ))}
-                </div>
              </HorizontalScroller>
           </section>
         )}
@@ -172,13 +171,11 @@ export default function Home() {
                 </Link>
             </div>
             <HorizontalScroller>
-              <div className="flex gap-4">
                 {productsInSection.map((product) => (
-                  <div key={product.id} className="w-40 flex-shrink-0">
+                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                     <ProductCard product={product} />
-                  </div>
+                  </CarouselItem>
                 ))}
-              </div>
             </HorizontalScroller>
           </section>
         ))}

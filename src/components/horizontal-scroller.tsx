@@ -2,13 +2,30 @@
 'use client';
 
 import * as React from 'react';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselApi,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
+import Autoplay from 'embla-carousel-autoplay';
 
 export function HorizontalScroller({ children }: { children: React.ReactNode }) {
   return (
-    <ScrollArea className="w-full whitespace-nowrap">
-      <div className="px-4">{children}</div>
-      <ScrollBar orientation="horizontal" className="h-2.5" />
-    </ScrollArea>
+    <Carousel
+      opts={{
+        align: 'start',
+        dragFree: true,
+      }}
+      className="w-full"
+    >
+      <CarouselContent className="-ml-4 pl-4">
+          {children}
+      </CarouselContent>
+      <CarouselPrevious className="hidden md:flex" />
+      <CarouselNext className="hidden md:flex" />
+    </Carousel>
   );
 }
