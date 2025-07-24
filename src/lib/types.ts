@@ -1,4 +1,6 @@
 
+import { Timestamp } from "firebase/firestore";
+
 export interface Product {
     id: string;
     name: string;
@@ -51,4 +53,26 @@ export interface Ad {
   link?: string;
   isActive: boolean;
   title: string;
+}
+
+export interface OrderItem {
+    id: string;
+    imageUrl: string;
+    name: string;
+    price: number;
+    quantity: number;
+}
+  
+export interface Order {
+    id: string;
+    createdAt: Timestamp;
+    deliveryAddress: string;
+    items: OrderItem[];
+    paymentMethod: string;
+    status: string;
+    totalAmount: number;
+    userEmail: string;
+    userId: string;
+    userName: string;
+    userPhone: string;
 }
