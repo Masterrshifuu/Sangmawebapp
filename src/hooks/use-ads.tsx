@@ -25,7 +25,7 @@ export function AdsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const adsCollection = collection(db, 'ads');
-    const q = query(adsCollection, where('status', '==', 'active'));
+    const q = query(adsCollection, where('isActive', '==', true));
     
     const unsubscribe = onSnapshot(
       q,

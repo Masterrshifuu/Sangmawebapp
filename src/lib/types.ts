@@ -47,7 +47,7 @@ export interface Ad {
   id: string;
   mediaUrl: string;
   mediaType: 'image' | 'video';
-  linkUrl?: string;
-  status: 'active' | 'inactive';
+  link?: string;
+  isActive: boolean;
   title: string;
 }

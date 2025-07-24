@@ -56,9 +56,9 @@ export function AdCarousel() {
         />
       );
 
-    if (ad.linkUrl) {
+    if (ad.link && ad.link !== '--') {
       return (
-        <Link href={ad.linkUrl} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
+        <Link href={ad.link} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
           {mediaElement}
         </Link>
       );
