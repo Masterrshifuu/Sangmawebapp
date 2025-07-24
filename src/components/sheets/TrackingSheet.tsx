@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -11,7 +11,6 @@ import {
   DrawerClose,
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import {
   ChevronLeft,
   CheckCircle2,
@@ -19,15 +18,37 @@ import {
   Truck,
   Home,
   Loader2,
-  Search,
+  MapPin,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { db } from '@/lib/firebase';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
+import { db, auth } from '@/lib/firebase';
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  Timestamp,
+  orderBy,
+  limit,
+} from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
 import { format } from 'date-fns';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { onAuthStateChanged, type User } from 'firebase/auth';
+import dynamic from 'next/dynamic';
+
+const MapContainer = dynamic(
+  () => import('react-leaflet').then(mod => mod.MapContainer),
+  { ssr: false }
+);
+const TileLayer = dynamic(
+  () => import('react-leaflet').then(mod => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import('react-leaflet').then(mod => mod.Marker),
+  { ssr: false }
+);
 
 const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
   const firstItem = items[0];
@@ -45,6 +66,7 @@ const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
             alt={firstItem.name}
             fill
             className="object-contain"
+            sizes="20vw"
           />
         </div>
         <div className="flex-1">
@@ -157,39 +179,85 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   );
 };
 
+const NoOrderState = () => {
+    const [isClient, setIsClient] = useState(false);
+    
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    if (!isClient) {
+        return <div className="flex justify-center items-center p-8"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
+    }
+  
+    const position: [number, number] = [25.5159, 90.2201]; // Tura coordinates
+  
+    return (
+        <div className="h-[calc(80vh-150px)] w-full flex flex-col">
+            <div className="p-4 text-center">
+                <h3 className="font-bold text-lg">No Active Orders</h3>
+                <p className="text-muted-foreground text-sm">When you place an order, you can track it here.</p>
+            </div>
+            <div className="flex-1 rounded-lg overflow-hidden border">
+                <MapContainer center={position} zoom={13} scrollWheelZoom={false} className="w-full h-full">
+                    <TileLayer
+                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={position}></Marker>
+                </MapContainer>
+            </div>
+        </div>
+    );
+};
+
+
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
-  const [orderId, setOrderId] = useState('');
+  const [user, setUser] = useState<User | null>(null);
   const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [estimatedDeliveryTime, setEstimatedDeliveryTime] = useState<Date | null>(null);
+  const [open, setOpen] = useState(false);
 
-  const handleTrackOrder = async () => {
-    if (!orderId) {
-      setError('Please enter an Order ID.');
-      return;
-    }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  const fetchMostRecentOrder = async (userId: string) => {
     setLoading(true);
     setError(null);
     setOrder(null);
     setEstimatedDeliveryTime(null);
 
     try {
-      const orderRef = doc(db, 'orders', orderId);
-      const orderSnap = await getDoc(orderRef);
+      const ordersRef = collection(db, 'orders');
+      const q = query(
+        ordersRef,
+        where('userId', '==', userId),
+        where('status', '!=', 'delivered'),
+        orderBy('status'), // This might need a composite index
+        orderBy('createdAt', 'desc'),
+        limit(1)
+      );
 
-      if (orderSnap.exists()) {
-        const orderData = orderSnap.data();
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const orderDoc = querySnapshot.docs[0];
+        const orderData = orderDoc.data();
         const createdAt = (orderData.createdAt as Timestamp).toDate();
 
-        // Calculate estimated delivery time (25 to 45 mins from createdAt)
         const randomMinutes = Math.floor(Math.random() * (45 - 25 + 1)) + 25;
         const deliveryTime = new Date(createdAt.getTime() + randomMinutes * 60000);
         setEstimatedDeliveryTime(deliveryTime);
 
-        setOrder({ id: orderSnap.id, ...orderData } as Order);
+        setOrder({ id: orderDoc.id, ...orderData } as Order);
       } else {
-        setError(`No order found with ID "${orderId}". Please check the ID and try again.`);
+        setOrder(null); // No active orders found
       }
     } catch (err: any) {
       console.error('Error fetching order:', err);
@@ -198,9 +266,20 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
   };
+  
+  // Fetch order when sheet opens and user is available
+  useEffect(() => {
+    if (open && user) {
+        fetchMostRecentOrder(user.uid);
+    } else if (open && !user) {
+        setLoading(false);
+        setOrder(null);
+    }
+  }, [open, user]);
+
 
   return (
-    <Drawer>
+    <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
       <DrawerContent className="h-full md:h-[80vh] flex flex-col p-0">
         <DrawerHeader className="p-4 pt-4 text-center flex items-center justify-between border-b">
@@ -217,45 +296,11 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         </DrawerHeader>
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 space-y-6">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Enter Order ID (e.g., SMM000001)"
-                className="flex-1"
-                value={orderId}
-                onChange={(e) => setOrderId(e.target.value.trim())}
-                onKeyDown={(e) => e.key === 'Enter' && handleTrackOrder()}
-              />
-              <Button onClick={handleTrackOrder} disabled={loading}>
-                {loading ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  <Search />
-                )}
-                <span className="sr-only">Track</span>
-              </Button>
-            </div>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {!loading && !order && !error && (
-                 <div className="text-center text-muted-foreground p-8">
-                    <Truck className="mx-auto h-12 w-12 mb-4"/>
-                    <p>Enter your order ID to see its status.</p>
+            {loading ? (
+                <div className="flex justify-center items-center p-8">
+                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
-            )}
-
-            {loading && (
-              <div className="flex justify-center items-center p-8">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
-              </div>
-            )}
-
-            {order && (
+            ) : order ? (
               <>
                 {estimatedDeliveryTime && order.status !== 'delivered' && (
                   <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center">
@@ -268,6 +313,8 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                 <TrackingTimeline status={order.status} />
                 <OrderSummaryCard items={order.items} />
               </>
+            ) : (
+                <NoOrderState />
             )}
           </div>
         </main>

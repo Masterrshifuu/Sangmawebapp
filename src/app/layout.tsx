@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { ProductsProvider } from '@/hooks/use-products';
 import { BottomNavbar } from '@/components/BottomNavbar';
 import { AdsProvider } from '@/hooks/use-ads';
+import 'leaflet/dist/leaflet.css';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
