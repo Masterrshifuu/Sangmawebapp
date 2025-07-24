@@ -3,11 +3,11 @@
 
 import { Home, LayoutGrid, Truck, Sparkles, ShoppingCart, User } from 'lucide-react';
 
-import { AiChatSheet } from '@/components/AiChatSheet';
-import { CartSheet } from '@/components/CartSheet';
-import { TrackingSheet } from '@/components/TrackingSheet';
-import { CategorySheet } from '@/components/CategorySheet';
-import { AccountSheet } from '@/components/AccountSheet';
+import { AiChatSheet } from '@/components/sheets/AiChatSheet';
+import { CartSheet } from '@/components/sheets/CartSheet';
+import { TrackingSheet } from '@/components/sheets/TrackingSheet';
+import { CategorySheet } from '@/components/sheets/CategorySheet';
+import { AccountSheet } from '@/components/sheets/AccountSheet';
 
 export const navItems = [
   { href: '/', label: 'Home', icon: Home, isLink: true },

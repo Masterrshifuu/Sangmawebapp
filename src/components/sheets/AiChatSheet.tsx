@@ -9,8 +9,8 @@ import {
   DrawerTrigger,
   DrawerClose,
 } from '@/components/ui/drawer';
-import { ChatPanel } from './chat-panel';
-import { Button } from './ui/button';
+import { ChatPanel } from '@/components/chat-panel';
+import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 
 export function AiChatSheet({ children }: { children: React.ReactNode }) {

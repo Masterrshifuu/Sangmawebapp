@@ -7,12 +7,12 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-  DrawerClose,
+  DrawerClose
 } from '@/components/ui/drawer';
-import { Button } from './ui/button';
+import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 
-export function CategorySheet({ children }: { children: React.ReactNode }) {
+export function AccountSheet({ children }: { children: React.ReactNode }) {
   return (
     <Drawer>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
@@ -26,7 +26,7 @@ export function CategorySheet({ children }: { children: React.ReactNode }) {
                     <span className="sr-only">Back</span>
                 </Button>
             </DrawerClose>
-          <DrawerTitle className="flex-1 text-center">All Categories</DrawerTitle>
+          <DrawerTitle className="flex-1 text-center">Your Account</DrawerTitle>
           <div className="w-10 md:block hidden" />
         </DrawerHeader>
         <main className="container mx-auto px-4 py-8">

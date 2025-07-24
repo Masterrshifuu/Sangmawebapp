@@ -13,10 +13,10 @@ import {
 } from '@/components/ui/drawer';
 import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useState } from 'react';
-import { CheckoutDialog } from './CheckoutDialog';
-import { CartItemCard } from './cart/CartItemCard';
+import { CheckoutDialog } from '@/components/CheckoutDialog';
+import { CartItemCard } from '@/components/cart/CartItemCard';
 
 export function CartSheet({ children }: { children: React.ReactNode }) {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
