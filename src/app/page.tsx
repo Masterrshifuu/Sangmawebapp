@@ -153,7 +153,7 @@ export default function Home() {
       <Header />
       <main className="flex-1 pb-16 md:pb-0">
          <section className="py-6">
-            <div className="px-4 mb-4 flex justify-between items-center">
+            <div className="container mx-auto px-4 mb-4 flex justify-between items-center">
                 <h2 className="text-2xl font-bold font-headline">Shop by Category</h2>
                 <Link href="/categories" className="text-sm font-medium text-accent-foreground hover:underline">
                     View All &gt;
@@ -169,7 +169,7 @@ export default function Home() {
 
         {bestsellerCategories.length > 0 && (
           <section className="py-4">
-             <div className="px-4 mb-4 flex justify-between items-center">
+             <div className="container mx-auto px-4 mb-4 flex justify-between items-center">
                 <h2 className="text-2xl font-bold font-headline">Bestsellers</h2>
              </div>
              <HorizontalScroller>
@@ -187,7 +187,7 @@ export default function Home() {
                 const [categoryName, productsInSection] = item;
                 return (
                     <section key={categoryName} className="py-4">
-                        <div className="px-4 mb-4 flex justify-between items-center">
+                        <div className="container mx-auto px-4 mb-4 flex justify-between items-center">
                             <h2 className="text-2xl font-bold font-headline">{categoryName}</h2>
                             <Link href={`/category/${categoryName.toLowerCase()}`} className="text-sm font-medium text-accent-foreground hover:underline">
                                 View All &gt;

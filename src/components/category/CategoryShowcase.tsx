@@ -42,8 +42,8 @@ export function CategoryShowcase({
           </CarouselItem>
         ))}
       </CarouselContent>
-      <CarouselPrevious className="hidden md:flex" />
-      <CarouselNext className="hidden md:flex" />
+      <CarouselPrevious className="hidden md:flex left-0" />
+      <CarouselNext className="hidden md:flex right-0" />
     </Carousel>
   );
 }

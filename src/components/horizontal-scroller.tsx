@@ -27,13 +27,13 @@ export function HorizontalScroller({ children }: { children: React.ReactNode }) 
           stopOnMouseEnter: true,
         }),
       ]}
-      className="w-full"
+      className="w-full px-4"
     >
-      <CarouselContent className="-ml-4 pl-4">
+      <CarouselContent className="-ml-4">
           {children}
       </CarouselContent>
-      <CarouselPrevious className="hidden md:flex" />
-      <CarouselNext className="hidden md:flex" />
+      <CarouselPrevious className="hidden md:flex left-0" />
+      <CarouselNext className="hidden md:flex right-0" />
     </Carousel>
   );
 }
