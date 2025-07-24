@@ -23,7 +23,7 @@ export function DesktopNav() {
             return (
               <SheetComponent key={item.label}>
                 <button className="relative flex flex-col items-center justify-center text-sm font-medium text-yellow-500 hover:text-primary transition-all active:scale-95">
-                  <Icon className="w-6 h-6" />
+                  <Icon className="w-6 h-6 fill-current" />
                   <span className="sr-only">{item.label}</span>
                   {item.label === 'Cart' && totalItems > 0 && (
                      <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
@@ -44,7 +44,7 @@ export function DesktopNav() {
                 isActive ? 'text-primary' : 'text-yellow-500 hover:text-primary'
               )}
             >
-              <Icon className="w-6 h-6" />
+              <Icon className="w-6 h-6 fill-current" />
               <span className="sr-only">{item.label}</span>
             </Link>
           );
