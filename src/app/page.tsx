@@ -3,29 +3,30 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Header from '@/components/header';
-import { BestsellerCard } from '@/components/BestsellerCard';
 import { getHomePageData } from '@/lib/home';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { useProducts } from '@/hooks/use-products';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
-import { HorizontalScroller } from '@/components/horizontal-scroller';
-import { CarouselItem } from '@/components/ui/carousel';
 import { useAds } from '@/hooks/use-ads';
 import { AdCard } from '@/components/AdCard';
-import type { Ad } from '@/lib/types';
-import { CategoryPreviewCard } from '@/components/category/CategoryPreviewCard';
+import type { Ad, Product } from '@/lib/types';
+import { ProductCard } from '@/components/product-card';
 
 // Helper function to shuffle an array
 function shuffle<T>(array: T[]): T[] {
+  if (!array) return [];
   const newArray = [...array];
   let currentIndex = newArray.length;
   let randomIndex;
 
+  // While there remain elements to shuffle.
   while (currentIndex !== 0) {
+    // Pick a remaining element.
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
 
+    // And swap it with the current element.
     [newArray[currentIndex], newArray[randomIndex]] = [
       newArray[randomIndex],
       newArray[currentIndex],
@@ -51,21 +52,12 @@ const HomePageSkeleton = () => (
                 </div>
             </section>
 
-            {/* Bestsellers Skeleton */}
-            <section>
-                <Skeleton className="h-8 w-40 mb-4 ml-4" />
-                <div className="grid grid-cols-2 gap-4 px-4">
-                    <Skeleton className="w-full aspect-square rounded-lg" />
-                    <Skeleton className="w-full aspect-square rounded-lg" />
-                </div>
-            </section>
-
              {/* Product Grid Skeleton */}
-            <section>
-                <Skeleton className="h-8 w-32 mb-4 ml-4" />
-                <div className="flex gap-4 px-4">
-                    {[...Array(2)].map((_, i) => (
-                       <Skeleton key={i} className="w-80 h-80 rounded-lg flex-shrink-0" />
+            <section className="px-4">
+                <Skeleton className="h-8 w-32 mb-4" />
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {[...Array(8)].map((_, i) => (
+                       <Skeleton key={i} className="w-full aspect-[4/5] rounded-lg" />
                     ))}
                 </div>
             </section>
@@ -77,6 +69,8 @@ const HomePageSkeleton = () => (
 export default function Home() {
   const { products, error, loading } = useProducts();
   const { ads, loading: adsLoading } = useAds();
+  
+  const [shuffledProducts, setShuffledProducts] = useState<Product[]>([]);
   const [shuffledAds, setShuffledAds] = useState<Ad[]>([]);
 
   const homePageData = useMemo(() => {
@@ -87,10 +81,30 @@ export default function Home() {
   }, [products]);
 
   useEffect(() => {
+    if (products.length > 0) {
+        setShuffledProducts(shuffle(products));
+    }
     if (ads.length > 0) {
         setShuffledAds(shuffle(ads));
     }
-  }, [ads]);
+  }, [products, ads]);
+
+  // Interleave ads with products
+  const interleavedContent = useMemo(() => {
+    const content: (Product | Ad)[] = [...shuffledProducts];
+    if (shuffledAds.length > 0) {
+        let adIndex = 0;
+        // Insert an ad after every 6 products
+        for (let i = 6; i < content.length; i += 7) {
+            if (adIndex < shuffledAds.length) {
+                content.splice(i, 0, shuffledAds[adIndex]);
+                adIndex++;
+            }
+        }
+    }
+    return content;
+  }, [shuffledProducts, shuffledAds]);
+
 
   if (loading || adsLoading) {
     return <HomePageSkeleton />;
@@ -126,25 +140,7 @@ export default function Home() {
     return <HomePageSkeleton />;
   }
   
-  const { productsByCategory, showcaseCategories, bestsellerCategories, previewCategories } = homePageData;
-  
-  const nonBestsellerPreviewCategories = previewCategories.filter(
-      pCat => !bestsellerCategories.some(bCat => bCat.name === pCat.name)
-  );
-  
-  const interleavedContent = [];
-  let adIndex = 0;
-  
-  if (nonBestsellerPreviewCategories.length > 0) {
-      interleavedContent.push({type: 'preview', data: nonBestsellerPreviewCategories});
-  }
-
-  // Insert an ad after the main category previews, if ads are available
-  if (shuffledAds.length > 0) {
-      interleavedContent.push({type: 'ad', data: shuffledAds[adIndex]});
-      adIndex++;
-  }
-
+  const { showcaseCategories } = homePageData;
 
   return (
     <>
@@ -164,40 +160,20 @@ export default function Home() {
             )}
         </section>
 
-        {bestsellerCategories.length > 0 && (
-          <section className="py-4">
-             <div className="container mx-auto px-4 mb-4 flex justify-between items-center">
-                <h2 className="text-2xl font-bold font-headline">Bestsellers</h2>
-             </div>
-             <HorizontalScroller>
-                {bestsellerCategories.map((category) => (
-                    <CarouselItem key={category.name} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
-                        <BestsellerCard category={category} />
-                    </CarouselItem>
-                ))}
-             </HorizontalScroller>
-          </section>
-        )}
-
-        {interleavedContent.map((item, index) => {
-            if (item.type === 'preview') {
-                const categories = item.data as typeof previewCategories;
-                return (
-                    <section key={`preview-section-${index}`} className="py-4">
-                        <HorizontalScroller>
-                           {categories.map((category) => (
-                                <CarouselItem key={category.name} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                    <CategoryPreviewCard category={category} />
-                                </CarouselItem>
-                            ))}
-                        </HorizontalScroller>
-                    </section>
-                )
-            } else if (item.type === 'ad') { 
-                return <AdCard key={(item.data as Ad).id || `ad-${index}`} ad={item.data as Ad} />
-            }
-            return null;
-        })}
+        <section className="py-4">
+            <div className="container mx-auto px-4">
+                <h2 className="text-2xl font-bold font-headline mb-4">Just for You</h2>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {interleavedContent.map((item, index) => {
+                        if ('mediaType' in item) { // This is an Ad
+                            return <AdCard key={(item as Ad).id || `ad-${index}`} ad={item as Ad} className="col-span-2 aspect-[2/1] md:aspect-[3/1]" />;
+                        } else { // This is a Product
+                            return <ProductCard key={(item as Product).id} product={item as Product} />;
+                        }
+                    })}
+                </div>
+            </div>
+        </section>
 
       </main>
     </>

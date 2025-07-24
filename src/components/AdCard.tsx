@@ -4,8 +4,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Ad } from '@/lib/types';
+import { cn } from '@/lib/utils';
 
-export function AdCard({ ad }: { ad: Ad }) {
+export function AdCard({ ad, className }: { ad: Ad, className?: string }) {
   const renderMedia = () => {
     const mediaElement =
       ad.mediaType === 'video' ? (
@@ -15,14 +16,14 @@ export function AdCard({ ad }: { ad: Ad }) {
           muted
           loop
           playsInline
-          className="w-full h-full object-contain"
+          className="w-full h-full object-cover"
         />
       ) : (
         <Image
           src={ad.mediaUrl}
           alt={ad.title || 'Advertisement'}
           fill
-          className="object-contain"
+          className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
       );
@@ -38,12 +39,8 @@ export function AdCard({ ad }: { ad: Ad }) {
   };
 
   return (
-    <section className="py-6">
-      <div className="container mx-auto px-4">
-        <div className="relative aspect-[2/1] md:aspect-[3/1] w-full overflow-hidden rounded-lg bg-muted/20">
-          {renderMedia()}
-        </div>
-      </div>
-    </section>
+    <div className={cn("relative w-full overflow-hidden rounded-lg bg-muted/20", className)}>
+      {renderMedia()}
+    </div>
   );
 }
