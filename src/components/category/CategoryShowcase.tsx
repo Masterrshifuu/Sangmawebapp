@@ -3,6 +3,8 @@
 
 import type { Product, ShowcaseCategory } from '@/lib/types';
 import { CategoryPill } from './CategoryPill';
+import { HorizontalScroller } from '../horizontal-scroller';
+import { CarouselItem } from '../ui/carousel';
 
 export function CategoryShowcase({
   showcaseCategories,
@@ -11,14 +13,12 @@ export function CategoryShowcase({
   productsByCategory: Record<string, Product[]>;
 }) {
   return (
-    <div className="px-4">
-        <div className="grid grid-cols-4 gap-4">
-            {showcaseCategories.slice(0, 4).map(category => (
-                <div key={category.name}>
-                    <CategoryPill category={category} />
-                </div>
-            ))}
-        </div>
-    </div>
+    <HorizontalScroller>
+      {showcaseCategories.map(category => (
+        <CarouselItem key={category.name} className="basis-1/3 md:basis-1/4 lg:basis-1/6">
+          <CategoryPill category={category} />
+        </CarouselItem>
+      ))}
+    </HorizontalScroller>
   );
 }
