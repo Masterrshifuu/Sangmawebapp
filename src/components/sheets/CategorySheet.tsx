@@ -87,7 +87,7 @@ export function CategorySheet({ children }: { children: React.ReactNode }) {
                                             sizes="(max-width: 768px) 33vw, 20vw"
                                         />
                                     </div>
-                                    <p className="text-sm font-medium leading-tight group-hover:underline">{category.name}</p>
+                                    <p className="text-sm font-semibold leading-tight group-hover:underline">{category.name}</p>
                                 </Link>
                             </DrawerClose>
                         ))}
