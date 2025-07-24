@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { LocationPicker } from './location-picker';
 import { SearchSheet } from './SearchSheet';
+import { DesktopNav } from './DesktopNav';
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -25,7 +26,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#fdffbd]/80 backdrop-blur-sm border-b">
+    <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-sm border-b">
       <div className="container mx-auto px-4">
         <div
           className={cn(
@@ -52,7 +53,7 @@ export default function Header() {
           </div>
         </div>
         
-        <div className="py-3">
+        <div className="py-2">
             <SearchSheet>
                 <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors">
                     <Search className="h-5 w-5 mr-3" />
@@ -60,6 +61,7 @@ export default function Header() {
                 </button>
             </SearchSheet>
         </div>
+        <DesktopNav />
       </div>
     </header>
   );

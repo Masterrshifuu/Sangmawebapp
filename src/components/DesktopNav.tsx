@@ -7,14 +7,13 @@ import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/use-cart';
 import { navItems } from '@/lib/navigation';
 
-
-export function BottomNavbar() {
+export function DesktopNav() {
   const pathname = usePathname();
   const { totalItems } = useCart();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 h-16 bg-background/70 backdrop-blur-sm border-t z-50 md:hidden">
-      <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${navItems.length}, 1fr)`}}>
+    <nav className="hidden md:flex justify-center items-center py-2">
+      <div className="flex items-center gap-6">
         {navItems.map((item) => {
           const isActive = item.href === pathname;
           const Icon = item.icon;
@@ -23,11 +22,11 @@ export function BottomNavbar() {
             const SheetComponent = item.component;
             return (
               <SheetComponent key={item.label}>
-                <button className="relative flex flex-col items-center justify-center h-full text-sm font-medium text-muted-foreground hover:text-primary transition-all active:scale-95">
-                  <Icon className="w-6 h-6" />
+                <button className="relative flex flex-col items-center justify-center text-sm font-medium text-muted-foreground hover:text-primary transition-all active:scale-95">
+                  <Icon className="w-5 h-5" />
                   <span className="text-xs mt-1">{item.label}</span>
                   {item.label === 'Cart' && totalItems > 0 && (
-                     <span className="absolute top-1 right-4 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
+                     <span className="absolute -top-2 -right-2 w-5 h-5 bg-primary text-primary-foreground text-xs font-bold rounded-full flex items-center justify-center">
                         {totalItems}
                     </span>
                   )}
@@ -41,11 +40,11 @@ export function BottomNavbar() {
               key={item.label}
               href={item.href || '#'}
               className={cn(
-                'flex flex-col items-center justify-center h-full text-sm font-medium transition-all active:scale-95',
+                'flex flex-col items-center justify-center text-sm font-medium transition-all active:scale-95',
                 isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
               )}
             >
-              <Icon className="w-6 h-6" />
+              <Icon className="w-5 h-5" />
               <span className="text-xs mt-1">{item.label}</span>
             </Link>
           );
