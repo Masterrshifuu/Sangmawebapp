@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
 
@@ -18,6 +18,14 @@ import { Star, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CartQuantityControl } from '@/components/cart/CartQuantityControl';
 import { useProducts } from '@/hooks/use-products';
+import {
+    Carousel,
+    CarouselContent,
+    CarouselItem,
+    CarouselNext,
+    CarouselPrevious,
+    type CarouselApi,
+  } from "@/components/ui/carousel"
 
 // Helper component for star ratings
 const StarRating = ({ rating = 4.5, reviewCount = 0 }: { rating?: number; reviewCount?: number }) => (
@@ -69,8 +77,10 @@ export default function ProductPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
-  const [selectedImage, setSelectedImage] = useState<string>('');
   
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
+  const [currentSlide, setCurrentSlide] = useState(0)
+
   useEffect(() => {
     if (!id || products.length === 0) return;
 
@@ -78,7 +88,6 @@ export default function ProductPage() {
 
     if (currentProduct) {
         setProduct(currentProduct);
-        setSelectedImage(currentProduct.imageUrl);
         
         const currentSimilarProducts = products
           .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
@@ -91,7 +100,23 @@ export default function ProductPage() {
         }
     }
   }, [id, products, productsLoading]);
-  
+
+  useEffect(() => {
+    if (!carouselApi) {
+      return
+    }
+ 
+    setCurrentSlide(carouselApi.selectedScrollSnap())
+ 
+    carouselApi.on("select", () => {
+        setCurrentSlide(carouselApi.selectedScrollSnap())
+    })
+  }, [carouselApi])
+
+  const handleThumbnailClick = useCallback((index: number) => {
+    carouselApi?.scrollTo(index);
+  }, [carouselApi]);
+
   if (productsLoading) {
     return <ProductPageSkeleton />;
   }
@@ -126,27 +151,41 @@ export default function ProductPage() {
             <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
                 {/* Image Gallery */}
                 <div>
-                    <div className="aspect-square relative w-full bg-muted/30 rounded-lg overflow-hidden">
-                        <Image
-                            key={selectedImage}
-                            src={selectedImage || 'https://placehold.co/600x600.png'}
-                            alt={product.name}
-                            fill
-                            className="object-contain"
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            priority
-                        />
-                    </div>
+                    <Carousel setApi={setCarouselApi} className="w-full">
+                        <CarouselContent>
+                            {allImages.map((img, index) => (
+                                <CarouselItem key={index}>
+                                    <div className="aspect-square relative w-full bg-muted/30 rounded-lg overflow-hidden">
+                                        <Image
+                                            src={img || 'https://placehold.co/600x600.png'}
+                                            alt={`${product.name} image ${index + 1}`}
+                                            fill
+                                            className="object-contain"
+                                            sizes="(max-width: 768px) 100vw, 50vw"
+                                            priority={index === 0}
+                                        />
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        {allImages.length > 1 && (
+                            <>
+                                <CarouselPrevious className="absolute left-2" />
+                                <CarouselNext className="absolute right-2" />
+                            </>
+                        )}
+                    </Carousel>
+
                     {allImages.length > 1 && (
                         <div className="mt-4 grid grid-cols-5 gap-2">
                             {allImages.map((img, index) => (
                                 <button
                                     key={index}
-                                    onClick={() => setSelectedImage(img)}
+                                    onClick={() => handleThumbnailClick(index)}
                                     className={cn(
                                         "aspect-square relative rounded-md overflow-hidden transition-all",
                                         "ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                                        selectedImage === img ? 'ring-2 ring-primary' : 'hover:opacity-80'
+                                        currentSlide === index ? 'ring-2 ring-primary' : 'hover:opacity-80'
                                     )}
                                 >
                                     <Image
@@ -161,6 +200,7 @@ export default function ProductPage() {
                         </div>
                     )}
                 </div>
+
 
                 {/* Product Details */}
                 <div className="flex flex-col space-y-4">
