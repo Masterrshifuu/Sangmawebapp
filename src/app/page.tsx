@@ -14,7 +14,8 @@ import { CategoryPreviewCard } from '@/components/category/CategoryPreviewCard';
 import { CarouselItem } from '@/components/ui/carousel';
 import { useAds } from '@/hooks/use-ads';
 import { AdCard } from '@/components/AdCard';
-import type { Ad } from '@/lib/types';
+import { ProductCard } from '@/components/product-card';
+import type { Ad, Product } from '@/lib/types';
 
 
 const HomePageSkeleton = () => (
@@ -52,12 +53,36 @@ export default function Home() {
   const { products, error, loading } = useProducts();
   const { ads, loading: adsLoading } = useAds();
   const [shuffledAds, setShuffledAds] = useState<Ad[]>([]);
+  const [justForYouContent, setJustForYouContent] = useState<(Product | Ad)[]>([]);
 
   useEffect(() => {
     if (ads.length > 0) {
       setShuffledAds([...ads].sort(() => 0.5 - Math.random()));
     }
   }, [ads]);
+
+  useEffect(() => {
+    if (products.length > 0 && ads.length > 0) {
+        const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
+        const localShuffledAds = [...ads].sort(() => 0.5 - Math.random());
+        
+        const feed: (Product | Ad)[] = [];
+        let adIndex = 0;
+        const adInterval = 6;
+
+        shuffledProducts.forEach((product, index) => {
+            feed.push(product);
+            if ((index + 1) % adInterval === 0 && adIndex < localShuffledAds.length) {
+                feed.push(localShuffledAds[adIndex]);
+                adIndex++;
+            }
+        });
+        setJustForYouContent(feed);
+    } else if (products.length > 0) {
+        setJustForYouContent([...products].sort(() => 0.5 - Math.random()));
+    }
+  }, [products, ads]);
+
 
   const homePageData = useMemo(() => {
     if (products.length > 0) {
@@ -171,6 +196,27 @@ export default function Home() {
                         }
                     })}
                 </HorizontalScroller>
+            </section>
+        )}
+
+        {justForYouContent.length > 0 && (
+            <section className="py-8">
+                 <div className="container mx-auto px-4 mb-4">
+                    <h2 className="text-2xl font-bold font-headline">Just For You</h2>
+                </div>
+                <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                    {justForYouContent.map((item, index) => {
+                         if ('mediaType' in item) { // This is an Ad
+                            return (
+                                <AdCard key={(item as Ad).id || `ad-feed-${index}`} ad={item as Ad} className="aspect-[4/3]" />
+                            );
+                        } else { // This is a Product
+                            return (
+                                <ProductCard key={(item as Product).id} product={item as Product} />
+                            );
+                        }
+                    })}
+                </div>
             </section>
         )}
       </main>
