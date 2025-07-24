@@ -22,7 +22,7 @@ export function DesktopNav() {
             const SheetComponent = item.component;
             return (
               <SheetComponent key={item.label}>
-                <button className="relative flex flex-col items-center justify-center text-sm font-medium text-muted-foreground hover:text-primary transition-all active:scale-95">
+                <button className="relative flex flex-col items-center justify-center text-sm font-medium text-yellow-500 hover:text-primary transition-all active:scale-95">
                   <Icon className="w-6 h-6" />
                   <span className="sr-only">{item.label}</span>
                   {item.label === 'Cart' && totalItems > 0 && (
@@ -41,7 +41,7 @@ export function DesktopNav() {
               href={item.href || '#'}
               className={cn(
                 'flex flex-col items-center justify-center text-sm font-medium transition-all active:scale-95',
-                isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                isActive ? 'text-primary' : 'text-yellow-500 hover:text-primary'
               )}
             >
               <Icon className="w-6 h-6" />

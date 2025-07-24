@@ -26,7 +26,7 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b">
+    <header className="sticky top-0 z-50 border-b border-transparent">
       <div className="bg-[#faf368] backdrop-blur-sm">
         <div className="container mx-auto px-4">
           <div
@@ -71,7 +71,7 @@ export default function Header() {
           isScrolled ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         )}
       >
-          <div className="overflow-hidden">
+          <div className="overflow-hidden bg-background/0">
             <div className="container mx-auto px-4">
               <DesktopNav />
             </div>
