@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { LocationPicker } from './location-picker';
-import { SearchSheet } from './SearchSheet';
+import { SearchDialog } from './SearchDialog';
 import { DesktopNav } from './DesktopNav';
 
 export default function Header() {
@@ -55,12 +55,12 @@ export default function Header() {
           </div>
           
           <div className="py-2">
-              <SearchSheet>
+              <SearchDialog>
                   <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors">
                       <Search className="h-5 w-5 mr-3" />
                       <span>Search for products...</span>
                   </button>
-              </SearchSheet>
+              </SearchDialog>
           </div>
         </div>
       </div>
