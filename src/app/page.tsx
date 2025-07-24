@@ -18,6 +18,9 @@ import { ProductCard } from '@/components/product-card';
 import type { Ad, Product } from '@/lib/types';
 
 
+// Define a new type for the feed content
+type FeedItem = (Product | (Ad & { displaySize: 'small' | 'large' }));
+
 const HomePageSkeleton = () => (
     <>
         <Header />
@@ -26,7 +29,7 @@ const HomePageSkeleton = () => (
             <section>
                 <Skeleton className="h-8 w-48 mb-4 ml-4" />
                 <div className="flex gap-4 overflow-x-auto pb-4 px-4">
-                    {[...Array(6)].map((_, i) => (
+                    {[...Array(4)].map((_, i) => (
                         <div key={i} className="flex flex-col items-center space-y-2 flex-shrink-0">
                             <Skeleton className="w-20 h-20 rounded-lg" />
                             <Skeleton className="h-4 w-16" />
@@ -53,7 +56,7 @@ export default function Home() {
   const { products, error, loading } = useProducts();
   const { ads, loading: adsLoading } = useAds();
   const [shuffledAds, setShuffledAds] = useState<Ad[]>([]);
-  const [justForYouContent, setJustForYouContent] = useState<(Product | Ad)[]>([]);
+  const [justForYouContent, setJustForYouContent] = useState<FeedItem[]>([]);
 
   useEffect(() => {
     if (ads.length > 0) {
@@ -66,14 +69,17 @@ export default function Home() {
         const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
         const localShuffledAds = [...ads].sort(() => 0.5 - Math.random());
         
-        const feed: (Product | Ad)[] = [];
+        const feed: FeedItem[] = [];
         let adIndex = 0;
         const adInterval = 6;
 
         shuffledProducts.forEach((product, index) => {
             feed.push(product);
             if ((index + 1) % adInterval === 0 && adIndex < localShuffledAds.length) {
-                feed.push(localShuffledAds[adIndex]);
+                const ad = localShuffledAds[adIndex];
+                // Randomly decide the size of the ad
+                const displaySize = Math.random() > 0.7 ? 'large' : 'small';
+                feed.push({ ...ad, displaySize });
                 adIndex++;
             }
         });
@@ -207,8 +213,12 @@ export default function Home() {
                 <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
                     {justForYouContent.map((item, index) => {
                          if ('mediaType' in item) { // This is an Ad
+                            const ad = item as Ad & { displaySize: 'small' | 'large' };
+                            const isLarge = ad.displaySize === 'large';
                             return (
-                                <AdCard key={(item as Ad).id || `ad-feed-${index}`} ad={item as Ad} className="aspect-[4/3]" />
+                                <div key={ad.id || `ad-feed-${index}`} className={isLarge ? 'col-span-2' : ''}>
+                                    <AdCard ad={ad} className={isLarge ? "aspect-video" : "aspect-[4/3]"} />
+                                </div>
                             );
                         } else { // This is a Product
                             return (
