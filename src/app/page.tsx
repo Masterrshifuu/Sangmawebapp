@@ -154,7 +154,7 @@ export default function Home() {
              </div>
              <HorizontalScroller>
                 {bestsellerCategories.map((category) => (
-                    <CarouselItem key={category.name} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                    <CarouselItem key={category.name} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
                         <BestsellerCard category={category} />
                     </CarouselItem>
                 ))}
@@ -172,7 +172,7 @@ export default function Home() {
             </div>
             <HorizontalScroller>
                 {productsInSection.map((product) => (
-                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
+                  <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/5">
                     <ProductCard product={product} />
                   </CarouselItem>
                 ))}
