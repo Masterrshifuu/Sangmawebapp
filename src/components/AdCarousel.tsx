@@ -68,7 +68,6 @@ export function AdCarousel() {
 
   return (
     <section className="py-6">
-      <div className="container mx-auto px-4">
         <Carousel
           plugins={[plugin.current]}
           className="w-full"
@@ -81,14 +80,13 @@ export function AdCarousel() {
           <CarouselContent>
             {ads.map((ad) => (
               <CarouselItem key={ad.id}>
-                <div className="relative aspect-[2/1] md:aspect-[3/1] w-full overflow-hidden rounded-lg">
+                <div className="relative aspect-[2/1] md:aspect-[3/1] w-full overflow-hidden">
                   {renderMedia(ad)}
                 </div>
               </CarouselItem>
             ))}
           </CarouselContent>
         </Carousel>
-      </div>
     </section>
   );
 }
