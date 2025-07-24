@@ -239,7 +239,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         ordersRef,
         where('userId', '==', userId),
         where('status', '!=', 'delivered'),
-        orderBy('status'), // This might need a composite index
         orderBy('createdAt', 'desc'),
         limit(1)
       );
@@ -261,7 +260,11 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       }
     } catch (err: any) {
       console.error('Error fetching order:', err);
-      setError('An error occurred while fetching your order. Please try again later.');
+      if (err.code === 'failed-precondition') {
+          setError('This query requires a Firestore index. Please create it in your Firebase console.');
+      } else {
+          setError('An error occurred while fetching your order. Please try again later.');
+      }
     } finally {
       setLoading(false);
     }
@@ -299,6 +302,11 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
             {loading ? (
                 <div className="flex justify-center items-center p-8">
                     <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                </div>
+            ) : error ? (
+                <div className="p-4 text-center text-red-500 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="font-bold">Error</p>
+                    <p>{error}</p>
                 </div>
             ) : order ? (
               <>
