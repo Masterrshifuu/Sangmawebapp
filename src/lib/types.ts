@@ -29,6 +29,7 @@ export interface BestsellerImage {
 export interface BestsellerCategory {
     name: string;
     images: BestsellerImage[];
+    totalProducts: number;
 }
 
 export interface ShowcaseCategory {

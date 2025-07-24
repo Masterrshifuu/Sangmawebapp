@@ -1,7 +1,7 @@
 
 'use client';
 
-import type { Product, ShowcaseCategory } from '@/lib/types';
+import type { ShowcaseCategory } from '@/lib/types';
 import { CategoryPill } from './CategoryPill';
 import { HorizontalScroller } from '../horizontal-scroller';
 import { CarouselItem } from '../ui/carousel';
@@ -10,7 +10,6 @@ export function CategoryShowcase({
   showcaseCategories,
 }: {
   showcaseCategories: ShowcaseCategory[];
-  productsByCategory: Record<string, Product[]>;
 }) {
   return (
     <HorizontalScroller>

@@ -5,6 +5,7 @@ export function getHomePageData(products: Product[]) {
   const productsByCategory: Record<string, Product[]> = {};
   const showcaseCategories: ShowcaseCategory[] = [];
   const bestsellerCategories: BestsellerCategory[] = [];
+  const previewCategories: BestsellerCategory[] = [];
   const categoryImages: Record<string, string> = {};
 
   // First, group products by category
@@ -28,6 +29,16 @@ export function getHomePageData(products: Product[]) {
             imageUrl: categoryImages[categoryName],
         });
     }
+
+    // Create preview categories for all categories with at least 4 products
+    const categoryProducts = productsByCategory[categoryName];
+    if (categoryProducts.length >= 4) {
+      previewCategories.push({
+        name: categoryName,
+        images: categoryProducts.slice(0, 4).map(p => ({ src: p.imageUrl, alt: p.name })),
+        totalProducts: categoryProducts.length,
+      })
+    }
   }
 
   // Identify bestseller products and group them by category
@@ -47,13 +58,15 @@ export function getHomePageData(products: Product[]) {
       bestsellerCategories.push({
         name: categoryName,
         images: categoryProducts.slice(0, 4).map(p => ({ src: p.imageUrl, alt: p.name })),
+        totalProducts: categoryProducts.length,
       });
     }
   }
-
+  
   return {
     productsByCategory,
     showcaseCategories,
     bestsellerCategories,
+    previewCategories,
   };
 }
