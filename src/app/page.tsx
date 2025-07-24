@@ -171,7 +171,7 @@ export default function Home() {
              </div>
              <HorizontalScroller>
                 {bestsellerCategories.map((category) => (
-                    <CarouselItem key={category.name} className="basis-11/12 md:basis-1/2 lg:basis-1/3">
+                    <CarouselItem key={category.name} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                         <BestsellerCard category={category} />
                     </CarouselItem>
                 ))}
@@ -186,7 +186,7 @@ export default function Home() {
                     <section key={`preview-section-${index}`} className="py-4">
                         <HorizontalScroller>
                            {categories.map((category) => (
-                                <CarouselItem key={category.name} className="basis-11/12 md:basis-1/2 lg:basis-1/3">
+                                <CarouselItem key={category.name} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
                                     <CategoryPreviewCard category={category} />
                                 </CarouselItem>
                             ))}
