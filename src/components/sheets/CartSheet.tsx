@@ -67,7 +67,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                 <div className="w-full space-y-4">
                   <div className="flex justify-between font-bold text-lg">
                     <span>Subtotal</span>
-                    <span>₹{totalPrice.toFixed(2)}</span>
+                    <span>INR {totalPrice.toFixed(2)}</span>
                   </div>
                   <DrawerClose asChild>
                     <Button className="w-full" onClick={handleCheckout}>
