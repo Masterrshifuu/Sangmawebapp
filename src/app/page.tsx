@@ -20,6 +20,7 @@ import type { Ad, Product } from '@/lib/types';
 
 // Define a new type for the feed content
 type FeedItem = (Product | (Ad & { displaySize: 'small' | 'large' }));
+type InterleavedItem = BestsellerCategory | Ad;
 
 const HomePageSkeleton = () => (
     <>
@@ -55,24 +56,20 @@ const HomePageSkeleton = () => (
 export default function Home() {
   const { products, error, loading } = useProducts();
   const { ads, loading: adsLoading } = useAds();
-  const [shuffledAds, setShuffledAds] = useState<Ad[]>([]);
-  
-  useEffect(() => {
-    if (ads.length > 0) {
-      setShuffledAds([...ads].sort(() => 0.5 - Math.random()));
-    }
+
+  const shuffledAds = useMemo(() => {
+    if (ads.length === 0) return [];
+    return [...ads].sort(() => 0.5 - Math.random());
   }, [ads]);
 
   const justForYouContent = useMemo(() => {
     if (products.length === 0) return [];
-
+    
     const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
 
-    if (ads.length === 0) {
+    if (shuffledAds.length === 0) {
         return shuffledProducts;
     }
-
-    const localShuffledAds = [...ads].sort(() => 0.5 - Math.random());
     
     const feed: FeedItem[] = [];
     let adIndex = 0;
@@ -80,16 +77,15 @@ export default function Home() {
 
     shuffledProducts.forEach((product, index) => {
         feed.push(product);
-        if ((index + 1) % adInterval === 0 && adIndex < localShuffledAds.length) {
-            const ad = localShuffledAds[adIndex];
-            // Randomly decide the size of the ad
+        if ((index + 1) % adInterval === 0 && adIndex < shuffledAds.length) {
+            const ad = shuffledAds[adIndex];
             const displaySize = Math.random() > 0.7 ? 'large' : 'small';
             feed.push({ ...ad, displaySize });
             adIndex++;
         }
     });
     return feed;
-  }, [products, ads]);
+  }, [products, shuffledAds]);
 
 
   const homePageData = useMemo(() => {
@@ -98,6 +94,22 @@ export default function Home() {
     }
     return null;
   }, [products]);
+  
+  const interleavedContent = useMemo(() => {
+    if (!homePageData) return [];
+    const content: InterleavedItem[] = [...homePageData.previewCategories];
+    if (shuffledAds.length > 0) {
+      let adIndex = 0;
+      for (let i = 2; i < content.length; i += 3) {
+        if (adIndex < shuffledAds.length) {
+          content.splice(i, 0, shuffledAds[adIndex]);
+          adIndex++;
+        }
+      }
+    }
+    return content;
+  }, [homePageData, shuffledAds]);
+
 
   if (loading || adsLoading) {
     return <HomePageSkeleton />;
@@ -133,21 +145,7 @@ export default function Home() {
     return <HomePageSkeleton />;
   }
   
-  const { showcaseCategories, bestsellerCategories, previewCategories } = homePageData;
-
-  // Interleave ads with category previews
-  const interleavedContent = [...previewCategories];
-  if (shuffledAds.length > 0) {
-    let adIndex = 0;
-    // Insert an ad after every 2 category previews
-    for (let i = 2; i < interleavedContent.length; i += 3) {
-      if (adIndex < shuffledAds.length) {
-        // Here we have to cast since there's no common type
-        (interleavedContent as any[]).splice(i, 0, shuffledAds[adIndex]);
-        adIndex++;
-      }
-    }
-  }
+  const { showcaseCategories, bestsellerCategories } = homePageData;
 
   return (
     <>
