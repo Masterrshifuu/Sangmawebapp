@@ -21,10 +21,10 @@ export function CartItemCard({ item }: { item: CartItem }) {
       </div>
       <div className="flex-1">
         <p className="font-semibold">{item.product.name}</p>
-        <p className="text-sm text-muted-foreground">₹{price.toFixed(2)}</p>
+        <p className="text-sm text-muted-foreground">INR {price.toFixed(2)}</p>
       </div>
       <div className="flex flex-col items-end gap-2">
-        <p className="font-bold">₹{(price * item.quantity).toFixed(2)}</p>
+        <p className="font-bold">INR {(price * item.quantity).toFixed(2)}</p>
         <div className="w-24">
             <CartQuantityControl product={item.product} />
         </div>

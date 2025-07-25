@@ -36,7 +36,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
   }, [totalPrice, location, cart.length]);
 
   const isServiceable = deliveryCharge !== null;
-  const finalTotal = isServiceable ? totalPrice + deliveryCharge : totalPrice;
+  const finalTotal = isServiceable ? totalPrice + (deliveryCharge ?? 0) : totalPrice;
 
   return (
     <>
@@ -79,13 +79,13 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                 <div className="w-full space-y-2">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>₹{totalPrice.toFixed(2)}</span>
+                    <span>INR {totalPrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-muted-foreground">
                     <span>Delivery Fee</span>
                     {isServiceable ? (
                       <span>
-                        {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
+                        {deliveryCharge === 0 ? 'FREE' : `INR ${deliveryCharge.toFixed(2)}`}
                       </span>
                     ) : (
                       <span className="text-destructive font-medium">Unserviceable</span>
@@ -96,7 +96,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
 
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total Amount</span>
-                    <span>₹{finalTotal.toFixed(2)}</span>
+                    <span>INR {finalTotal.toFixed(2)}</span>
                   </div>
 
                   {!isServiceable && (

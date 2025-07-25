@@ -14,17 +14,14 @@ import { CarouselItem } from '@/components/ui/carousel';
 import { useAds } from '@/hooks/use-ads';
 import { AdCard } from '@/components/AdCard';
 import { ProductCard } from '@/components/product-card';
-import type { Ad, Product, BestsellerCategory } from '@/lib/types';
+import type { Ad, Product } from '@/lib/types';
 
-
-// Define a new type for the feed content
 type FeedItem = Product | Ad;
 
 const HomePageSkeleton = () => (
     <>
         <Header />
         <main className="flex-1 pb-16 md:pb-0 py-6 space-y-8">
-            {/* Category Showcase Skeleton */}
             <section>
                 <Skeleton className="h-8 w-48 mb-4 ml-4" />
                 <div className="flex gap-4 overflow-x-auto pb-4 px-4">
@@ -36,8 +33,6 @@ const HomePageSkeleton = () => (
                     ))}
                 </div>
             </section>
-
-             {/* Bestsellers Skeleton */}
              <section>
                 <Skeleton className="h-8 w-32 mb-4 ml-4" />
                 <div className="flex gap-4 overflow-x-auto pb-4 px-4">
@@ -62,9 +57,30 @@ export default function Home() {
     return null;
   }, [products]);
 
-  const justForYouProducts = useMemo(() => {
-    return [...products].sort(() => 0.5 - Math.random());
-  }, [products]);
+  const justForYouContent = useMemo(() => {
+    if (products.length === 0 || ads.length === 0) {
+      return products;
+    }
+  
+    const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
+    const content: FeedItem[] = [...shuffledProducts];
+    const adInterval = 5; // Insert an ad every 5 products
+  
+    // Use a copy of ads and shuffle them to vary their order
+    const shuffledAds = [...ads].sort(() => 0.5 - Math.random());
+    
+    for (let i = 0; i < shuffledAds.length; i++) {
+      const ad = shuffledAds[i];
+      const insertionIndex = (i + 1) * adInterval;
+      if (insertionIndex < content.length) {
+        content.splice(insertionIndex, 0, ad);
+      } else {
+        content.push(ad);
+      }
+    }
+  
+    return content;
+  }, [products, ads]);
 
 
   if (loading || adsLoading) {
@@ -103,6 +119,10 @@ export default function Home() {
   
   const { showcaseCategories, bestsellerCategories } = homePageData;
 
+  const isAd = (item: FeedItem): item is Ad => {
+    return 'mediaType' in item;
+  };
+
   return (
     <>
       <Header />
@@ -136,29 +156,18 @@ export default function Home() {
             </section>
         )}
         
-        {ads.length > 0 && (
-            <section className="py-4 space-y-6">
-              <div className="container mx-auto px-4">
-                  <h2 className="text-2xl font-bold font-headline">Advertisements</h2>
-              </div>
-                <HorizontalScroller>
-                    {ads.map((ad, index) => (
-                        <CarouselItem key={ad.id || `ad-${index}`} className="basis-11/12 md:basis-1/2">
-                                <AdCard ad={ad} className="aspect-video" />
-                        </CarouselItem>
-                    ))}
-                </HorizontalScroller>
-            </section>
-        )}
-
-        {justForYouProducts.length > 0 && (
+        {justForYouContent.length > 0 && (
             <section className="py-8">
                  <div className="container mx-auto px-4 mb-4">
                     <h2 className="text-2xl font-bold font-headline">Just For You</h2>
                 </div>
                 <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {justForYouProducts.map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                    {justForYouContent.map((item) => (
+                        isAd(item) ? (
+                            <AdCard key={item.id} ad={item} />
+                        ) : (
+                            <ProductCard key={item.id} product={item} />
+                        )
                     ))}
                 </div>
             </section>

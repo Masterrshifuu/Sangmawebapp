@@ -36,7 +36,7 @@ export function ProductCard({ product }: { product: Product }) {
                 <div className="mt-auto pt-3 flex justify-between items-end">
                     <div>
                         {typeof product.mrp === 'number' && (
-                            <p className="font-bold text-base">₹{product.mrp.toFixed(2)}</p>
+                            <p className="font-bold text-base">INR {product.mrp.toFixed(2)}</p>
                         )}
                     </div>
                     
