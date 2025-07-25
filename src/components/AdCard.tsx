@@ -7,18 +7,26 @@ import type { Ad } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
 export function AdCard({ ad, className }: { ad: Ad, className?: string }) {
-  const renderMedia = () => {
-    const mediaElement =
-      ad.mediaType === 'video' ? (
+  
+  if (ad.mediaType === 'video') {
+    return (
+      <div className={cn("relative w-full overflow-hidden rounded-lg bg-muted/20", className)}>
         <video
-          src={ad.mediaUrl}
           autoPlay
           muted
           loop
           playsInline
           className="w-full h-full object-cover"
-        />
-      ) : (
+        >
+          <source src={ad.mediaUrl} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("relative w-full overflow-hidden rounded-lg bg-muted/20", className)}>
         <Image
           src={ad.mediaUrl}
           alt={ad.title || 'Advertisement'}
@@ -26,21 +34,6 @@ export function AdCard({ ad, className }: { ad: Ad, className?: string }) {
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 50vw"
         />
-      );
-
-    if (ad.link && ad.link !== '--') {
-      return (
-        <Link href={ad.link} target="_blank" rel="noopener noreferrer" className="block h-full w-full">
-          {mediaElement}
-        </Link>
-      );
-    }
-    return mediaElement;
-  };
-
-  return (
-    <div className={cn("relative w-full overflow-hidden rounded-lg bg-muted/20", className)}>
-      {renderMedia()}
     </div>
   );
 }
