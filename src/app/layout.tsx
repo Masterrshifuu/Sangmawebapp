@@ -1,7 +1,7 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { PT_Sans, Poppins } from 'next/font/google';
+import { Inter, Poppins } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
@@ -10,10 +10,9 @@ import { BottomNavbar } from '@/components/BottomNavbar';
 import { AdsProvider } from '@/hooks/use-ads';
 import 'leaflet/dist/leaflet.css';
 
-const ptSans = PT_Sans({
+const inter = Inter({
   subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-pt-sans',
+  variable: '--font-inter',
 });
 
 const poppins = Poppins({
@@ -36,7 +35,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(ptSans.variable, poppins.variable)}
+      className={cn(inter.variable, poppins.variable)}
     >
       <body className="antialiased">
         <AuthWrapper>
