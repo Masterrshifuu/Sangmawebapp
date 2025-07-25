@@ -10,17 +10,15 @@ import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { BestsellerCard } from '@/components/BestsellerCard';
-import { CategoryPreviewCard } from '@/components/category/CategoryPreviewCard';
 import { CarouselItem } from '@/components/ui/carousel';
 import { useAds } from '@/hooks/use-ads';
 import { AdCard } from '@/components/AdCard';
 import { ProductCard } from '@/components/product-card';
-import type { Ad, Product } from '@/lib/types';
+import type { Ad, Product, BestsellerCategory } from '@/lib/types';
 
 
 // Define a new type for the feed content
-type FeedItem = (Product | (Ad & { displaySize: 'small' | 'large' }));
-type InterleavedItem = BestsellerCategory | Ad;
+type FeedItem = Product | Ad;
 
 const HomePageSkeleton = () => (
     <>
@@ -57,58 +55,16 @@ export default function Home() {
   const { products, error, loading } = useProducts();
   const { ads, loading: adsLoading } = useAds();
 
-  const shuffledAds = useMemo(() => {
-    if (ads.length === 0) return [];
-    return [...ads].sort(() => 0.5 - Math.random());
-  }, [ads]);
-
-  const justForYouContent = useMemo(() => {
-    if (products.length === 0) return [];
-    
-    const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
-
-    if (shuffledAds.length === 0) {
-        return shuffledProducts;
-    }
-    
-    const feed: FeedItem[] = [];
-    let adIndex = 0;
-    const adInterval = 6;
-
-    shuffledProducts.forEach((product, index) => {
-        feed.push(product);
-        if ((index + 1) % adInterval === 0 && adIndex < shuffledAds.length) {
-            const ad = shuffledAds[adIndex];
-            const displaySize = Math.random() > 0.7 ? 'large' : 'small';
-            feed.push({ ...ad, displaySize });
-            adIndex++;
-        }
-    });
-    return feed;
-  }, [products, shuffledAds]);
-
-
   const homePageData = useMemo(() => {
     if (products.length > 0) {
       return getHomePageData(products);
     }
     return null;
   }, [products]);
-  
-  const interleavedContent = useMemo(() => {
-    if (!homePageData) return [];
-    const content: InterleavedItem[] = [...homePageData.previewCategories];
-    if (shuffledAds.length > 0) {
-      let adIndex = 0;
-      for (let i = 2; i < content.length; i += 3) {
-        if (adIndex < shuffledAds.length) {
-          content.splice(i, 0, shuffledAds[adIndex]);
-          adIndex++;
-        }
-      }
-    }
-    return content;
-  }, [homePageData, shuffledAds]);
+
+  const justForYouProducts = useMemo(() => {
+    return [...products].sort(() => 0.5 - Math.random());
+  }, [products]);
 
 
   if (loading || adsLoading) {
@@ -180,52 +136,30 @@ export default function Home() {
             </section>
         )}
         
-        {interleavedContent.length > 0 && (
+        {ads.length > 0 && (
             <section className="py-4 space-y-6">
               <div className="container mx-auto px-4">
-                  <h2 className="text-2xl font-bold font-headline">Explore More</h2>
+                  <h2 className="text-2xl font-bold font-headline">Advertisements</h2>
               </div>
                 <HorizontalScroller>
-                    {interleavedContent.map((item, index) => {
-                        if ('mediaType' in item) { // This is an Ad
-                            return (
-                                <CarouselItem key={(item as Ad).id || `ad-${index}`} className="basis-11/12 md:basis-1/2">
-                                     <AdCard ad={item as Ad} className="aspect-video" />
-                                </CarouselItem>
-                            );
-                        } else { // This is a CategoryPreview
-                            return (
-                                <CarouselItem key={(item as any).name} className="basis-1/2 md:basis-1/3 lg:basis-1/4">
-                                    <CategoryPreviewCard category={item} />
-                                </CarouselItem>
-                            );
-                        }
-                    })}
+                    {ads.map((ad, index) => (
+                        <CarouselItem key={ad.id || `ad-${index}`} className="basis-11/12 md:basis-1/2">
+                                <AdCard ad={ad} className="aspect-video" />
+                        </CarouselItem>
+                    ))}
                 </HorizontalScroller>
             </section>
         )}
 
-        {justForYouContent.length > 0 && (
+        {justForYouProducts.length > 0 && (
             <section className="py-8">
                  <div className="container mx-auto px-4 mb-4">
                     <h2 className="text-2xl font-bold font-headline">Just For You</h2>
                 </div>
                 <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {justForYouContent.map((item, index) => {
-                         if ('mediaType' in item) { // This is an Ad
-                            const ad = item as Ad & { displaySize: 'small' | 'large' };
-                            const isLarge = ad.displaySize === 'large';
-                            return (
-                                <div key={ad.id || `ad-feed-${index}`} className={isLarge ? 'col-span-2' : ''}>
-                                    <AdCard ad={ad} className={isLarge ? "aspect-video" : "aspect-[4/3]"} />
-                                </div>
-                            );
-                        } else { // This is a Product
-                            return (
-                                <ProductCard key={(item as Product).id} product={item as Product} />
-                            );
-                        }
-                    })}
+                    {justForYouProducts.map((product) => (
+                        <ProductCard key={product.id} product={product} />
+                    ))}
                 </div>
             </section>
         )}
