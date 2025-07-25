@@ -30,26 +30,22 @@ export function AdsProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onSnapshot(
       q,
       (snapshot) => {
-        if (snapshot.empty) {
-            setAds([]);
-        } else {
-            const adsList = snapshot.docs
-                .map(doc => {
-                    const data = doc.data();
-                    // Convert Firestore Timestamps to serializable ISO strings
-                    for (const key in data) {
-                        if (isTimestamp(data[key])) {
-                            data[key] = data[key].toDate().toISOString();
-                        }
+        const adsList = snapshot.docs
+            .map(doc => {
+                const data = doc.data();
+                // Convert Firestore Timestamps to serializable ISO strings
+                for (const key in data) {
+                    if (isTimestamp(data[key])) {
+                        data[key] = data[key].toDate().toISOString();
                     }
-                    return {
-                        id: doc.id,
-                        ...data
-                    } as Ad;
-                });
-            
-            setAds(adsList);
-        }
+                }
+                return {
+                    id: doc.id,
+                    ...data
+                } as Ad;
+            });
+        
+        setAds(adsList);
         setLoading(false);
       },
       (err) => {
