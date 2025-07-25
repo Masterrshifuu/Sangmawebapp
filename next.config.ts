@@ -22,7 +22,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self' *.tile.openstreetmap.org; connect-src 'self' *.googleapis.com wss://*.firebaseapp.com; img-src 'self' data: *.tile.openstreetmap.org https://*; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; ",
+            value: "default-src 'self' *.tile.openstreetmap.org; connect-src 'self' *.googleapis.com wss://*.firebaseapp.com; img-src 'self' data: *.tile.openstreetmap.org https://*; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' data:;",
           },
         ],
       },
