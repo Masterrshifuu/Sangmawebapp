@@ -13,6 +13,9 @@ export function calculateDeliveryCharge(subtotal: number, location: string): num
   const lowerCaseLocation = location.toLowerCase();
 
   if (lowerCaseLocation.includes('tura nehu')) {
+    if (subtotal > 3000) {
+      return 0; // Free delivery for orders over ₹3000
+    }
     return 100; // Flat ₹100 fee for Tura NEHU
   }
 

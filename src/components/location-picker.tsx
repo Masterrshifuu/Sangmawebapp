@@ -2,23 +2,16 @@
 'use client';
 
 import { MapPin, ChevronDown } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import LocationSheet from '@/components/location-sheet';
+import { useLocation } from '@/hooks/use-location';
 
 export function LocationPicker() {
-    const [location, setLocation] = useState('Chandmari, South Tura');
+    const { location, setLocation } = useLocation();
     const [isLocationSheetOpen, setIsLocationSheetOpen] = useState(false);
-
-    useEffect(() => {
-        const savedLocation = localStorage.getItem('userLocation');
-        if (savedLocation) {
-            setLocation(savedLocation);
-        }
-    }, []);
 
     const handleSaveLocation = (newLocation: string) => {
         setLocation(newLocation);
-        localStorage.setItem('userLocation', newLocation);
         setIsLocationSheetOpen(false);
     };
 

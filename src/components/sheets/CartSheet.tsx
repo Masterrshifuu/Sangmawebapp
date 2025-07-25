@@ -14,17 +14,29 @@ import {
 import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { CheckoutDialog } from '@/components/CheckoutDialog';
 import { CartItemCard } from '@/components/cart/CartItemCard';
+import { useLocation } from '@/hooks/use-location';
+import { calculateDeliveryCharge } from '@/lib/delivery';
+import { Separator } from '@/components/ui/separator';
 
 export function CartSheet({ children }: { children: React.ReactNode }) {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const { location } = useLocation();
 
   const handleCheckout = () => {
     setIsCheckoutOpen(true);
   };
+
+  const deliveryCharge = useMemo(() => {
+    if (cart.length === 0) return 0;
+    return calculateDeliveryCharge(totalPrice, location);
+  }, [totalPrice, location, cart.length]);
+
+  const isServiceable = deliveryCharge !== null;
+  const finalTotal = isServiceable ? totalPrice + deliveryCharge : totalPrice;
 
   return (
     <>
@@ -64,13 +76,41 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                 </div>
               </ScrollArea>
               <DrawerFooter className="p-4 border-t bg-background mt-auto">
-                <div className="w-full space-y-4">
-                  <div className="flex justify-between font-bold text-lg">
+                <div className="w-full space-y-2">
+                  <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
                     <span>₹{totalPrice.toFixed(2)}</span>
                   </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Delivery Fee</span>
+                    {isServiceable ? (
+                      <span>
+                        {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
+                      </span>
+                    ) : (
+                      <span className="text-destructive font-medium">Unserviceable</span>
+                    )}
+                  </div>
+                  
+                  <Separator className="my-2" />
+
+                  <div className="flex justify-between font-bold text-lg">
+                    <span>Total Amount</span>
+                    <span>₹{finalTotal.toFixed(2)}</span>
+                  </div>
+
+                  {!isServiceable && (
+                    <p className="text-xs text-destructive text-center p-2 bg-destructive/10 rounded-md">
+                      Sorry, we do not deliver to your selected location. Please change your address to proceed.
+                    </p>
+                  )}
+
                   <DrawerClose asChild>
-                    <Button className="w-full" onClick={handleCheckout}>
+                    <Button 
+                      className="w-full" 
+                      onClick={handleCheckout} 
+                      disabled={!isServiceable}
+                    >
                       Proceed to Checkout
                     </Button>
                   </DrawerClose>
