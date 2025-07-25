@@ -56,37 +56,39 @@ export default function Home() {
   const { products, error, loading } = useProducts();
   const { ads, loading: adsLoading } = useAds();
   const [shuffledAds, setShuffledAds] = useState<Ad[]>([]);
-  const [justForYouContent, setJustForYouContent] = useState<FeedItem[]>([]);
-
+  
   useEffect(() => {
     if (ads.length > 0) {
       setShuffledAds([...ads].sort(() => 0.5 - Math.random()));
     }
   }, [ads]);
 
-  useEffect(() => {
-    if (products.length > 0 && ads.length > 0) {
-        const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
-        const localShuffledAds = [...ads].sort(() => 0.5 - Math.random());
-        
-        const feed: FeedItem[] = [];
-        let adIndex = 0;
-        const adInterval = 6;
+  const justForYouContent = useMemo(() => {
+    if (products.length === 0) return [];
 
-        shuffledProducts.forEach((product, index) => {
-            feed.push(product);
-            if ((index + 1) % adInterval === 0 && adIndex < localShuffledAds.length) {
-                const ad = localShuffledAds[adIndex];
-                // Randomly decide the size of the ad
-                const displaySize = Math.random() > 0.7 ? 'large' : 'small';
-                feed.push({ ...ad, displaySize });
-                adIndex++;
-            }
-        });
-        setJustForYouContent(feed);
-    } else if (products.length > 0) {
-        setJustForYouContent([...products].sort(() => 0.5 - Math.random()));
+    const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
+
+    if (ads.length === 0) {
+        return shuffledProducts;
     }
+
+    const localShuffledAds = [...ads].sort(() => 0.5 - Math.random());
+    
+    const feed: FeedItem[] = [];
+    let adIndex = 0;
+    const adInterval = 6;
+
+    shuffledProducts.forEach((product, index) => {
+        feed.push(product);
+        if ((index + 1) % adInterval === 0 && adIndex < localShuffledAds.length) {
+            const ad = localShuffledAds[adIndex];
+            // Randomly decide the size of the ad
+            const displaySize = Math.random() > 0.7 ? 'large' : 'small';
+            feed.push({ ...ad, displaySize });
+            adIndex++;
+        }
+    });
+    return feed;
   }, [products, ads]);
 
 
