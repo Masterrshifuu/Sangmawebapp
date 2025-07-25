@@ -1,7 +1,6 @@
 
 'use client';
 
-import Link from 'next/link';
 import Image from 'next/image';
 import type { Ad } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -9,18 +8,17 @@ import { cn } from '@/lib/utils';
 export function AdCard({ ad, className }: { ad: Ad, className?: string }) {
   
   if (ad.mediaType === 'video') {
+    // Using an iframe for data URLs is more robust for embedded content.
     return (
       <div className={cn("relative w-full overflow-hidden rounded-lg bg-muted/20", className)}>
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="w-full h-full object-cover"
-        >
-          <source src={ad.mediaUrl} type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
+        <iframe
+          src={ad.mediaUrl}
+          title={ad.title || 'Advertisement Video'}
+          frameBorder="0"
+          allow="autoplay; encrypted-media"
+          allowFullScreen
+          className="w-full h-full"
+        ></iframe>
       </div>
     );
   }
