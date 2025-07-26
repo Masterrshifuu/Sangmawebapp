@@ -2,7 +2,9 @@
 'use client';
 
 import type { Product, CartItem } from '@/lib/types';
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useState, ReactNode, useEffect, useCallback } from 'react';
+import { useAuth } from './use-auth';
+import { getUserData, updateUserCart } from '@/lib/user';
 
 type CartContextType = {
   cart: CartItem[];
@@ -12,47 +14,82 @@ type CartContextType = {
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
+  loading: boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
-  
-  // Load cart from localStorage on initial render
-  useEffect(() => {
+  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+
+  const getLocalCart = (): CartItem[] => {
     try {
       const storedCart = localStorage.getItem('sangma-megha-mart-cart');
-      if (storedCart) {
-        setCart(JSON.parse(storedCart));
-      }
+      return storedCart ? JSON.parse(storedCart) : [];
     } catch (error) {
       console.error("Failed to parse cart from localStorage", error);
+      return [];
     }
-  }, []);
+  };
+  
+  const saveLocalCart = (cartToSave: CartItem[]) => {
+      localStorage.setItem('sangma-megha-mart-cart', JSON.stringify(cartToSave));
+  }
 
-  // Save cart to localStorage whenever it changes
+  // Effect to load cart from Firestore for logged-in users or localStorage for guests
   useEffect(() => {
-    localStorage.setItem('sangma-megha-mart-cart', JSON.stringify(cart));
-  }, [cart]);
+    const loadCart = async () => {
+        setLoading(true);
+        if (user) {
+            const userData = await getUserData(user.uid);
+            setCart(userData?.cart || []);
+        } else {
+            setCart(getLocalCart());
+        }
+        setLoading(false);
+    };
+
+    if (!authLoading) {
+        loadCart();
+    }
+  }, [user, authLoading]);
+
+  // Effect to sync cart changes to Firestore or localStorage
+  const syncCart = useCallback(async (updatedCart: CartItem[]) => {
+    if (user) {
+      await updateUserCart(user.uid, updatedCart);
+    } else {
+      saveLocalCart(updatedCart);
+    }
+  }, [user]);
 
 
   const addItem = (product: Product, quantity = 1) => {
     setCart((prevCart) => {
       const existingItem = prevCart.find((item) => item.product.id === product.id);
+      let newCart;
       if (existingItem) {
-        return prevCart.map((item) =>
+        newCart = prevCart.map((item) =>
           item.product.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
             : item
         );
+      } else {
+        newCart = [...prevCart, { product, quantity }];
       }
-      return [...prevCart, { product, quantity }];
+      syncCart(newCart);
+      return newCart;
     });
   };
 
   const removeItem = (productId: string) => {
-    setCart((prevCart) => prevCart.filter((item) => item.product.id !== productId));
+    setCart((prevCart) => {
+        const newCart = prevCart.filter((item) => item.product.id !== productId);
+        syncCart(newCart);
+        return newCart;
+    });
   };
 
   const updateQuantity = (productId: string, quantity: number) => {
@@ -60,15 +97,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
       removeItem(productId);
       return;
     }
-    setCart((prevCart) =>
-      prevCart.map((item) =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
-    );
+    setCart((prevCart) => {
+        const newCart = prevCart.map((item) =>
+            item.product.id === productId ? { ...item, quantity } : item
+        );
+        syncCart(newCart);
+        return newCart;
+    });
   };
 
   const clearCart = () => {
     setCart([]);
+    syncCart([]);
   };
 
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
@@ -78,7 +118,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, 0);
 
   return (
-    <CartContext.Provider value={{ cart, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice }}>
+    <CartContext.Provider value={{ cart, addItem, removeItem, updateQuantity, clearCart, totalItems, totalPrice, loading }}>
       {children}
     </CartContext.Provider>
   );

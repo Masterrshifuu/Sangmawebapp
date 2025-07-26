@@ -32,6 +32,16 @@ export interface CartItem {
     quantity: number;
 }
 
+export interface UserData {
+    cart: CartItem[];
+    totalOrders: number;
+    totalReviews: number;
+    likes: number;
+    dislikes: number;
+    lastLogin: FieldValue;
+    loginCount: number;
+}
+
 export interface BestsellerImage {
     src: string;
     alt: string;

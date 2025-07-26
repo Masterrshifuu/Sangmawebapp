@@ -11,6 +11,7 @@ import {
     orderBy
 } from 'firebase/firestore';
 import type { Review } from './types';
+import { incrementUserStat } from './user';
 
 // Get all reviews for a specific product
 export async function getReviews(productId: string): Promise<Review[]> {
@@ -78,6 +79,9 @@ export async function addReview(
                 createdAt: new Date().toISOString() // Use current date for immediate optimistic update
             };
         });
+        
+        // Increment user's review count stat
+        await incrementUserStat(reviewData.userId, 'totalReviews');
 
         if (!newReview) {
             throw new Error("Transaction failed to return new review.");

@@ -24,6 +24,7 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose, DrawerFo
 import { ScrollArea } from '../ui/scroll-area';
 import { getStoreStatus } from '@/lib/datetime';
 import { createOrderTimer } from '@/lib/timer';
+import { incrementUserStat } from '@/lib/user';
 
 interface CheckoutSheetProps {
     open: boolean;
@@ -136,6 +137,8 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
       const orderDocRef = await addDoc(collection(db, 'orders'), orderData);
       // Create the timer document as well
       await createOrderTimer(orderDocRef.id, user.uid);
+      // Increment the user's total order count
+      await incrementUserStat(user.uid, 'totalOrders');
 
       toast({
         title: 'Order Placed Successfully!',
