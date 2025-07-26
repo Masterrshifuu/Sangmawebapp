@@ -15,6 +15,14 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // This prevents a restart loop with the Genkit watcher.
+    turbopack: {
+      watchOptions: {
+        ignored: ['**/.genkit/**'],
+      },
+    },
+  },
   async headers() {
     return [
       {
