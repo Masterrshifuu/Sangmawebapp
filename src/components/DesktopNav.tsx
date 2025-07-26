@@ -15,7 +15,7 @@ export function DesktopNav() {
     <nav className="hidden md:flex justify-center items-center py-2">
       <div className="flex items-center gap-6">
         {navItems.map((item) => {
-          const isActive = item.href === pathname;
+          const isActive = (item.isLink && item.href === '/') ? pathname === '/' : (item.isLink && pathname.startsWith(item.href || '---'));
           const Icon = item.icon;
 
           if (item.component) {

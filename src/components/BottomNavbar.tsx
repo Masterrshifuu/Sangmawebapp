@@ -16,7 +16,7 @@ export function BottomNavbar() {
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-background/70 backdrop-blur-sm border-t z-50 md:hidden">
       <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${navItems.length}, 1fr)`}}>
         {navItems.map((item) => {
-          const isActive = item.href === pathname;
+          const isActive = (item.isLink && item.href === '/') ? pathname === '/' : (item.isLink && pathname.startsWith(item.href || '---'));
           const Icon = item.icon;
 
           if (item.component) {

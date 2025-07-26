@@ -7,7 +7,6 @@ import { AiChatSheet } from '@/components/sheets/AiChatSheet';
 import { CartSheet } from '@/components/sheets/CartSheet';
 import { TrackingSheet } from '@/components/sheets/TrackingSheet';
 import { CategorySheet } from '@/components/sheets/CategorySheet';
-import { AccountSheet } from '@/components/sheets/AccountSheet';
 
 export const navItems = [
   { href: '/', label: 'Home', icon: Home, isLink: true },
@@ -15,5 +14,5 @@ export const navItems = [
   { label: 'Tracking', icon: Truck, component: TrackingSheet },
   { label: 'AI Chat', icon: Sparkles, component: AiChatSheet },
   { label: 'Cart', icon: ShoppingCart, component: CartSheet },
-  { label: 'Account', icon: User, component: AccountSheet },
+  { href: '/account', label: 'Account', icon: User, isLink: true },
 ];
