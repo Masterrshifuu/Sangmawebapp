@@ -10,7 +10,7 @@ import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { verifyPayment, VerifyPaymentInput } from '@/ai/flows/verify-payment-flow';
-import type { CartItem, Order, User } from '@/lib/types';
+import type { Order } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -20,10 +20,9 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, ChevronLeft, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose, DrawerFooter } from '../ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '../ui/drawer';
 import { ScrollArea } from '../ui/scroll-area';
 import { getStoreStatus } from '@/lib/datetime';
-import { createOrderTimer } from '@/lib/timer';
 import { incrementUserStat } from '@/lib/user';
 import { Checkbox } from '../ui/checkbox';
 
@@ -117,7 +116,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
     setIsPlacingOrder(true);
 
-    const orderStatus = storeStatus.isOpen ? 'placed' : 'scheduled';
+    const isScheduled = !storeStatus.isOpen;
 
     const orderData: Order = {
       userId: user.uid,
@@ -134,27 +133,23 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
         imageUrl: item.product.imageUrl
       })),
       paymentMethod,
-      status: orderStatus,
+      status: isScheduled ? 'Scheduled' : 'Pending',
       totalAmount: finalTotal,
-      estimatedDeliveryTime: 35,
-      extraTime: 0,
-      finalETA: 35,
+      active: !isScheduled, // An order is active unless it's scheduled for later
+      extraTimeInMinutes: 0,
+      extraReasons: []
     };
 
     try {
-      const orderDocRef = await addDoc(collection(db, 'orders'), orderData);
+      await addDoc(collection(db, 'orders'), orderData);
       
-      // Only create a timer for immediate orders
-      if (orderStatus === 'placed') {
-        await createOrderTimer(orderDocRef.id, user.uid);
-      }
-
       await incrementUserStat(user.uid, 'totalOrders');
 
       toast({
-        title: orderStatus === 'placed' ? 'Order Placed Successfully!' : 'Order Scheduled!',
-        description: orderStatus === 'placed' ? 'Thank you for your purchase. You can track your order in the tracking section.' : 'Your order has been scheduled for the next opening time.',
+        title: isScheduled ? 'Order Scheduled!' : 'Order Placed Successfully!',
+        description: isScheduled ? 'Your order has been scheduled for the next opening time.' : 'Thank you for your purchase. You can track your order in the tracking section.',
       });
+
       clearCart();
       onOpenChange(false);
       router.push('/?order=success');

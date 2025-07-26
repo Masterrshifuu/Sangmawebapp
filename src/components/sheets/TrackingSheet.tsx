@@ -31,11 +31,10 @@ import {
   orderBy,
   limit,
 } from 'firebase/firestore';
-import type { Order, OrderItem, OrderTimer } from '@/lib/types';
+import type { Order, OrderItem } from '@/lib/types';
 import { format, addMinutes } from 'date-fns';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
-import { getOrderTimer } from '@/lib/timer';
 
 const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
   const firstItem = items[0];
@@ -72,45 +71,38 @@ const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
 
 const TrackingTimeline = ({ status }: { status: string }) => {
   const orderStatusHierarchy = [
-    'placed',
-    'confirmed',
-    'packed',
-    'out_for_delivery',
-    'delivered',
+    'Pending',
+    'Confirmed',
+    'OutForDelivery',
+    'Delivered',
   ];
-  const currentStatusIndex = orderStatusHierarchy.indexOf(
-    status?.toLowerCase() || ''
+  const currentStatusIndex = orderStatusHierarchy.findIndex(
+    s => s.toLowerCase() === status?.toLowerCase()
   );
 
   const steps = [
     {
       icon: Package,
       title: 'Order Placed',
-      status: 'placed',
+      status: 'Pending',
       description: 'We have received your order.',
     },
     {
       icon: CheckCircle2,
       title: 'Order Confirmed',
-      status: 'confirmed',
+      status: 'Confirmed',
       description: 'Your order has been confirmed.',
-    },
-    {
-      icon: Package,
-      title: 'Being Prepared',
-      status: 'packed',
-      description: 'Your order is being prepared.',
     },
     {
       icon: Truck,
       title: 'Out for Delivery',
-      status: 'out_for_delivery',
+      status: 'OutForDelivery',
       description: 'Your order is on its way.',
     },
     {
       icon: Home,
       title: 'Delivered',
-      status: 'delivered',
+      status: 'Delivered',
       description: 'Your order has been delivered.',
     },
   ];
@@ -118,7 +110,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   return (
     <div className="space-y-4">
       {steps.map((step, index) => {
-        const stepStatusIndex = orderStatusHierarchy.indexOf(step.status);
+        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s.toLowerCase() === step.status.toLowerCase());
         const isCompleted = stepStatusIndex < currentStatusIndex;
         const isCurrent = stepStatusIndex === currentStatusIndex;
 
@@ -169,18 +161,16 @@ const TrackingTimeline = ({ status }: { status: string }) => {
 const NoOrderState = () => (
     <div className="flex flex-col items-center justify-center text-center p-8 space-y-4 h-full">
         <Logo className="opacity-50" />
-        <p className="text-muted-foreground">No orders yet</p>
+        <p className="text-muted-foreground">No active orders</p>
     </div>
 );
 
 
-const RecentOrderCard = ({ order }: { order: Order }) => {
-
-    return (
+const NoActiveOrderCard = () => (
       <div className="space-y-4">
         <div className="p-4 rounded-lg border text-center">
             <h3 className="text-lg font-semibold">No Active Orders</h3>
-            <p className="text-sm text-muted-foreground">Showing your most recent delivery.</p>
+            <p className="text-sm text-muted-foreground">Place a new order to track it here!</p>
         </div>
         <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
             <p className="text-sm">Estimated Delivery</p>
@@ -189,25 +179,23 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
                 35 minutes
             </p>
         </div>
-        <OrderSummaryCard items={order.items} />
       </div>
-    )
-}
+)
 
-const CountdownTimer = ({ timer }: { timer: OrderTimer}) => {
+const CountdownTimer = ({ order }: { order: Order}) => {
     const [timeLeft, setTimeLeft] = useState('');
     const [eta, setEta] = useState('');
 
     const calculateTimeLeft = useCallback(() => {
-        if (!timer?.orderTime || !(timer.orderTime instanceof Timestamp)) {
-          // If orderTime is not a valid Timestamp, we can't calculate.
+        const orderTimestamp = order.createdAt as unknown as Timestamp;
+        if (!orderTimestamp) {
           setTimeLeft('Calculating...');
           setEta('');
           return;
         };
 
-        const orderTime = timer.orderTime.toDate();
-        const etaMinutes = timer.finalETA || 35;
+        const orderTime = orderTimestamp.toDate();
+        const etaMinutes = 35 + (order.extraTimeInMinutes || 0);
         const etaTime = addMinutes(orderTime, etaMinutes);
         setEta(format(etaTime, 'p'));
 
@@ -223,7 +211,7 @@ const CountdownTimer = ({ timer }: { timer: OrderTimer}) => {
         const seconds = Math.floor((difference / 1000) % 60);
 
         setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
-    }, [timer]);
+    }, [order]);
 
     useEffect(() => {
         calculateTimeLeft();
@@ -246,8 +234,6 @@ const CountdownTimer = ({ timer }: { timer: OrderTimer}) => {
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
-  const [orderTimer, setOrderTimer] = useState<OrderTimer | null>(null);
-  const [recentOrder, setRecentOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -263,46 +249,33 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     setLoading(true);
     setError(null);
     setActiveOrder(null);
-    setRecentOrder(null);
-    setOrderTimer(null);
 
     try {
       const ordersRef = collection(db, 'orders');
       const q = query(
         ordersRef, 
         where('userId', '==', userId), 
+        where('active', '==', true),
         orderBy('createdAt', 'desc'),
-        limit(10) // Look at last 10 orders to find an active one
+        limit(1)
       );
       const querySnapshot = await getDocs(q);
       
-      const userOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-
-      if (userOrders.length === 0) {
+      if (querySnapshot.empty) {
         setLoading(false);
         return;
       }
-
-      const foundActiveOrder = userOrders.find(order => order.status && order.status.toLowerCase() !== 'delivered');
       
-      if (foundActiveOrder) {
-        setActiveOrder(foundActiveOrder);
-        const timer = await getOrderTimer(foundActiveOrder.id!);
-        if (timer) {
-          setOrderTimer(timer);
-        } else {
-           // This case can happen if the timer doc creation fails.
-           // We can show the tracking without a countdown.
-          console.warn(`Timer not found for active order ${foundActiveOrder.id}`)
-        }
-      } else {
-        // No active order, show the most recent one
-        setRecentOrder(userOrders[0]);
-      }
+      const foundActiveOrder = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as Order;
+      setActiveOrder(foundActiveOrder);
 
     } catch (err: any) {
       console.error('Error fetching order:', err);
-      setError('An error occurred while fetching your order. Please try again later.');
+      if (err.code === 'failed-precondition') {
+             setError("This query requires a Firestore index. Please check the browser console for a link to create it, or check the 'Console Error' in the preview window.");
+        } else {
+             setError('An error occurred while fetching your order. Please try again later.');
+        }
     } finally {
       setLoading(false);
     }
@@ -314,7 +287,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     } else if (open && !user) {
         setLoading(false);
         setActiveOrder(null);
-        setRecentOrder(null);
     }
   }, [open, user, fetchOrders]);
 
@@ -349,14 +321,12 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                 </div>
             ) : activeOrder ? (
               <>
-                {orderTimer && <CountdownTimer timer={orderTimer} />}
+                <CountdownTimer order={activeOrder} />
                 <TrackingTimeline status={activeOrder.status} />
                 <OrderSummaryCard items={activeOrder.items} />
               </>
-            ) : recentOrder ? (
-              <RecentOrderCard order={recentOrder} />
             ) : (
-                <NoOrderState />
+              <NoActiveOrderCard />
             )}
           </div>
         </main>

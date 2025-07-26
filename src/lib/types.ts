@@ -81,24 +81,39 @@ export interface OrderItem {
     price: number;
     quantity: number;
 }
+
+export interface ExtraReason {
+    addedBy: string;
+    reason: string;
+    minutesAdded: number;
+    timestamp: Timestamp | FieldValue;
+}
   
 export interface Order {
     id?: string;
-    createdAt: Timestamp | FieldValue;
-    deliveryAddress: string;
-    items: OrderItem[];
-    paymentMethod: string;
-    status: string; // e.g., 'placed', 'confirmed', 'out_for_delivery', 'delivered'
-    totalAmount: number;
-    userEmail: string;
     userId: string;
     userName: string;
+    userEmail: string;
     userPhone: string;
     
-    // Timer related fields
-    estimatedDeliveryTime?: number; // in minutes, e.g., 35
-    extraTime?: number; // in minutes, e.g., 5
-    finalETA?: number; // e.g. 40
+    // Core Order Details
+    items: OrderItem[];
+    totalAmount: number;
+    deliveryAddress: string;
+    paymentMethod: string;
+    
+    // Status and Tracking
+    status: string; // e.g., 'Pending', 'Confirmed', 'OutForDelivery', 'Delivered', 'Cancelled'
+    active: boolean; // true if order is in-progress
+    
+    // Timestamps
+    createdAt: Timestamp | FieldValue;
+    deliveryStartTime?: Timestamp | FieldValue; // Set when status becomes 'OutForDelivery'
+    expectedDeliveryTime?: Timestamp | FieldValue; // deliveryStartTime + 35 min + extraTime
+    
+    // Delays
+    extraTimeInMinutes: number;
+    extraReasons: ExtraReason[];
 }
 
 export interface Review {
@@ -108,14 +123,4 @@ export interface Review {
     rating: number;
     comment: string;
     createdAt: string; // Stored as ISO string
-}
-
-export interface OrderTimer {
-    id?: string;
-    orderId: string;
-    userId: string;
-    orderTime: Timestamp | FieldValue;
-    estimatedDeliveryTime: number; // 35
-    extraTime: number; // 0 initially
-    finalETA: number; // 35 initially
 }
