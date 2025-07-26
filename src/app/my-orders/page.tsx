@@ -28,6 +28,7 @@ const statusStyles: { [key: string]: string } = {
 const OrderCard = ({ order }: { order: Order }) => {
   const createdAt = (order.createdAt as unknown as Timestamp).toDate();
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
+  const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
 
   return (
     <div className="bg-card rounded-lg border shadow-sm">
@@ -57,7 +58,7 @@ const OrderCard = ({ order }: { order: Order }) => {
         ))}
       </div>
       <div className="p-4 bg-muted/30 rounded-b-lg flex justify-between items-center">
-        <p className="text-sm font-semibold">Total: INR {order.totalAmount.toFixed(2)}</p>
+        <p className="text-sm font-semibold">Total: INR {totalAmount.toFixed(2)}</p>
         <Button size="sm" variant="outline" asChild>
             <Link href="#">View Details</Link>
         </Button>
