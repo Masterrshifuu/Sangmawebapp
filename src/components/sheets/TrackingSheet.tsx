@@ -224,7 +224,7 @@ function getDynamicDeliveryTime() {
         }
     }
 
-    return format(deliveryTime, 'hh:mm a');
+    return format(deliveryTime, 'hh:mm:ss a');
 }
 
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
@@ -249,7 +249,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       setEstimatedTime(getDynamicDeliveryTime());
       const intervalId = setInterval(() => {
         setEstimatedTime(getDynamicDeliveryTime());
-      }, 60000); // Update every minute
+      }, 1000); // Update every second
       return () => clearInterval(intervalId);
     }
   }, [activeOrder]);
