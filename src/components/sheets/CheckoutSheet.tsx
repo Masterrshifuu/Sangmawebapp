@@ -65,6 +65,14 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
     }
   }, [open]);
 
+  // Safely close the sheet if the cart becomes empty while it's open
+  useEffect(() => {
+    if (open && cart.length === 0) {
+        onOpenChange(false);
+    }
+  }, [open, cart.length, onOpenChange]);
+
+
   const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, location), [totalPrice, location]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
 
@@ -181,15 +189,12 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
     if (authLoading) return <CheckoutPageSkeleton />;
 
     if (!user && !authLoading) {
-        toast({ title: 'Please log in to continue.'});
-        onOpenChange(false);
-        // A bit of a hack to re-trigger login prompt on home
-        router.push('/?login=true'); 
+        // This effect will handle closing if already open
         return <CheckoutPageSkeleton />;
     }
     
+    // This check is now handled by the useEffect
     if (cart.length === 0) {
-      onOpenChange(false);
       return <CheckoutPageSkeleton />;
     }
     
