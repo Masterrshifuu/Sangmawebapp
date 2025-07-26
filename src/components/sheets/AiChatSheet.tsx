@@ -13,7 +13,15 @@ import { ChatPanel } from '@/components/chat-panel';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
 
-export function AiChatSheet({ children }: { children: React.ReactNode }) {
+interface AiChatSheetProps {
+    children: React.ReactNode;
+    productContext?: {
+        name: string;
+        description: string;
+    }
+}
+
+export function AiChatSheet({ children, productContext }: AiChatSheetProps) {
   return (
     <Drawer>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
@@ -30,7 +38,7 @@ export function AiChatSheet({ children }: { children: React.ReactNode }) {
           <DrawerTitle className="flex-1 text-center">AI Shopping Assistant</DrawerTitle>
            <div className="w-10 md:block hidden" />
         </DrawerHeader>
-        <ChatPanel />
+        <ChatPanel productContext={productContext} />
       </DrawerContent>
     </Drawer>
   );

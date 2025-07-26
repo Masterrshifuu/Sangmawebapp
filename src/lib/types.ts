@@ -16,6 +16,7 @@ export interface Product {
     tags?: string[];
     isBestseller?: boolean;
     stock: number;
+    reviews?: Review[];
 }
 
 export interface User {
@@ -77,10 +78,20 @@ export interface Order {
     deliveryAddress: string;
     items: OrderItem[];
     paymentMethod: string;
+
     status: string;
     totalAmount: number;
     userEmail: string;
     userId: string;
     userName: string;
     userPhone: string;
+}
+
+export interface Review {
+    id: string;
+    userId: string;
+    userName: string;
+    rating: number;
+    comment: string;
+    createdAt: string; // Stored as ISO string
 }

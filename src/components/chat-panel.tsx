@@ -11,22 +11,34 @@ import { ArrowUp } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
 import { ProductCard } from './product-card';
 
-export function ChatPanel() {
+type ChatMessage = AIState[number] & {
+    productContext?: { name: string; description: string };
+};
+
+export function ChatPanel({ productContext }: { productContext?: { name: string, description: string } }) {
   const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<AIState>([]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
 
-    const newMessages: AIState = [
-      ...messages,
-      {
+    const userMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'user',
         content: inputValue,
-      },
+    };
+    
+    // Add product context to the first user message if it exists
+    if (messages.length === 0 && productContext) {
+        userMessage.productContext = productContext;
+    }
+
+    const newMessages: ChatMessage[] = [
+      ...messages,
+      userMessage,
     ];
+
     setMessages(newMessages);
     setInputValue('');
 
@@ -38,6 +50,12 @@ export function ChatPanel() {
     <div className="flex flex-col h-full">
       <ScrollArea className="flex-1 p-4">
         <div className="space-y-4">
+          {messages.length === 0 && productContext && (
+            <div className="p-3 rounded-lg bg-muted text-sm text-muted-foreground">
+                <p className="font-semibold">Ask me anything about {productContext.name}!</p>
+                <p>For example: "Is this good for breakfast?" or "What are the ingredients?"</p>
+            </div>
+          )}
           {messages.map((message) => (
             <div key={message.id} className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}>
               <div className={`p-3 rounded-lg max-w-sm ${message.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
@@ -59,7 +77,7 @@ export function ChatPanel() {
           <Input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask about products or deals..."
+            placeholder={productContext ? `Ask about ${productContext.name}` : "Ask about products or deals..."}
             className="flex-1"
           />
           <Button type="submit" size="icon" disabled={!inputValue.trim()}>

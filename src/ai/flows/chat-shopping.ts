@@ -18,6 +18,13 @@ const ChatShoppingInputSchema = z.object({
     .string()
     .optional()
     .describe('The user order history to provide better recommendations.'),
+  productContext: z
+    .object({
+        name: z.string(),
+        description: z.string(),
+    })
+    .optional()
+    .describe('The product the user is currently viewing.'),
 });
 export type ChatShoppingInput = z.infer<typeof ChatShoppingInputSchema>;
 
@@ -44,6 +51,13 @@ const chatShoppingPrompt = ai.definePrompt({
       You can answer questions about products, provide recommendations, and place orders.
       If the user asks for recommendations, provide a list of product names in the productList field.
       Use the order history to provide better recommendations.
+
+      {{#if productContext}}
+      The user is currently looking at the following product:
+      Name: {{productContext.name}}
+      Description: {{productContext.description}}
+      Focus your response on this product unless the user asks about something else.
+      {{/if}}
 
       Order History: {{{orderHistory}}}
       User Query: {{{query}}}
