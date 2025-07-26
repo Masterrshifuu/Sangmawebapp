@@ -26,6 +26,8 @@ import {
     CarouselPrevious,
     type CarouselApi,
   } from "@/components/ui/carousel"
+import { HorizontalScroller } from '@/components/horizontal-scroller';
+import { ProductCard } from '@/components/product-card';
 
 // Helper component for star ratings
 const StarRating = ({ rating = 4.5, reviewCount = 0 }: { rating?: number; reviewCount?: number }) => (
@@ -67,6 +69,41 @@ const ProductPageSkeleton = () => (
         </main>
     </>
 );
+
+const FeaturedProducts = ({ products }: { products: Product[] }) => {
+    const featured = products.filter(p => p.isBestseller);
+    if (featured.length === 0) return null;
+
+    return (
+        <section>
+            <h2 className="text-2xl font-bold mb-4 font-headline">Featured Items</h2>
+            <HorizontalScroller>
+                {featured.map(product => (
+                    <CarouselItem key={product.id} className="basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5">
+                        <ProductCard product={product} />
+                    </CarouselItem>
+                ))}
+            </HorizontalScroller>
+        </section>
+    );
+}
+
+const RecommendedProducts = ({ products, currentProductId }: { products: Product[], currentProductId: string }) => {
+    const recommended = products.filter(p => p.id !== currentProductId).sort(() => 0.5 - Math.random()).slice(0, 10);
+    if (recommended.length === 0) return null;
+
+    return (
+        <section>
+            <h2 className="text-2xl font-bold mb-4 font-headline">Recommended For You</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {recommended.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                ))}
+            </div>
+        </section>
+    );
+};
+
 
 export default function ProductPage() {
   const params = useParams();
@@ -260,8 +297,10 @@ export default function ProductPage() {
                 </div>
             </div>
 
-            <div className="mt-24">
+            <div className="mt-24 space-y-16">
                 <SimilarProducts products={similarProducts} />
+                <FeaturedProducts products={products} />
+                <RecommendedProducts products={products} currentProductId={product.id} />
             </div>
         </main>
     </>
