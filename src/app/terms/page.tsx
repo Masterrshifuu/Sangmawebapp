@@ -1,5 +1,6 @@
 
 import Header from '@/components/header';
+import Link from 'next/link';
 
 export default function TermsPage() {
   return (
@@ -16,9 +17,11 @@ export default function TermsPage() {
             liable for minor delays due to traffic or weather. All products are
             subject to availability. We reserve the right to refuse service or
             cancel orders at our discretion. You are responsible for providing a
-            correct and safe delivery address. All payments are final as per
- our
-            Refund Policy.
+            correct and safe delivery address. All payments are final as per our{' '}
+            <Link href="/refund-policy" className="text-blue-600 hover:underline">
+                Refund Policy
+            </Link>
+            .
           </p>
           {/* Add more detailed terms here */}
         </div>
