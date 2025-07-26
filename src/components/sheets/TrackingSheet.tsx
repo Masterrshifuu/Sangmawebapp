@@ -199,8 +199,32 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
     )
 }
 
-interface DeliveryTimeInfo {
-    endTime: string;
+function getISTDate() {
+    const now = new Date();
+    const utcOffset = now.getTimezoneOffset() * 60000;
+    const istOffset = 5.5 * 3600000;
+    return new Date(now.getTime() + utcOffset + istOffset);
+}
+
+function getDynamicDeliveryTime() {
+    const now = getISTDate();
+    const currentHour = now.getHours();
+
+    let deliveryTime = new Date(now);
+
+    if (currentHour >= 9 && currentHour < 18) {
+        // Between 9 AM and 6 PM: current time + 35 minutes
+        deliveryTime.setMinutes(now.getMinutes() + 35);
+    } else {
+        // Outside business hours: set to 9:30 AM
+        deliveryTime.setHours(9, 30, 0, 0);
+        if (currentHour >= 18) {
+            // After 6 PM, set for tomorrow
+            deliveryTime.setDate(now.getDate() + 1);
+        }
+    }
+
+    return format(deliveryTime, 'hh:mm a');
 }
 
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
@@ -209,7 +233,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
   const [recentOrder, setRecentOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deliveryTimeInfo, setDeliveryTimeInfo] = useState<DeliveryTimeInfo | null>(null);
+  const [estimatedTime, setEstimatedTime] = useState('');
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -218,13 +242,24 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     });
     return () => unsubscribe();
   }, []);
+  
+  // Effect for live time update
+  useEffect(() => {
+    if (activeOrder) {
+      setEstimatedTime(getDynamicDeliveryTime());
+      const intervalId = setInterval(() => {
+        setEstimatedTime(getDynamicDeliveryTime());
+      }, 60000); // Update every minute
+      return () => clearInterval(intervalId);
+    }
+  }, [activeOrder]);
+
 
   const fetchOrders = async (userId: string) => {
     setLoading(true);
     setError(null);
     setActiveOrder(null);
     setRecentOrder(null);
-    setDeliveryTimeInfo(null);
 
     try {
       const ordersRef = collection(db, 'orders');
@@ -236,6 +271,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       }
 
       const allOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+      
       const userOrders = allOrders
         .filter(order => order.userId === userId)
         .sort((a, b) => (b.createdAt as any).seconds - (a.createdAt as any).seconds);
@@ -248,12 +284,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       const foundActiveOrder = userOrders.find(order => order.status.toLowerCase() !== 'delivered');
 
       if (foundActiveOrder) {
-        const createdAt = (foundActiveOrder.createdAt as Timestamp).toDate();
-        const deliveryTime = new Date(createdAt.getTime() + 35 * 60000);
-        
-        setDeliveryTimeInfo({
-            endTime: format(deliveryTime, 'hh:mm a'),
-        });
         setActiveOrder(foundActiveOrder);
       } else {
         setRecentOrder(userOrders[0]);
@@ -307,14 +337,10 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                 </div>
             ) : activeOrder ? (
               <>
-                {deliveryTimeInfo && (
-                  <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center">
-                    <p className="text-sm">Estimated Delivery</p>
-                    <p className="text-2xl font-bold">
-                        {deliveryTimeInfo.endTime}
-                    </p>
-                  </div>
-                )}
+                <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center">
+                  <p className="text-sm">Estimated Delivery</p>
+                  <p className="text-2xl font-bold">{estimatedTime}</p>
+                </div>
                 <TrackingTimeline status={activeOrder.status} />
                 <OrderSummaryCard items={activeOrder.items} />
               </>
@@ -329,3 +355,5 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     </Drawer>
   );
 }
+
+    
