@@ -25,6 +25,7 @@ import { ScrollArea } from '../ui/scroll-area';
 import { getStoreStatus } from '@/lib/datetime';
 import { createOrderTimer } from '@/lib/timer';
 import { incrementUserStat } from '@/lib/user';
+import { Checkbox } from '../ui/checkbox';
 
 interface CheckoutSheetProps {
     open: boolean;
@@ -57,10 +58,12 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [storeStatus, setStoreStatus] = useState(getStoreStatus());
+  const [scheduleForNextDay, setScheduleForNextDay] = useState(false);
 
   useEffect(() => {
     // Re-check store status when the sheet opens
     if (open) {
+        setStoreStatus(getStoreStatus());
         const statusInterval = setInterval(() => {
             setStoreStatus(getStoreStatus());
         }, 1000 * 30); // check every 30 seconds
@@ -76,6 +79,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
         setScreenshotPreview(null);
         setIsPlacingOrder(false);
         setIsVerifying(false);
+        setScheduleForNextDay(false);
     }
   }, [open]);
 
@@ -108,8 +112,12 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   };
 
   const placeOrder = async (isVerified: boolean = false) => {
-    if (!user || deliveryCharge === null || !storeStatus.isOpen) return;
+    if (!user || deliveryCharge === null) return;
+    if (!storeStatus.isOpen && !scheduleForNextDay) return;
+
     setIsPlacingOrder(true);
+
+    const orderStatus = storeStatus.isOpen ? 'placed' : 'scheduled';
 
     const orderData: Order = {
       userId: user.uid,
@@ -126,7 +134,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
         imageUrl: item.product.imageUrl
       })),
       paymentMethod,
-      status: 'placed',
+      status: orderStatus,
       totalAmount: finalTotal,
       estimatedDeliveryTime: 35,
       extraTime: 0,
@@ -135,14 +143,17 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
     try {
       const orderDocRef = await addDoc(collection(db, 'orders'), orderData);
-      // Create the timer document as well
-      await createOrderTimer(orderDocRef.id, user.uid);
-      // Increment the user's total order count
+      
+      // Only create a timer for immediate orders
+      if (orderStatus === 'placed') {
+        await createOrderTimer(orderDocRef.id, user.uid);
+      }
+
       await incrementUserStat(user.uid, 'totalOrders');
 
       toast({
-        title: 'Order Placed Successfully!',
-        description: 'Thank you for your purchase. You can track your order in the tracking section.',
+        title: orderStatus === 'placed' ? 'Order Placed Successfully!' : 'Order Scheduled!',
+        description: orderStatus === 'placed' ? 'Thank you for your purchase. You can track your order in the tracking section.' : 'Your order has been scheduled for the next opening time.',
       });
       clearCart();
       onOpenChange(false);
@@ -228,6 +239,8 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
         )
     }
 
+    const canPlaceOrder = storeStatus.isOpen || scheduleForNextDay;
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
              {!storeStatus.isOpen && (
@@ -237,8 +250,14 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
                            <AlertCircle /> Store Closed
                         </CardTitle>
                     </CardHeader>
-                    <CardContent className="text-yellow-700">
-                        {storeStatus.message}
+                    <CardContent className="text-yellow-700 space-y-4">
+                        <p>{storeStatus.message}</p>
+                        <div className="flex items-center space-x-2 p-3 bg-yellow-100 rounded-md">
+                            <Checkbox id="schedule" checked={scheduleForNextDay} onCheckedChange={(checked) => setScheduleForNextDay(!!checked)} />
+                            <label htmlFor="schedule" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                Yes, schedule my order for the next available slot.
+                            </label>
+                        </div>
                     </CardContent>
                 </Card>
              )}
@@ -280,20 +299,25 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
                     <CardDescription>Select how you want to pay for your order.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <RadioGroup value={paymentMethod} onValueChange={(v) => setPaymentMethod(v as 'cod' | 'upi')} className="space-y-4">
-                        <Label htmlFor="cod" className="flex items-center gap-4 p-4 border rounded-lg cursor-pointer has-[:checked]:bg-muted/50 has-[:checked]:border-primary">
-                            <RadioGroupItem value="cod" id="cod" />
+                    <RadioGroup 
+                        value={paymentMethod} 
+                        onValueChange={(v) => setPaymentMethod(v as 'cod' | 'upi')} 
+                        className="space-y-4"
+                        disabled={!canPlaceOrder}
+                    >
+                        <Label htmlFor="cod" className={`flex items-center gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${canPlaceOrder ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+                            <RadioGroupItem value="cod" id="cod" disabled={!canPlaceOrder} />
                             <div>
                                 <p className="font-semibold">Cash on Delivery</p>
                                 <p className="text-sm text-muted-foreground">Pay with cash when your order arrives.</p>
                             </div>
                         </Label>
-                        <Label htmlFor="upi" className="flex items-start gap-4 p-4 border rounded-lg cursor-pointer has-[:checked]:bg-muted/50 has-[:checked]:border-primary">
-                             <RadioGroupItem value="upi" id="upi" />
+                        <Label htmlFor="upi" className={`flex items-start gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${canPlaceOrder ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+                             <RadioGroupItem value="upi" id="upi" disabled={!canPlaceOrder} />
                             <div className="flex-1">
                                 <p className="font-semibold">Pay with UPI</p>
                                 <p className="text-sm text-muted-foreground">Scan the QR code and upload a screenshot of your payment.</p>
-                                {paymentMethod === 'upi' && (
+                                {paymentMethod === 'upi' && canPlaceOrder && (
                                     <div className="mt-4 space-y-4">
                                         <div className="bg-white p-2 rounded-md max-w-[200px] mx-auto">
                                              <Image 
@@ -340,7 +364,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
                 type="submit" 
                 className="w-full" 
                 size="lg"
-                disabled={isPlacingOrder || isVerifying || (paymentMethod === 'upi' && !screenshotFile) || !storeStatus.isOpen}
+                disabled={isPlacingOrder || isVerifying || (paymentMethod === 'upi' && !screenshotFile) || !canPlaceOrder}
             >
                 {isPlacingOrder || isVerifying ? (
                     <Loader2 className="animate-spin" />
