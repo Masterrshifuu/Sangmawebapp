@@ -11,7 +11,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const VerifyPaymentInputSchema = z.object({
+const VerifyPaymentInputSchema = z.object({
   photoDataUri: z
     .string()
     .describe(
@@ -21,7 +21,7 @@ export const VerifyPaymentInputSchema = z.object({
 });
 export type VerifyPaymentInput = z.infer<typeof VerifyPaymentInputSchema>;
 
-export const VerifyPaymentOutputSchema = z.object({
+const VerifyPaymentOutputSchema = z.object({
   isPaymentVerified: z.boolean().describe('Whether or not the payment amount in the screenshot matches the expected amount.'),
   reason: z.string().optional().describe('The reason why the verification failed.'),
   foundAmount: z.string().optional().describe('The amount found in the screenshot.'),
