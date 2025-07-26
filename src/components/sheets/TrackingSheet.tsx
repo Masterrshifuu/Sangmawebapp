@@ -229,7 +229,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     try {
       const ordersRef = collection(db, 'orders');
       
-      // Simpler query: Get the last 5 orders for the user, sorted by creation date.
       const recentOrdersQuery = query(
         ordersRef,
         where('userId', '==', userId),
@@ -246,7 +245,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
 
       const allRecentOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
 
-      // Find the first order that is NOT delivered. This is our active order.
       const foundActiveOrder = allRecentOrders.find(order => order.status.toLowerCase() !== 'delivered');
 
       if (foundActiveOrder) {
@@ -257,7 +255,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         setEstimatedDeliveryTime(deliveryTime);
         setActiveOrder(foundActiveOrder);
       } else {
-        // If no active order was found, the most recent one must be delivered.
         setRecentOrder(allRecentOrders[0]);
       }
 
