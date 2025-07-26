@@ -172,7 +172,7 @@ const NoOrderState = () => (
 const RecentOrderCard = ({ order }: { order: Order }) => {
     const createdAt = (order.createdAt as unknown as Timestamp).toDate();
     
-    const deliveryDurationMinutes = Math.floor(Math.random() * (45 - 25 + 1)) + 25;
+    const deliveryDurationMinutes = 35; // Fixed delivery time as requested
 
     return (
       <div className="space-y-4">
@@ -199,13 +199,18 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
     )
 }
 
+interface DeliveryTimeInfo {
+    startTime: string;
+    endTime: string;
+}
+
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [recentOrder, setRecentOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [estimatedDeliveryTime, setEstimatedDeliveryTime] = useState<Date | null>(null);
+  const [deliveryTimeInfo, setDeliveryTimeInfo] = useState<DeliveryTimeInfo | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -220,12 +225,10 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     setError(null);
     setActiveOrder(null);
     setRecentOrder(null);
-    setEstimatedDeliveryTime(null);
+    setDeliveryTimeInfo(null);
 
     try {
       const ordersRef = collection(db, 'orders');
-      
-      // Fetch all orders - this avoids the need for a composite index
       const querySnapshot = await getDocs(ordersRef);
       
       if (querySnapshot.empty) {
@@ -233,7 +236,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      // Filter and sort on the client-side
       const allOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
       const userOrders = allOrders
         .filter(order => order.userId === userId)
@@ -248,13 +250,14 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
 
       if (foundActiveOrder) {
         const createdAt = (foundActiveOrder.createdAt as Timestamp).toDate();
-        const randomMinutes = Math.floor(Math.random() * (45 - 25 + 1)) + 25;
-        const deliveryTime = new Date(createdAt.getTime() + randomMinutes * 60000);
+        const deliveryTime = new Date(createdAt.getTime() + 35 * 60000);
         
-        setEstimatedDeliveryTime(deliveryTime);
+        setDeliveryTimeInfo({
+            startTime: format(createdAt, 'hh:mm a'),
+            endTime: format(deliveryTime, 'hh:mm a'),
+        });
         setActiveOrder(foundActiveOrder);
       } else {
-        // If no active order, the first one in the sorted list is the most recent delivered one
         setRecentOrder(userOrders[0]);
       }
 
@@ -306,11 +309,14 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                 </div>
             ) : activeOrder ? (
               <>
-                {estimatedDeliveryTime && activeOrder.status !== 'delivered' && (
+                {deliveryTimeInfo && (
                   <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center">
                     <p className="text-sm">Estimated Delivery</p>
                     <p className="text-2xl font-bold">
-                      {format(estimatedDeliveryTime, 'hh:mm a')}
+                        {deliveryTimeInfo.endTime}
+                    </p>
+                    <p className="text-xs mt-1">
+                        ({deliveryTimeInfo.startTime} + 35 mins)
                     </p>
                   </div>
                 )}
