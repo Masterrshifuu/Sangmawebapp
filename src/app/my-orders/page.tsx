@@ -113,10 +113,15 @@ export default function MyOrdersPage() {
       
       try {
         const ordersRef = collection(db, 'orders');
-        const q = query(ordersRef, where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+        // This simple query will not require a composite index.
+        const q = query(ordersRef, where('userId', '==', user.uid));
         const querySnapshot = await getDocs(q);
 
         const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+        
+        // Sort the orders on the client-side to avoid complex queries.
+        fetchedOrders.sort((a, b) => (b.createdAt as any).seconds - (a.createdAt as any).seconds);
+
         setOrders(fetchedOrders);
       } catch (err: any) {
         console.error("Error fetching orders:", err);
