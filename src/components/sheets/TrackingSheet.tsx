@@ -18,7 +18,6 @@ import {
   Truck,
   Home,
   Loader2,
-  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -33,7 +32,7 @@ import {
   limit,
 } from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
 
@@ -177,9 +176,7 @@ const NoOrderState = () => (
 const RecentOrderCard = ({ order }: { order: Order }) => {
     const createdAt = (order.createdAt as unknown as Timestamp).toDate();
     
-    // Assuming delivery took between 25 to 45 minutes for delivered orders
     const deliveryDurationMinutes = Math.floor(Math.random() * (45 - 25 + 1)) + 25;
-    const deliveredAt = new Date(createdAt.getTime() + deliveryDurationMinutes * 60000);
 
     return (
       <div className="space-y-4">
@@ -232,12 +229,11 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     try {
       const ordersRef = collection(db, 'orders');
       
-      // Query for active order
       const activeOrderQuery = query(
         ordersRef,
         where('userId', '==', userId),
         where('status', '!=', 'delivered'),
-        orderBy('status'), // Firestore requires an orderBy when using a relational operator
+        orderBy('status'), 
         orderBy('createdAt', 'desc'),
         limit(1)
       );
@@ -255,7 +251,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
 
         setActiveOrder({ id: orderDoc.id, ...orderData } as Order);
       } else {
-        // No active order, query for the most recent delivered order
         const recentOrderQuery = query(
             ordersRef,
             where('userId', '==', userId),
@@ -281,7 +276,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     }
   };
   
-  // Fetch order when sheet opens and user is available
   useEffect(() => {
     if (open && user) {
         fetchOrders(user.uid);
