@@ -24,12 +24,8 @@ import Image from 'next/image';
 import { db, auth } from '@/lib/firebase';
 import {
   collection,
-  query,
-  where,
   getDocs,
   Timestamp,
-  orderBy,
-  limit,
 } from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
 import { format } from 'date-fns';
@@ -229,23 +225,26 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     try {
       const ordersRef = collection(db, 'orders');
       
-      const recentOrdersQuery = query(
-        ordersRef,
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc'),
-        limit(5)
-      );
-
-      const querySnapshot = await getDocs(recentOrdersQuery);
+      // Fetch all orders - this avoids the need for a composite index
+      const querySnapshot = await getDocs(ordersRef);
       
       if (querySnapshot.empty) {
         setLoading(false);
         return;
       }
 
-      const allRecentOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+      // Filter and sort on the client-side
+      const allOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+      const userOrders = allOrders
+        .filter(order => order.userId === userId)
+        .sort((a, b) => (b.createdAt as any).seconds - (a.createdAt as any).seconds);
 
-      const foundActiveOrder = allRecentOrders.find(order => order.status.toLowerCase() !== 'delivered');
+      if (userOrders.length === 0) {
+        setLoading(false);
+        return;
+      }
+
+      const foundActiveOrder = userOrders.find(order => order.status.toLowerCase() !== 'delivered');
 
       if (foundActiveOrder) {
         const createdAt = (foundActiveOrder.createdAt as Timestamp).toDate();
@@ -255,16 +254,13 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         setEstimatedDeliveryTime(deliveryTime);
         setActiveOrder(foundActiveOrder);
       } else {
-        setRecentOrder(allRecentOrders[0]);
+        // If no active order, the first one in the sorted list is the most recent delivered one
+        setRecentOrder(userOrders[0]);
       }
 
     } catch (err: any) {
       console.error('Error fetching order:', err);
-      if (err.code === 'failed-precondition') {
-          setError('This query requires a Firestore index. Please create it in your Firebase console.');
-      } else {
-          setError('An error occurred while fetching your order. Please try again later.');
-      }
+      setError('An error occurred while fetching your order. Please try again later.');
     } finally {
       setLoading(false);
     }
