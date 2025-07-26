@@ -175,8 +175,6 @@ const NoOrderState = () => (
 
 
 const RecentOrderCard = ({ order }: { order: Order }) => {
-    const createdAt = (order.createdAt as unknown as Timestamp).toDate();
-    const deliveryDurationMinutes = order.finalETA || 35;
 
     return (
       <div className="space-y-4">
@@ -184,19 +182,12 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
             <h3 className="text-lg font-semibold">No Active Orders</h3>
             <p className="text-sm text-muted-foreground">Showing your most recent delivery.</p>
         </div>
-        <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm space-y-3">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">Order Date</span>
-            <span className="font-medium">{format(createdAt, "PPP")}</span>
-          </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">Status</span>
-            <span className="font-medium capitalize text-green-600">Delivered</span>
-          </div>
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-muted-foreground">Delivery Time</span>
-            <span className="font-medium">{deliveryDurationMinutes} minutes</span>
-          </div>
+        <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
+            <p className="text-sm">Estimated Delivery</p>
+            <p className="text-3xl font-bold flex items-center justify-center gap-2">
+                <Timer />
+                35 minutes
+            </p>
         </div>
         <OrderSummaryCard items={order.items} />
       </div>
