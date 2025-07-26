@@ -14,16 +14,18 @@ import {
 import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { CartItemCard } from '@/components/cart/CartItemCard';
 import { useLocation } from '@/hooks/use-location';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { Separator } from '@/components/ui/separator';
-import Link from 'next/link';
+import { CheckoutSheet } from './CheckoutSheet';
 
 export function CartSheet({ children }: { children: React.ReactNode }) {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { location } = useLocation();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
 
   const deliveryCharge = useMemo(() => {
     if (cart.length === 0) return 0;
@@ -33,9 +35,14 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
   const isServiceable = deliveryCharge !== null;
   const finalTotal = isServiceable ? totalPrice + (deliveryCharge ?? 0) : totalPrice;
 
+  const handleProceedToCheckout = () => {
+    setIsCartOpen(false);
+    setIsCheckoutOpen(true);
+  };
+
   return (
     <>
-      <Drawer>
+      <Drawer open={isCartOpen} onOpenChange={setIsCartOpen}>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent
           className="h-full md:h-[80vh] flex flex-col p-0"
@@ -100,17 +107,15 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                     </p>
                   )}
 
-                  <DrawerClose asChild>
-                    <Link href="/checkout" passHref>
-                        <Button 
-                            className="w-full" 
-                            disabled={!isServiceable}
-                            aria-disabled={!isServiceable}
-                        >
-                            Proceed to Checkout
-                        </Button>
-                    </Link>
-                  </DrawerClose>
+                  <Button 
+                      className="w-full" 
+                      disabled={!isServiceable}
+                      aria-disabled={!isServiceable}
+                      onClick={handleProceedToCheckout}
+                  >
+                      Proceed to Checkout
+                  </Button>
+                  
                   <Button variant="outline" className="w-full" onClick={clearCart}>
                     Clear Cart
                   </Button>
@@ -120,6 +125,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
           )}
         </DrawerContent>
       </Drawer>
+      <CheckoutSheet open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen} />
     </>
   );
 }

@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/hooks/use-cart';
 import { useLocation } from '@/hooks/use-location';
@@ -11,7 +11,6 @@ import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { verifyPayment, VerifyPaymentInput } from '@/ai/flows/verify-payment-flow';
 import type { CartItem, Order, User } from '@/lib/types';
-import Header from '@/components/header';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -19,13 +18,18 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload } from 'lucide-react';
+import { Loader2, Upload, ChevronLeft } from 'lucide-react';
 import Image from 'next/image';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose, DrawerFooter } from '../ui/drawer';
+import { ScrollArea } from '../ui/scroll-area';
+
+interface CheckoutSheetProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+}
 
 const CheckoutPageSkeleton = () => (
-    <>
-      <Header />
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
+    <div className="p-4">
         <div className="animate-pulse space-y-8">
             <div className="space-y-2">
                 <div className="h-8 w-1/2 bg-muted rounded"></div>
@@ -34,11 +38,10 @@ const CheckoutPageSkeleton = () => (
             <div className="h-64 bg-muted rounded-lg"></div>
             <div className="h-48 bg-muted rounded-lg"></div>
         </div>
-      </main>
-    </>
+    </div>
 )
 
-export default function CheckoutPage() {
+export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
@@ -50,6 +53,17 @@ export default function CheckoutPage() {
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+
+  useEffect(() => {
+    // Reset state when the sheet is closed
+    if (!open) {
+        setPaymentMethod('cod');
+        setScreenshotFile(null);
+        setScreenshotPreview(null);
+        setIsPlacingOrder(false);
+        setIsVerifying(false);
+    }
+  }, [open]);
 
   const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, location), [totalPrice, location]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
@@ -101,6 +115,7 @@ export default function CheckoutPage() {
         description: 'Thank you for your purchase. You can track your order in the tracking section.',
       });
       clearCart();
+      onOpenChange(false);
       router.push('/?order=success');
     } catch (error) {
       console.error("Error placing order: ", error);
@@ -162,45 +177,43 @@ export default function CheckoutPage() {
     }
   };
 
-  if (authLoading) return <CheckoutPageSkeleton />;
+  const renderContent = () => {
+    if (authLoading) return <CheckoutPageSkeleton />;
 
-  if (!user && !authLoading) {
-      router.push('/?login=true'); // Redirect to home to open login prompt
+    if (!user && !authLoading) {
+        toast({ title: 'Please log in to continue.'});
+        onOpenChange(false);
+        // A bit of a hack to re-trigger login prompt on home
+        router.push('/?login=true'); 
+        return <CheckoutPageSkeleton />;
+    }
+    
+    if (cart.length === 0) {
+      onOpenChange(false);
       return <CheckoutPageSkeleton />;
-  }
-  
-  if (cart.length === 0) {
-    router.push('/');
-    return <CheckoutPageSkeleton />;
-  }
-  
-  if (deliveryCharge === null) {
-      return (
-          <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
-              <h2 className="text-2xl font-bold">Unserviceable Location</h2>
-              <p className="text-muted-foreground mt-2">We do not deliver to your selected location.</p>
-              <Button onClick={() => router.push('/')} className="mt-4">Go Back</Button>
-          </div>
-      )
-  }
+    }
+    
+    if (deliveryCharge === null) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 text-center">
+                <h2 className="text-2xl font-bold">Unserviceable Location</h2>
+                <p className="text-muted-foreground mt-2">We do not deliver to your selected location.</p>
+                <Button onClick={() => onOpenChange(false)} className="mt-4">Go Back</Button>
+            </div>
+        )
+    }
 
-  return (
-    <>
-      <Header />
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <h1 className="text-3xl font-bold font-headline mb-2">Checkout</h1>
-        <p className="text-muted-foreground mb-8">Confirm your order and payment method.</p>
-
-        <form onSubmit={handleSubmit} className="space-y-8">
+    return (
+        <form onSubmit={handleSubmit} className="space-y-4">
             <Card>
                 <CardHeader>
                     <CardTitle>Order Summary</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <div className="space-y-2 text-sm">
+                    <div className="space-y-2 text-sm max-h-32 overflow-y-auto">
                         {cart.map(item => (
                             <div key={item.product.id} className="flex justify-between">
-                                <span className="text-muted-foreground">{item.product.name} x {item.quantity}</span>
+                                <span className="text-muted-foreground flex-1 truncate pr-2">{item.product.name} x {item.quantity}</span>
                                 <span>INR {(item.product.mrp * item.quantity).toFixed(2)}</span>
                             </div>
                         ))}
@@ -256,7 +269,7 @@ export default function CheckoutPage() {
                                             />
                                         </div>
                                         {screenshotPreview && (
-                                            <div className="mt-2">
+                                            <div className="mt-2 text-center">
                                                 <Image src={screenshotPreview} alt="Screenshot preview" width={150} height={300} className="rounded-md mx-auto border" />
                                             </div>
                                         )}
@@ -299,7 +312,28 @@ export default function CheckoutPage() {
                 )}
             </Button>
         </form>
-      </main>
-    </>
+    );
+  }
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="h-full md:h-[90vh] flex flex-col p-0">
+            <DrawerHeader className="p-4 pt-4 border-b flex items-center justify-between">
+                <DrawerClose asChild>
+                    <Button variant="ghost" size="icon">
+                        <ChevronLeft />
+                        <span className="sr-only">Back</span>
+                    </Button>
+                </DrawerClose>
+                <DrawerTitle className="flex-1 text-center">Checkout</DrawerTitle>
+                <div className="w-10" />
+            </DrawerHeader>
+            <ScrollArea className="flex-1">
+                <div className="p-4">
+                    {renderContent()}
+                </div>
+            </ScrollArea>
+        </DrawerContent>
+    </Drawer>
   );
 }
