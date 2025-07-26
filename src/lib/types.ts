@@ -1,5 +1,5 @@
 
-import { Timestamp } from "firebase/firestore";
+import { FieldValue, Timestamp } from "firebase/firestore";
 
 export interface Product {
     id: string;
@@ -16,6 +16,14 @@ export interface Product {
     tags?: string[];
     isBestseller?: boolean;
     stock: number;
+}
+
+export interface User {
+  uid: string;
+  email?: string | null;
+  displayName?: string | null;
+  photoURL?: string | null;
+  phoneNumber?: string | null;
 }
 
 export interface CartItem {
@@ -64,8 +72,8 @@ export interface OrderItem {
 }
   
 export interface Order {
-    id: string;
-    createdAt: Timestamp;
+    id?: string;
+    createdAt: Timestamp | FieldValue;
     deliveryAddress: string;
     items: OrderItem[];
     paymentMethod: string;

@@ -14,21 +14,16 @@ import {
 import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useState, useMemo } from 'react';
-import { CheckoutDialog } from '@/components/CheckoutDialog';
+import { useMemo } from 'react';
 import { CartItemCard } from '@/components/cart/CartItemCard';
 import { useLocation } from '@/hooks/use-location';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { Separator } from '@/components/ui/separator';
+import Link from 'next/link';
 
 export function CartSheet({ children }: { children: React.ReactNode }) {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { location } = useLocation();
-
-  const handleCheckout = () => {
-    setIsCheckoutOpen(true);
-  };
 
   const deliveryCharge = useMemo(() => {
     if (cart.length === 0) return 0;
@@ -106,13 +101,15 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                   )}
 
                   <DrawerClose asChild>
-                    <Button 
-                      className="w-full" 
-                      onClick={handleCheckout} 
-                      disabled={!isServiceable}
-                    >
-                      Proceed to Checkout
-                    </Button>
+                    <Link href="/checkout" passHref>
+                        <Button 
+                            className="w-full" 
+                            disabled={!isServiceable}
+                            aria-disabled={!isServiceable}
+                        >
+                            Proceed to Checkout
+                        </Button>
+                    </Link>
                   </DrawerClose>
                   <Button variant="outline" className="w-full" onClick={clearCart}>
                     Clear Cart
@@ -123,7 +120,6 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
           )}
         </DrawerContent>
       </Drawer>
-      <CheckoutDialog open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen} />
     </>
   );
 }
