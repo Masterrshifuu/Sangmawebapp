@@ -200,7 +200,6 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
 }
 
 interface DeliveryTimeInfo {
-    startTime: string;
     endTime: string;
 }
 
@@ -253,7 +252,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         const deliveryTime = new Date(createdAt.getTime() + 35 * 60000);
         
         setDeliveryTimeInfo({
-            startTime: format(createdAt, 'hh:mm a'),
             endTime: format(deliveryTime, 'hh:mm a'),
         });
         setActiveOrder(foundActiveOrder);
@@ -314,9 +312,6 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                     <p className="text-sm">Estimated Delivery</p>
                     <p className="text-2xl font-bold">
                         {deliveryTimeInfo.endTime}
-                    </p>
-                    <p className="text-xs mt-1">
-                        ({deliveryTimeInfo.startTime} + 35 mins)
                     </p>
                   </div>
                 )}
