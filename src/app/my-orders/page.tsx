@@ -118,19 +118,20 @@ export default function MyOrdersPage() {
       
       try {
         const ordersRef = collection(db, 'orders');
-        // This simple query will not require a composite index.
-        const q = query(ordersRef, where('userId', '==', user.uid));
+        // This query now requires a composite index on (userId, createdAt)
+        const q = query(ordersRef, where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
 
         const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
         
-        // Sort the orders on the client-side to avoid complex queries.
-        fetchedOrders.sort((a, b) => (b.createdAt as any).seconds - (a.createdAt as any).seconds);
-
         setOrders(fetchedOrders);
       } catch (err: any) {
         console.error("Error fetching orders:", err);
-        setError("Failed to fetch your orders. Please try again later. This may be due to a missing Firestore index.");
+        if (err.code === 'failed-precondition') {
+             setError("This query requires a Firestore index. Please check the browser console for a link to create it, or check the 'Console Error' in the preview window.");
+        } else {
+             setError("Failed to fetch your orders. Please try again later.");
+        }
       } finally {
         setLoading(false);
       }
