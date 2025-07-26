@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
-import { format } from 'date-fns';
 
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -15,7 +14,7 @@ import SimilarProducts from '@/components/similar-products';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Star, Clock } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CartQuantityControl } from '@/components/cart/CartQuantityControl';
 import { useProducts } from '@/hooks/use-products';
@@ -30,6 +29,7 @@ import {
   } from "@/components/ui/carousel"
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { ProductCard } from '@/components/product-card';
+import { DynamicDeliveryTime } from '@/components/DynamicDeliveryTime';
 
 // Helper component for star ratings
 const StarRating = ({ rating = 4.5, reviewCount = 0 }: { rating?: number; reviewCount?: number }) => (
@@ -105,31 +105,6 @@ const RecommendedProducts = ({ products, currentProductId }: { products: Product
         </section>
     );
 };
-
-const DynamicDeliveryTime = () => {
-    const [deliveryTime, setDeliveryTime] = useState('');
-  
-    useEffect(() => {
-      const calculateDeliveryTime = () => {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() + 35);
-        setDeliveryTime(format(now, 'p')); // Formats to "4:30 PM"
-      };
-  
-      calculateDeliveryTime();
-      const intervalId = setInterval(calculateDeliveryTime, 60000); // Update every minute
-  
-      return () => clearInterval(intervalId);
-    }, []);
-  
-    return (
-      <div className="flex items-center gap-2 text-green-600 font-medium">
-        <Clock className="w-5 h-5" />
-        <span>Delivery by {deliveryTime}</span>
-      </div>
-    );
-};
-
 
 export default function ProductPage() {
   const params = useParams();

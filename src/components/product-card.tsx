@@ -3,11 +3,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
 import { Product } from "@/lib/types";
 import { useCart } from "@/hooks/use-cart";
 import { Plus } from "lucide-react";
 import { CartQuantityControl } from "./cart/CartQuantityControl";
+import { DynamicDeliveryTime } from "./DynamicDeliveryTime";
 
 export function ProductCard({ product }: { product: Product }) {
     const { cart, addItem } = useCart();
@@ -29,9 +29,10 @@ export function ProductCard({ product }: { product: Product }) {
             <div className="p-3 flex flex-col flex-grow">
                 <Link href={`/product/${product.id}`} className="block">
                     <h3 className="font-semibold text-sm leading-tight truncate">{product.name}</h3>
-                    <p className="text-xs text-muted-foreground mt-1 truncate">{product.description}</p>
                 </Link>
                 
+                <DynamicDeliveryTime className="text-xs mt-1" />
+
                 <div className="mt-auto pt-3 flex justify-between items-end">
                     <div>
                         {typeof product.mrp === 'number' && (
