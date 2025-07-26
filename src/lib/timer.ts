@@ -27,14 +27,14 @@ function processDoc(doc: any): OrderTimer | null {
 }
 
 /**
- * Creates a new timer document in the 'Estimated Timer' collection for a given order.
+ * Creates a new timer document in the 'EstimatedTimer' collection for a given order.
  * @param orderId - The ID of the order.
  * @param userId - The ID of the user who placed the order.
  * @returns The ID of the newly created timer document.
  */
 export async function createOrderTimer(orderId: string, userId: string): Promise<string> {
     try {
-        const timerRef = doc(db, 'Estimated Timer', orderId);
+        const timerRef = doc(db, 'EstimatedTimer', orderId);
         const newTimer: OrderTimer = {
             orderId,
             userId,
@@ -58,7 +58,7 @@ export async function createOrderTimer(orderId: string, userId: string): Promise
  */
 export async function getOrderTimer(orderId: string): Promise<OrderTimer | null> {
     try {
-        const timerRef = doc(db, 'Estimated Timer', orderId);
+        const timerRef = doc(db, 'EstimatedTimer', orderId);
         const docSnap = await getDoc(timerRef);
         if (docSnap.exists()) {
             return { id: docSnap.id, ...docSnap.data() } as OrderTimer;
@@ -78,7 +78,7 @@ export async function getOrderTimer(orderId: string): Promise<OrderTimer | null>
  */
 export async function addExtraTimeToOrder(orderId: string, extraTime: number): Promise<void> {
     try {
-        const timerRef = doc(db, 'Estimated Timer', orderId);
+        const timerRef = doc(db, 'EstimatedTimer', orderId);
         const docSnap = await getDoc(timerRef);
 
         if (!docSnap.exists()) {
