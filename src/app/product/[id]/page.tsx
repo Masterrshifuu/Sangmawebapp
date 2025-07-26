@@ -18,6 +18,7 @@ import { Star, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CartQuantityControl } from '@/components/cart/CartQuantityControl';
 import { useProducts } from '@/hooks/use-products';
+import { getProductById } from '@/lib/products';
 import {
     Carousel,
     CarouselContent,
@@ -113,30 +114,53 @@ export default function ProductPage() {
   const { products, loading: productsLoading, error: productsError } = useProducts();
 
   const [product, setProduct] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
   
   const [carouselApi, setCarouselApi] = useState<CarouselApi>()
   const [currentSlide, setCurrentSlide] = useState(0)
 
   useEffect(() => {
-    if (!id || products.length === 0) return;
+    const fetchProductData = async () => {
+        if (!id) return;
 
-    const currentProduct = products.find(p => p.id === id);
-
-    if (currentProduct) {
-        setProduct(currentProduct);
+        setLoading(true);
+        setError(null);
         
-        const currentSimilarProducts = products
-          .filter(p => p.category === currentProduct.category && p.id !== currentProduct.id)
-          .slice(0, 10);
-        setSimilarProducts(currentSimilarProducts);
-    } else {
-        // Handle case where product is not found after loading
-        if (!productsLoading) {
-            setProduct(null);
+        // First, try to find the product in the global list
+        const productFromState = products.find(p => p.id === id);
+
+        if (productFromState) {
+            setProduct(productFromState);
+        } else {
+            // If not found (e.g., direct link or out of stock), fetch it directly
+            const { product: fetchedProduct, error: fetchError } = await getProductById(id);
+            if (fetchError) {
+                setError(fetchError);
+            } else {
+                setProduct(fetchedProduct);
+            }
         }
+    };
+
+    // Only fetch when products are loaded or if it's the initial load
+    if (!productsLoading) {
+        fetchProductData();
     }
   }, [id, products, productsLoading]);
+
+  useEffect(() => {
+    if (product) {
+        // Find similar products from the global list
+        const currentSimilarProducts = products
+          .filter(p => p.category === product.category && p.id !== product.id)
+          .slice(0, 10);
+        setSimilarProducts(currentSimilarProducts);
+        setLoading(false);
+    }
+  }, [product, products]);
+
 
   useEffect(() => {
     if (!carouselApi) {
@@ -154,21 +178,21 @@ export default function ProductPage() {
     carouselApi?.scrollTo(index);
   }, [carouselApi]);
 
-  if (productsLoading) {
+  if (loading) {
     return <ProductPageSkeleton />;
   }
   
-  if (!product && !productsLoading) {
+  if (!product && !loading) {
       notFound();
   }
 
-  if (productsError) {
+  if (error || productsError) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center">
             <Header />
             <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md max-w-2xl">
                 <h2 className="text-xl font-bold mb-2">Error</h2>
-                <p>{productsError}</p>
+                <p>{error || productsError}</p>
             </div>
       </div>
     );

@@ -1,11 +1,25 @@
 
 import { db } from './firebase';
-import { collection, getDocs, type Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, type Timestamp } from 'firebase/firestore';
 import type { Product } from './types';
 
 // Helper function to check if a value is a Firestore Timestamp
 function isTimestamp(value: any): value is Timestamp {
     return value && typeof value.toDate === 'function';
+}
+
+function processDoc(doc: any) {
+    const data = doc.data();
+    // Convert any Firestore Timestamps to serializable ISO strings
+    for (const key in data) {
+      if (isTimestamp(data[key])) {
+        data[key] = data[key].toDate().toISOString();
+      }
+    }
+    return {
+      id: doc.id,
+      ...data
+    } as Product;
 }
 
 // This function is designed for one-time data fetching, primarily on the server
@@ -18,19 +32,7 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
       return { products: [], error: null };
     }
 
-    const productsList = productsSnapshot.docs.map(doc => {
-      const data = doc.data();
-      // Convert any Firestore Timestamps to serializable ISO strings
-      for (const key in data) {
-        if (isTimestamp(data[key])) {
-          data[key] = data[key].toDate().toISOString();
-        }
-      }
-      return {
-        id: doc.id,
-        ...data
-      } as Product;
-    });
+    const productsList = productsSnapshot.docs.map(processDoc);
 
     return { products: productsList, error: null };
   } catch (error: any) {
@@ -44,4 +46,22 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
     }
     return { products: [], error: errorMessage };
   }
+}
+
+export async function getProductById(id: string): Promise<{ product: Product | null, error: string | null }> {
+    try {
+        const productDocRef = doc(db, 'products', id);
+        const productSnapshot = await getDoc(productDocRef);
+
+        if (!productSnapshot.exists()) {
+            return { product: null, error: 'Product not found.' };
+        }
+        
+        const product = processDoc(productSnapshot);
+
+        return { product, error: null };
+    } catch (error: any) {
+        console.error(`Error fetching product with ID ${id}:`, error);
+        return { product: null, error: `Failed to fetch product: ${error.message}` };
+    }
 }
