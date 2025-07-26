@@ -56,7 +56,7 @@ export type AIState = {
 }[];
 
 export interface Ad {
-  id: string;
+  id:string;
   mediaUrl: string;
   mediaType: 'image' | 'video';
   link?: string;
@@ -78,13 +78,17 @@ export interface Order {
     deliveryAddress: string;
     items: OrderItem[];
     paymentMethod: string;
-
-    status: string;
+    status: string; // e.g., 'placed', 'confirmed', 'out_for_delivery', 'delivered'
     totalAmount: number;
     userEmail: string;
     userId: string;
     userName: string;
     userPhone: string;
+    
+    // Timer related fields
+    estimatedDeliveryTime?: number; // in minutes, e.g., 35
+    extraTime?: number; // in minutes, e.g., 5
+    finalETA?: number; // e.g. 40
 }
 
 export interface Review {
@@ -94,4 +98,14 @@ export interface Review {
     rating: number;
     comment: string;
     createdAt: string; // Stored as ISO string
+}
+
+export interface OrderTimer {
+    id?: string;
+    orderId: string;
+    userId: string;
+    orderTime: Timestamp | FieldValue;
+    estimatedDeliveryTime: number; // 35
+    extraTime: number; // 0 initially
+    finalETA: number; // 35 initially
 }

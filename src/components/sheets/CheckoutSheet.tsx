@@ -18,10 +18,12 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Upload, ChevronLeft } from 'lucide-react';
+import { Loader2, Upload, ChevronLeft, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose, DrawerFooter } from '../ui/drawer';
 import { ScrollArea } from '../ui/scroll-area';
+import { getStoreStatus } from '@/lib/datetime';
+import { createOrderTimer } from '@/lib/timer';
 
 interface CheckoutSheetProps {
     open: boolean;
@@ -53,6 +55,17 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [storeStatus, setStoreStatus] = useState(getStoreStatus());
+
+  useEffect(() => {
+    // Re-check store status when the sheet opens
+    if (open) {
+        const statusInterval = setInterval(() => {
+            setStoreStatus(getStoreStatus());
+        }, 1000 * 30); // check every 30 seconds
+        return () => clearInterval(statusInterval);
+    }
+  }, [open]);
 
   useEffect(() => {
     // Reset state when the sheet is closed
@@ -94,10 +107,10 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   };
 
   const placeOrder = async (isVerified: boolean = false) => {
-    if (!user || deliveryCharge === null) return;
+    if (!user || deliveryCharge === null || !storeStatus.isOpen) return;
     setIsPlacingOrder(true);
 
-    const orderData = {
+    const orderData: Order = {
       userId: user.uid,
       userName: user.displayName || 'Anonymous',
       userEmail: user.email || '',
@@ -114,10 +127,16 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
       paymentMethod,
       status: 'placed',
       totalAmount: finalTotal,
+      estimatedDeliveryTime: 35,
+      extraTime: 0,
+      finalETA: 35,
     };
 
     try {
-      await addDoc(collection(db, 'orders'), orderData);
+      const orderDocRef = await addDoc(collection(db, 'orders'), orderData);
+      // Create the timer document as well
+      await createOrderTimer(orderDocRef.id, user.uid);
+
       toast({
         title: 'Order Placed Successfully!',
         description: 'Thank you for your purchase. You can track your order in the tracking section.',
@@ -189,11 +208,9 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
     if (authLoading) return <CheckoutPageSkeleton />;
 
     if (!user && !authLoading) {
-        // This effect will handle closing if already open
         return <CheckoutPageSkeleton />;
     }
     
-    // This check is now handled by the useEffect
     if (cart.length === 0) {
       return <CheckoutPageSkeleton />;
     }
@@ -210,6 +227,18 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+             {!storeStatus.isOpen && (
+                <Card className="border-yellow-400 bg-yellow-50">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-yellow-800">
+                           <AlertCircle /> Store Closed
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="text-yellow-700">
+                        {storeStatus.message}
+                    </CardContent>
+                </Card>
+             )}
             <Card>
                 <CardHeader>
                     <CardTitle>Order Summary</CardTitle>
@@ -308,7 +337,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
                 type="submit" 
                 className="w-full" 
                 size="lg"
-                disabled={isPlacingOrder || isVerifying || (paymentMethod === 'upi' && !screenshotFile)}
+                disabled={isPlacingOrder || isVerifying || (paymentMethod === 'upi' && !screenshotFile) || !storeStatus.isOpen}
             >
                 {isPlacingOrder || isVerifying ? (
                     <Loader2 className="animate-spin" />

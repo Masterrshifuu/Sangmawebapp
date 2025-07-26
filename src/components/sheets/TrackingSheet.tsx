@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Drawer,
   DrawerContent,
@@ -17,7 +17,7 @@ import {
   Package,
   Truck,
   Home,
-  Loader2,
+  Timer,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -26,11 +26,16 @@ import {
   collection,
   getDocs,
   Timestamp,
+  query,
+  where,
+  orderBy,
+  limit,
 } from 'firebase/firestore';
-import type { Order, OrderItem } from '@/lib/types';
-import { format } from 'date-fns';
+import type { Order, OrderItem, OrderTimer } from '@/lib/types';
+import { format, addMinutes } from 'date-fns';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
+import { getOrderTimer } from '@/lib/timer';
 
 const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
   const firstItem = items[0];
@@ -171,8 +176,7 @@ const NoOrderState = () => (
 
 const RecentOrderCard = ({ order }: { order: Order }) => {
     const createdAt = (order.createdAt as unknown as Timestamp).toDate();
-    
-    const deliveryDurationMinutes = 35; // Fixed delivery time as requested
+    const deliveryDurationMinutes = order.finalETA || 35;
 
     return (
       <div className="space-y-4">
@@ -199,19 +203,57 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
     )
 }
 
-function getDynamicDeliveryTime() {
-    const deliveryTime = new Date();
-    deliveryTime.setMinutes(deliveryTime.getMinutes() + 35);
-    return format(deliveryTime, 'p'); // e.g., "4:30 PM"
-}
+const CountdownTimer = ({ order, timer }: { order: Order, timer: OrderTimer}) => {
+    const [timeLeft, setTimeLeft] = useState('');
+    const [eta, setEta] = useState('');
+
+    const calculateTimeLeft = useCallback(() => {
+        if (!timer?.orderTime) return;
+
+        const orderTime = (timer.orderTime as Timestamp).toDate();
+        const etaMinutes = timer.finalETA || 35;
+        const etaTime = addMinutes(orderTime, etaMinutes);
+        setEta(format(etaTime, 'p'));
+
+        const now = new Date();
+        const difference = etaTime.getTime() - now.getTime();
+
+        if (difference <= 0) {
+            setTimeLeft('Arriving soon');
+            return;
+        }
+
+        const minutes = Math.floor((difference / 1000 / 60) % 60);
+        const seconds = Math.floor((difference / 1000) % 60);
+
+        setTimeLeft(`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`);
+    }, [timer]);
+
+    useEffect(() => {
+        calculateTimeLeft();
+        const intervalId = setInterval(calculateTimeLeft, 1000);
+        return () => clearInterval(intervalId);
+    }, [calculateTimeLeft]);
+
+    return (
+        <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
+            <p className="text-sm">Estimated Delivery by {eta}</p>
+            <p className="text-3xl font-bold flex items-center justify-center gap-2">
+                <Timer />
+                {timeLeft}
+            </p>
+        </div>
+    )
+};
+
 
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+  const [orderTimer, setOrderTimer] = useState<OrderTimer | null>(null);
   const [recentOrder, setRecentOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [estimatedTime, setEstimatedTime] = useState('');
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -221,38 +263,24 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
   
-  // Effect for live time update
-  useEffect(() => {
-    if (activeOrder) {
-      setEstimatedTime(getDynamicDeliveryTime());
-      const intervalId = setInterval(() => {
-        setEstimatedTime(getDynamicDeliveryTime());
-      }, 60000); // Update every minute
-      return () => clearInterval(intervalId);
-    }
-  }, [activeOrder]);
-
-
   const fetchOrders = async (userId: string) => {
     setLoading(true);
     setError(null);
     setActiveOrder(null);
     setRecentOrder(null);
+    setOrderTimer(null);
 
     try {
       const ordersRef = collection(db, 'orders');
-      const querySnapshot = await getDocs(ordersRef);
+      const q = query(
+        ordersRef, 
+        where('userId', '==', userId), 
+        orderBy('createdAt', 'desc'),
+        limit(10) // Look at last 10 orders to find an active one
+      );
+      const querySnapshot = await getDocs(q);
       
-      if (querySnapshot.empty) {
-        setLoading(false);
-        return;
-      }
-
-      const allOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-      
-      const userOrders = allOrders
-        .filter(order => order.userId === userId)
-        .sort((a, b) => (b.createdAt as any).seconds - (a.createdAt as any).seconds);
+      const userOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
 
       if (userOrders.length === 0) {
         setLoading(false);
@@ -260,10 +288,14 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       }
 
       const foundActiveOrder = userOrders.find(order => order.status.toLowerCase() !== 'delivered');
-
+      
       if (foundActiveOrder) {
         setActiveOrder(foundActiveOrder);
+        // Fetch the corresponding timer
+        const timer = await getOrderTimer(foundActiveOrder.id!);
+        setOrderTimer(timer);
       } else {
+        // No active order, show the most recent one
         setRecentOrder(userOrders[0]);
       }
 
@@ -314,12 +346,9 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                     <p className="font-bold">Error</p>
                     <p>{error}</p>
                 </div>
-            ) : activeOrder ? (
+            ) : activeOrder && orderTimer ? (
               <>
-                <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center">
-                  <p className="text-sm">Estimated Delivery</p>
-                  <p className="text-2xl font-bold">{estimatedTime}</p>
-                </div>
+                <CountdownTimer order={activeOrder} timer={orderTimer} />
                 <TrackingTimeline status={activeOrder.status} />
                 <OrderSummaryCard items={activeOrder.items} />
               </>
@@ -334,5 +363,3 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     </Drawer>
   );
 }
-
-    
