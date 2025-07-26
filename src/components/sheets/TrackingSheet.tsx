@@ -327,8 +327,9 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 space-y-6">
             {loading ? (
-                <div className="flex justify-center items-center p-8">
-                    <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                <div className="flex flex-col justify-center items-center p-8 space-y-4">
+                    <Logo className="animate-pulse" />
+                    <p className="text-muted-foreground text-sm">Finding your orders...</p>
                 </div>
             ) : error ? (
                 <div className="p-4 text-center text-red-500 bg-red-50 border border-red-200 rounded-lg">
