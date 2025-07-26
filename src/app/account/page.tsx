@@ -104,7 +104,7 @@ export default function AccountPage() {
   }
   
   const generalItems = [
-    { icon: Package, label: 'My Orders', href: '#' },
+    { icon: Package, label: 'My Orders', href: '/my-orders' },
     { icon: MapPin, label: 'Address Book', href: '#' },
   ];
   
