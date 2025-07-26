@@ -203,14 +203,19 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
     )
 }
 
-const CountdownTimer = ({ order, timer }: { order: Order, timer: OrderTimer}) => {
+const CountdownTimer = ({ timer }: { timer: OrderTimer}) => {
     const [timeLeft, setTimeLeft] = useState('');
     const [eta, setEta] = useState('');
 
     const calculateTimeLeft = useCallback(() => {
-        if (!timer?.orderTime) return;
+        if (!timer?.orderTime || !(timer.orderTime instanceof Timestamp)) {
+          // If orderTime is not a valid Timestamp, we can't calculate.
+          setTimeLeft('Calculating...');
+          setEta('');
+          return;
+        };
 
-        const orderTime = (timer.orderTime as Timestamp).toDate();
+        const orderTime = timer.orderTime.toDate();
         const etaMinutes = timer.finalETA || 35;
         const etaTime = addMinutes(orderTime, etaMinutes);
         setEta(format(etaTime, 'p'));
@@ -263,7 +268,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
   
-  const fetchOrders = async (userId: string) => {
+  const fetchOrders = useCallback(async (userId: string) => {
     setLoading(true);
     setError(null);
     setActiveOrder(null);
@@ -287,13 +292,18 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const foundActiveOrder = userOrders.find(order => order.status.toLowerCase() !== 'delivered');
+      const foundActiveOrder = userOrders.find(order => order.status && order.status.toLowerCase() !== 'delivered');
       
       if (foundActiveOrder) {
         setActiveOrder(foundActiveOrder);
-        // Fetch the corresponding timer
         const timer = await getOrderTimer(foundActiveOrder.id!);
-        setOrderTimer(timer);
+        if (timer) {
+          setOrderTimer(timer);
+        } else {
+           // This case can happen if the timer doc creation fails.
+           // We can show the tracking without a countdown.
+          console.warn(`Timer not found for active order ${foundActiveOrder.id}`)
+        }
       } else {
         // No active order, show the most recent one
         setRecentOrder(userOrders[0]);
@@ -305,7 +315,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
   
   useEffect(() => {
     if (open && user) {
@@ -315,7 +325,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         setActiveOrder(null);
         setRecentOrder(null);
     }
-  }, [open, user]);
+  }, [open, user, fetchOrders]);
 
 
   return (
@@ -346,9 +356,9 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                     <p className="font-bold">Error</p>
                     <p>{error}</p>
                 </div>
-            ) : activeOrder && orderTimer ? (
+            ) : activeOrder ? (
               <>
-                <CountdownTimer order={activeOrder} timer={orderTimer} />
+                {orderTimer && <CountdownTimer timer={orderTimer} />}
                 <TrackingTimeline status={activeOrder.status} />
                 <OrderSummaryCard items={activeOrder.items} />
               </>
