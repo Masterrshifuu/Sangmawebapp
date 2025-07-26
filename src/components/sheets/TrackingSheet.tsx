@@ -229,41 +229,38 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
     try {
       const ordersRef = collection(db, 'orders');
       
-      const activeOrderQuery = query(
+      // Simpler query: Get the last 5 orders for the user, sorted by creation date.
+      const recentOrdersQuery = query(
         ordersRef,
         where('userId', '==', userId),
-        where('status', '!=', 'delivered'),
-        orderBy('status'), 
         orderBy('createdAt', 'desc'),
-        limit(1)
+        limit(5)
       );
 
-      const activeSnapshot = await getDocs(activeOrderQuery);
+      const querySnapshot = await getDocs(recentOrdersQuery);
+      
+      if (querySnapshot.empty) {
+        setLoading(false);
+        return;
+      }
 
-      if (!activeSnapshot.empty) {
-        const orderDoc = activeSnapshot.docs[0];
-        const orderData = orderDoc.data();
-        const createdAt = (orderData.createdAt as Timestamp).toDate();
+      const allRecentOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
 
+      // Find the first order that is NOT delivered. This is our active order.
+      const foundActiveOrder = allRecentOrders.find(order => order.status.toLowerCase() !== 'delivered');
+
+      if (foundActiveOrder) {
+        const createdAt = (foundActiveOrder.createdAt as Timestamp).toDate();
         const randomMinutes = Math.floor(Math.random() * (45 - 25 + 1)) + 25;
         const deliveryTime = new Date(createdAt.getTime() + randomMinutes * 60000);
+        
         setEstimatedDeliveryTime(deliveryTime);
-
-        setActiveOrder({ id: orderDoc.id, ...orderData } as Order);
+        setActiveOrder(foundActiveOrder);
       } else {
-        const recentOrderQuery = query(
-            ordersRef,
-            where('userId', '==', userId),
-            where('status', '==', 'delivered'),
-            orderBy('createdAt', 'desc'),
-            limit(1)
-        );
-        const recentSnapshot = await getDocs(recentOrderQuery);
-        if (!recentSnapshot.empty) {
-            const orderDoc = recentSnapshot.docs[0];
-            setRecentOrder({ id: orderDoc.id, ...orderDoc.data() } as Order);
-        }
+        // If no active order was found, the most recent one must be delivered.
+        setRecentOrder(allRecentOrders[0]);
       }
+
     } catch (err: any) {
       console.error('Error fetching order:', err);
       if (err.code === 'failed-precondition') {
