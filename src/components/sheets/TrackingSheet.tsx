@@ -199,32 +199,10 @@ const RecentOrderCard = ({ order }: { order: Order }) => {
     )
 }
 
-function getISTDate() {
-    const now = new Date();
-    const utcOffset = now.getTimezoneOffset() * 60000;
-    const istOffset = 5.5 * 3600000;
-    return new Date(now.getTime() + utcOffset + istOffset);
-}
-
 function getDynamicDeliveryTime() {
-    const now = getISTDate();
-    const currentHour = now.getHours();
-
-    let deliveryTime = new Date(now);
-
-    if (currentHour >= 9 && currentHour < 18) {
-        // Between 9 AM and 6 PM: current time + 35 minutes
-        deliveryTime.setMinutes(now.getMinutes() + 35);
-    } else {
-        // Outside business hours: set to 9:30 AM
-        deliveryTime.setHours(9, 30, 0, 0);
-        if (currentHour >= 18) {
-            // After 6 PM, set for tomorrow
-            deliveryTime.setDate(now.getDate() + 1);
-        }
-    }
-
-    return format(deliveryTime, 'hh:mm:ss a');
+    const deliveryTime = new Date();
+    deliveryTime.setMinutes(deliveryTime.getMinutes() + 35);
+    return format(deliveryTime, 'p'); // e.g., "4:30 PM"
 }
 
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
@@ -249,7 +227,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       setEstimatedTime(getDynamicDeliveryTime());
       const intervalId = setInterval(() => {
         setEstimatedTime(getDynamicDeliveryTime());
-      }, 1000); // Update every second
+      }, 60000); // Update every minute
       return () => clearInterval(intervalId);
     }
   }, [activeOrder]);

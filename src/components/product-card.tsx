@@ -24,7 +24,6 @@ export function ProductCard({ product }: { product: Product }) {
                         className="object-contain group-hover:scale-105 transition-transform duration-300"
                         sizes="(max-width: 768px) 50vw, 25vw"
                     />
-                    <Badge className="absolute top-2 left-2 bg-accent text-accent-foreground border-transparent font-semibold">Instant Delivery</Badge>
                 </div>
             </Link>
             <div className="p-3 flex flex-col flex-grow">

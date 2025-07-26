@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
+import { format } from 'date-fns';
 
 import type { Product } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -102,6 +103,30 @@ const RecommendedProducts = ({ products, currentProductId }: { products: Product
                 ))}
             </div>
         </section>
+    );
+};
+
+const DynamicDeliveryTime = () => {
+    const [deliveryTime, setDeliveryTime] = useState('');
+  
+    useEffect(() => {
+      const calculateDeliveryTime = () => {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 35);
+        setDeliveryTime(format(now, 'p')); // Formats to "4:30 PM"
+      };
+  
+      calculateDeliveryTime();
+      const intervalId = setInterval(calculateDeliveryTime, 60000); // Update every minute
+  
+      return () => clearInterval(intervalId);
+    }, []);
+  
+    return (
+      <div className="flex items-center gap-2 text-green-600 font-medium">
+        <Clock className="w-5 h-5" />
+        <span>Delivery by {deliveryTime}</span>
+      </div>
     );
 };
 
@@ -275,10 +300,7 @@ export default function ProductPage() {
                         {product.description}
                     </p>
 
-                    <div className="flex items-center gap-2 text-green-600 font-medium">
-                        <Clock className="w-5 h-5" />
-                        <span>Instant Delivery: Approx. 14 mins</span>
-                    </div>
+                    <DynamicDeliveryTime />
 
                     <div className="!mt-auto pt-6">
                         <Accordion type="single" collapsible defaultValue="item-1">
