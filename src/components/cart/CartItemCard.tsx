@@ -2,6 +2,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { CartItem } from '@/lib/types';
 import { CartQuantityControl } from './CartQuantityControl';
 
@@ -10,17 +11,21 @@ export function CartItemCard({ item }: { item: CartItem }) {
   
   return (
     <div className="flex items-center gap-4">
-      <div className="relative w-20 h-20 rounded-md overflow-hidden bg-muted/40">
-        <Image
-          src={item.product.imageUrl}
-          alt={item.product.name}
-          fill
-          className="object-contain"
-          sizes="20vw"
-        />
-      </div>
+      <Link href={`/product/${item.product.id}`}>
+        <div className="relative w-20 h-20 rounded-md overflow-hidden bg-muted/40">
+          <Image
+            src={item.product.imageUrl}
+            alt={item.product.name}
+            fill
+            className="object-contain"
+            sizes="20vw"
+          />
+        </div>
+      </Link>
       <div className="flex-1">
-        <p className="font-semibold">{item.product.name}</p>
+        <Link href={`/product/${item.product.id}`}>
+            <p className="font-semibold hover:underline">{item.product.name}</p>
+        </Link>
         <p className="text-sm text-muted-foreground">INR {price.toFixed(2)}</p>
       </div>
       <div className="flex flex-col items-end gap-2">

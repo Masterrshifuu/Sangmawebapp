@@ -46,11 +46,15 @@ const OrderCard = ({ order }: { order: Order }) => {
       <div className="p-4">
         {order.items.map((item, index) => (
           <div key={item.id + index} className="flex items-center gap-4 mb-3 last:mb-0">
-            <div className="relative w-14 h-14 bg-muted/30 rounded-md overflow-hidden">
-                <Image src={item.imageUrl} alt={item.name} fill className="object-contain" sizes="15vw" />
-            </div>
+            <Link href={`/product/${item.id}`}>
+                <div className="relative w-14 h-14 bg-muted/30 rounded-md overflow-hidden">
+                    <Image src={item.imageUrl} alt={item.name} fill className="object-contain" sizes="15vw" />
+                </div>
+            </Link>
             <div className="flex-1">
-              <p className="text-sm font-medium leading-tight">{item.name}</p>
+              <Link href={`/product/${item.id}`}>
+                <p className="text-sm font-medium leading-tight hover:underline">{item.name}</p>
+              </Link>
               <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
             </div>
             <p className="text-sm font-medium">INR {(item.price * item.quantity).toFixed(2)}</p>
