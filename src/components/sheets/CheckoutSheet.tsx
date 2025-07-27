@@ -90,10 +90,10 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
   // Safely close the sheet if the cart becomes empty while it's open
   useEffect(() => {
-    if (open && cart.length === 0) {
+    if (open && cart.length === 0 && !authLoading) {
         onOpenChange(false);
     }
-  }, [open, cart.length, onOpenChange]);
+  }, [open, cart.length, onOpenChange, authLoading]);
 
 
   const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, location), [totalPrice, location]);
@@ -117,7 +117,15 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   };
 
   const placeOrder = async (isVerified: boolean = false) => {
-    if (!user || deliveryCharge === null) return;
+    if (!user || deliveryCharge === null) {
+        toast({
+            variant: 'destructive',
+            title: 'Login Required',
+            description: 'Please log in to place an order.',
+        });
+        return;
+    };
+
     if (!storeStatus.isOpen && !scheduleForNextDay) {
         toast({
             variant: 'destructive',
@@ -238,6 +246,14 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+        toast({
+            variant: 'destructive',
+            title: 'You must be logged in to place an order.',
+        });
+        // Optionally, trigger auth flow
+        return;
+    }
     if (paymentMethod === 'cod') {
         await placeOrder();
     } else {
@@ -247,10 +263,6 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
   const renderContent = () => {
     if (authLoading) return <CheckoutPageSkeleton />;
-
-    if (!user && !authLoading) {
-        return <CheckoutPageSkeleton />;
-    }
     
     if (cart.length === 0) {
       return <CheckoutPageSkeleton />;
