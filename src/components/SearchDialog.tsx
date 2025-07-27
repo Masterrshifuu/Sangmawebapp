@@ -116,7 +116,6 @@ export function SearchDialog({ children, query, setQuery, isSearchFocused, setIs
                                 className="pl-10 h-11 text-base"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
-                                autoFocus
                             />
                         </div>
                     </DrawerHeader>
