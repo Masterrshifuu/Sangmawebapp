@@ -28,13 +28,11 @@ export default function AiChatPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const { totalItems } = useCart();
 
   const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-        scrollAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -149,7 +147,7 @@ export default function AiChatPage() {
         </header>
 
         <div className="flex-1 flex flex-col">
-            <ScrollArea className="flex-1" viewportRef={scrollAreaRef}>
+            <ScrollArea className="flex-1">
                 <div className="max-w-4xl mx-auto px-4 h-full">
                     {messages.length === 0 ? (
                         <EmptyChat setInputValue={setInputValue} />
@@ -170,6 +168,7 @@ export default function AiChatPage() {
                             )}
                         </div>
                     )}
+                    <div ref={messagesEndRef} />
                 </div>
             </ScrollArea>
             
