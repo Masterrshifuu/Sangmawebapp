@@ -8,7 +8,6 @@ import {
     CarouselContent,
     CarouselItem,
   } from "@/components/ui/carousel"
-import { AnimatedBotIcon } from './AnimatedBotIcon';
 
 const suggestions = [
     "What are some healthy snacks?",
@@ -34,8 +33,7 @@ export const EmptyChat = ({ setInputValue }: { setInputValue: (value: string) =>
 
     return (
         <div className="flex-1 flex flex-col justify-center items-center text-center p-4">
-            <div className="w-full max-w-2xl flex flex-col items-center">
-                <AnimatedBotIcon className="mb-4" />
+            <div className="w-full max-w-2xl flex flex-col items-center mb-8">
                 <h2 className="text-2xl font-semibold">How can I help you today?</h2>
             </div>
             <div className="mt-12 w-full max-w-md">
