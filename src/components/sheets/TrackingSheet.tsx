@@ -35,6 +35,7 @@ import type { Order, OrderItem } from '@/lib/types';
 import { format, addMinutes } from 'date-fns';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
+import { DynamicDeliveryTime } from '../DynamicDeliveryTime';
 
 const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
   const firstItem = items[0];
@@ -173,11 +174,8 @@ const NoActiveOrderCard = () => (
             <p className="text-sm text-muted-foreground">Place a new order to track it here!</p>
         </div>
         <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
-            <p className="text-sm">Estimated Delivery</p>
-            <p className="text-3xl font-bold flex items-center justify-center gap-2">
-                <Timer />
-                35 minutes
-            </p>
+            <p className="text-sm">Next Estimated Delivery</p>
+            <DynamicDeliveryTime className="text-3xl font-bold !text-accent-foreground justify-center" />
         </div>
       </div>
 )
