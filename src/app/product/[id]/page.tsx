@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { notFound, useParams } from 'next/navigation';
 import Image from 'next/image';
+import Link from 'next/link';
 
 import type { Product, Review } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -35,7 +36,6 @@ import { getReviews, addReview } from '@/lib/reviews';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { AiChatSheet } from '@/components/sheets/AiChatSheet';
 
 
 const StarRating = ({ 
@@ -383,12 +383,12 @@ export default function ProductPage() {
                         {product.description}
                     </p>
 
-                    <AiChatSheet productContext={{name: product.name, description: product.description}}>
-                        <Button variant="outline">
+                    <Button variant="outline" asChild>
+                        <Link href="/ai-chat">
                             <Sparkles className="mr-2 h-4 w-4" />
                             Ask AI about this product
-                        </Button>
-                    </AiChatSheet>
+                        </Link>
+                    </Button>
 
                     <DynamicDeliveryTime />
 
