@@ -79,7 +79,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
     'delivered',
   ];
   const currentStatusIndex = orderStatusHierarchy.findIndex(
-    s => s.toLowerCase() === status?.toLowerCase().replace(/[\s_]/g, '')
+    s => s.toLowerCase() === status?.toLowerCase()
   );
 
   const steps = [
