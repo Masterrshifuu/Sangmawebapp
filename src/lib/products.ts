@@ -40,7 +40,20 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
     // Provide a more developer-friendly error message
     let errorMessage = `Firestore error: ${error.message}.`;
     if (error.code === 'permission-denied') {
-        errorMessage += ' Please check your Firestore security rules. They might be too restrictive. For development, you can use rules that allow reads: "rules_version = \'2\'; service cloud.firestore { match /databases/{database}/documents { match /{document=**} { allow read; } } }"';
+        errorMessage += ' Please update your Firestore security rules in the Firebase console to allow read access. For development, you can use these rules: \n\n' +
+        'rules_version = \'2\';\n' +
+        'service cloud.firestore {\n' +
+        '  match /databases/{database}/documents {\n' +
+        '    // Allow anyone to read products and their reviews\n' +
+        '    match /products/{productId} {\n' +
+        '      allow read: if true;\n' +
+        '      match /reviews/{reviewId} {\n' +
+        '        allow read: if true;\n' +
+        '      }\n' +
+        '    }\n' +
+        '    // Add other rules for collections like orders, userdata, etc. below\n' +
+        '  }\n' +
+        '}\n';
     } else if (error.code === 'unauthenticated') {
         errorMessage += ' The request was not authenticated. Make sure your server environment is configured with the correct Firebase credentials.';
     }
