@@ -12,7 +12,6 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { searchProducts, addToCart, getCart, placeOrder, getUserProfile } from './chat-tools';
-import { run } from 'genkit';
 
 const ChatShoppingInputSchema = z.object({
   query: z.string().describe('The user query about products or orders.'),
@@ -83,11 +82,8 @@ const chatShoppingFlow = ai.defineFlow(
     outputSchema: ChatShoppingOutputSchema,
   },
   async (input) => {
-    // Let the model run with potential tool calls.
-    // The `run` function handles the entire loop of tool requests and execution.
-    const llmResponse = await run('chat-shopping-run', () => chatShoppingPrompt(input));
-
-    // The final result from the model after all tool calls are resolved.
+    // The prompt automatically handles the tool-calling loop.
+    const llmResponse = await chatShoppingPrompt(input);
     const finalResult = llmResponse.output;
 
     if (finalResult) {
@@ -95,7 +91,7 @@ const chatShoppingFlow = ai.defineFlow(
       return finalResult;
     } else {
       // If the model did not provide a structured output (e.g., just text after a tool call),
-      // create a valid output object.
+      // create a valid output object from the raw text.
       return {
         response: llmResponse.text,
         productList: [],
