@@ -17,11 +17,11 @@ import {
   Package,
   Headphones,
   RefreshCw,
+  LogIn,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useEffect } from 'react';
 
 const AccountSkeleton = () => (
     <>
@@ -85,14 +85,6 @@ export default function AccountPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
-  useEffect(() => {
-    // Redirect if not loading and no user is found
-    if (!loading && !user) {
-      router.push('/');
-    }
-  }, [user, loading, router]);
-
-
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -102,10 +94,47 @@ export default function AccountPage() {
     }
   };
 
-  if (loading || !user) {
+  if (loading) {
     return <AccountSkeleton />;
   }
   
+  const legalItems = [
+    { icon: FileText, label: 'Terms & Conditions', href: '/terms' },
+    { icon: RefreshCw, label: 'Refund & Cancellation Policy', href: '/refund-policy' },
+    { icon: Headphones, label: 'Help Center', href: '#' },
+  ];
+
+  if (!user) {
+    // Logged-out view
+    return (
+        <>
+            <Header />
+            <main className="flex-1 pb-24 md:pb-0 bg-background">
+                <div className="p-6 text-center" style={{ backgroundColor: '#faf368' }}>
+                     <h1 className="text-xl font-bold font-headline text-black">
+                        Welcome to Sangma Megha Mart
+                    </h1>
+                    <p className="text-sm text-gray-800 mt-1">Log in to manage your orders and account details.</p>
+                     <Button className="mt-4" onClick={() => router.push('/?auth=true')}>
+                        <LogIn className="mr-2 h-4 w-4" />
+                        Login / Sign Up
+                    </Button>
+                </div>
+
+                 <div className="p-4 space-y-6">
+                    <section>
+                        <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">LEGAL & HELP</h2>
+                         <div className="space-y-2">
+                            {legalItems.map(item => <AccountListItem key={item.label} {...item} />)}
+                        </div>
+                    </section>
+                </div>
+            </main>
+        </>
+    )
+  }
+  
+  // Logged-in view
   const generalItems = [
     { icon: Package, label: 'My Orders', href: '/my-orders' },
     { icon: MapPin, label: 'Address Book', href: '#' },
@@ -114,12 +143,6 @@ export default function AccountPage() {
   const securityItems = [
     { icon: User, label: 'Profile Details', href: '#' },
     { icon: Shield, label: 'Change Password', href: '#' },
-  ];
-
-  const legalItems = [
-    { icon: FileText, label: 'Terms & Conditions', href: '/terms' },
-    { icon: RefreshCw, label: 'Refund & Cancellation Policy', href: '/refund-policy' },
-    { icon: Headphones, label: 'Help Center', href: '#' },
   ];
 
   return (
