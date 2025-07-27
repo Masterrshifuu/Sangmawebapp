@@ -8,7 +8,7 @@ import { getChatResponse, getChatResponseWithImage } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowUp, Bot, ImagePlus, X, Home, ShoppingCart } from 'lucide-react';
+import { ArrowUp, Bot, ImagePlus, X, Home, ShoppingCart, Menu } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 
 import { ChatMessageDisplay } from '@/components/chat/ChatMessageDisplay';
@@ -119,8 +119,12 @@ export default function AiChatPage() {
   return (
     <div className="flex h-screen bg-background">
       <main className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b p-2 md:p-4 h-[65px]">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background p-2 md:p-4 h-[65px]">
             <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon">
+                    <Menu />
+                    <span className="sr-only">Menu</span>
+                </Button>
                 <CartSheet>
                   <Button variant="ghost" size="icon" className="relative">
                       <ShoppingCart />
@@ -133,7 +137,7 @@ export default function AiChatPage() {
                   </Button>
                 </CartSheet>
             </div>
-            <div className="font-semibold font-headline text-lg">AI Assistant</div>
+            <div className="font-semibold font-headline text-lg">Sangma</div>
             <div className="flex items-center gap-2">
                 <Button variant="ghost" size="icon" asChild>
                   <Link href="/">
