@@ -10,10 +10,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ProductCard } from '@/components/product-card';
 import Image from 'next/image';
-import { ArrowUp, Bot, Plus, Search, MessageSquare, ExternalLink } from 'lucide-react';
+import { ArrowUp, Bot, Plus, Menu } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
 import { useLocation } from '@/hooks/use-location';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 
 type ChatMessage = AIState[number] & {
     productContext?: { name: string; description: string };
@@ -25,7 +26,7 @@ const Sidebar = () => {
     const { location } = useLocation();
 
     return (
-        <aside className="hidden md:flex flex-col w-64 bg-secondary/30 p-2">
+        <div className="flex flex-col h-full bg-secondary/30 p-2">
             <div className="p-2">
                 <Button variant="outline" className="w-full justify-start">
                     <Plus className="mr-2" /> New Chat
@@ -51,7 +52,7 @@ const Sidebar = () => {
                     <span className="font-semibold truncate">{user?.displayName || 'AI Assistant'}</span>
                 </div>
             </div>
-        </aside>
+        </div>
     )
 }
 
@@ -91,12 +92,12 @@ const ChatMessageDisplay = ({ message }: { message: ChatMessage }) => {
     ];
 
     return (
-      <div className="flex-1 flex flex-col justify-center items-center">
-        <div className="text-center">
+      <div className="flex-1 flex flex-col justify-center items-center text-center p-4">
+        <div>
             <Bot className="mx-auto h-12 w-12 mb-4" />
             <h2 className="text-2xl font-semibold">How can I help you today?</h2>
         </div>
-        <div className="mt-12 grid grid-cols-2 gap-4 w-full max-w-3xl">
+        <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-3xl">
             {suggestions.map((s, i) => (
                 <button 
                     key={i} 
@@ -155,12 +156,28 @@ export default function AiChatPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar />
+      <aside className="hidden md:flex flex-col w-64 border-r">
+          <Sidebar />
+      </aside>
+
       <main className="flex flex-1 flex-col">
-        <header className="flex md:hidden items-center justify-between border-b p-2">
-            <h1 className="text-lg font-semibold">AI Assistant</h1>
-            <Button variant="ghost" size="icon">
-                <Plus />
+        <header className="flex items-center justify-between border-b p-2 md:p-4">
+            <div className="flex items-center gap-2">
+                <Sheet>
+                    <SheetTrigger asChild>
+                        <Button variant="ghost" size="icon" className="md:hidden">
+                            <Menu />
+                            <span className="sr-only">Open Menu</span>
+                        </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="p-0 w-64">
+                       <Sidebar />
+                    </SheetContent>
+                </Sheet>
+                <h1 className="text-lg font-semibold">AI Assistant</h1>
+            </div>
+            <Button variant="outline" size="sm" className="hidden md:flex">
+                <Plus className="mr-2 h-4 w-4" /> New Chat
             </Button>
         </header>
 
@@ -188,7 +205,7 @@ export default function AiChatPage() {
             </div>
         </ScrollArea>
         
-        <div className="w-full max-w-4xl mx-auto p-4 bg-background md:bg-transparent pb-20 md:pb-4">
+        <div className="w-full max-w-4xl mx-auto p-4 bg-background/80 backdrop-blur-sm md:bg-transparent pb-20 md:pb-4">
           <form onSubmit={handleSubmit} className="relative">
             <Textarea
               value={inputValue}
