@@ -29,7 +29,7 @@ const PromptSuggestion = ({ text, onClick }: { text: string, onClick: (text: str
 
 export const EmptyChat = ({ setInputValue }: { setInputValue: (value: string) => void }) => {
     const plugin = React.useRef(
-        Autoplay({ delay: 3000, stopOnInteraction: true })
+        Autoplay({ delay: 1500, stopOnInteraction: true })
     )
 
     return (
