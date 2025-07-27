@@ -4,7 +4,9 @@
 import { chatShopping, ChatShoppingOutput } from "@/ai/flows/chat-shopping";
 import { itemRecommendation } from "@/ai/flows/item-recommendation";
 import { getProducts } from "@/lib/products";
-import type { Product, AIState } from "@/lib/types";
+import type { Product, AIState, UserData } from "@/lib/types";
+import { getUserData } from "@/lib/user";
+import { auth } from "@/lib/firebase";
 import Fuse from 'fuse.js';
 
 
@@ -47,9 +49,21 @@ export async function getChatResponse(
     - 2x Whole Milk
     - 1x Sourdough Bread
   `;
+  
+  const userId = auth.currentUser?.uid;
+  let userProfile: UserData | null = null;
+  if (userId) {
+    userProfile = await getUserData(userId);
+  }
 
   // 1. Call the AI flow with the user's query and optional product context
-  const result: ChatShoppingOutput = await chatShopping({ query, orderHistory, productContext });
+  const result: ChatShoppingOutput = await chatShopping({ 
+    query, 
+    orderHistory, 
+    productContext,
+    userId: userId,
+    userProfile: userProfile ? JSON.stringify(userProfile) : undefined,
+  });
 
   let productList: Product[] = [];
   // 2. Check if the AI returned a list of product names

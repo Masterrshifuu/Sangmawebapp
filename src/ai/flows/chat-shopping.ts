@@ -11,9 +11,12 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { searchProducts, addToCart, getCart, placeOrder, getUserProfile } from './chat-tools';
 
 const ChatShoppingInputSchema = z.object({
   query: z.string().describe('The user query about products or orders.'),
+  userId: z.string().optional().describe("The user's unique ID."),
+  userProfile: z.string().optional().describe("A JSON string of the user's profile data, including cart and address."),
   orderHistory: z
     .string()
     .optional()
@@ -34,7 +37,7 @@ const ChatShoppingOutputSchema = z.object({
   productList: z
     .array(z.string())
     .optional()
-    .describe('Recommended list of product names.'),
+    .describe('Recommended list of product names if the AI does not use a tool.'),
 });
 export type ChatShoppingOutput = z.infer<typeof ChatShoppingOutputSchema>;
 
@@ -47,22 +50,29 @@ const chatShoppingPrompt = ai.definePrompt({
   name: 'chatShoppingPrompt',
   input: {schema: ChatShoppingInputSchema},
   output: {schema: ChatShoppingOutputSchema},
-  prompt: `You are a shopping assistant. Your goal is to help the user with their shopping needs.
-      You can answer questions about products, provide recommendations, and place orders.
-      If the user asks for recommendations, provide a list of product names in the productList field.
-      Use the order history to provide better recommendations.
+  tools: [searchProducts, addToCart, getCart, placeOrder, getUserProfile],
+  prompt: `You are Sangma, a friendly and highly capable shopping assistant for Sangma Megha Mart.
+Your goal is to provide a seamless and helpful shopping experience. You can search for products, add items to the cart, check the cart's contents, and even place orders.
 
-      {{#if productContext}}
-      The user is currently looking at the following product:
-      Name: {{productContext.name}}
-      Description: {{productContext.description}}
-      Focus your response on this product unless the user asks about something else.
-      {{/if}}
+- **Always be conversational and friendly.**
+- **Product Search**: If the user asks for products, use the 'searchProducts' tool to find them in real-time.
+- **Adding to Cart**: If the user wants to add an item to their cart, use the 'addToCart' tool. You'll need the product ID and quantity.
+- **Viewing Cart**: If the user asks what's in their cart, use the 'getCart' tool.
+- **Placing Orders**: To place an order, use the 'placeOrder' tool.
+- **User Information**: Before placing an order, check if the user has a delivery address and phone number using the 'getUserProfile' tool. If they are missing, you MUST ask the user for this information before proceeding.
+- **Recommendations**: If you are not using a tool, you can provide general recommendations and fill the productList field.
+- **User Context**: The user's ID is {{userId}}. The user's profile (including address and phone) is in the following JSON string: {{{userProfile}}}.
 
-      Order History: {{{orderHistory}}}
-      User Query: {{{query}}}
+{{#if productContext}}
+The user is currently looking at the following product:
+Name: {{productContext.name}}
+Description: {{productContext.description}}
+Focus your response on this product unless the user asks about something else.
+{{/if}}
 
-      Response: {{response}}`,
+Order History: {{{orderHistory}}}
+User Query: {{{query}}}
+`,
 });
 
 const chatShoppingFlow = ai.defineFlow(
@@ -73,6 +83,20 @@ const chatShoppingFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await chatShoppingPrompt(input);
-    return output!;
+    
+    // If the model returns a direct output (no tool call), return it.
+    if (output) {
+      return output;
+    }
+
+    // If the model calls a tool, the response will be handled by Genkit's tool loop.
+    // We can provide a generic response if needed, but often the tool's output is sufficient.
+    // For this implementation, we'll assume the final response from the LLM after tool use is what we want.
+    // The `.text()` method will contain the final summarized response from the model.
+    const llmResponse = await chatShoppingPrompt(input);
+    return {
+      response: llmResponse.text,
+      productList: [],
+    };
   }
 );
