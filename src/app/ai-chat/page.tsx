@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import type { AIState, Product } from '@/lib/types';
 import { getChatResponse, getChatResponseWithImage } from '@/app/actions';
 
@@ -27,6 +27,17 @@ export default function AiChatPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,8 +140,8 @@ export default function AiChatPage() {
         </header>
 
         <div className="flex-1 flex flex-col">
-            <ScrollArea className="flex-1">
-                <div className="max-w-4xl mx-auto px-4">
+            <ScrollArea className="flex-1" viewportRef={scrollAreaRef}>
+                <div className="max-w-4xl mx-auto px-4 h-full">
                     {messages.length === 0 ? (
                         <EmptyChat setInputValue={setInputValue} />
                     ) : (

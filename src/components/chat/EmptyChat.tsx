@@ -32,7 +32,7 @@ export const EmptyChat = ({ setInputValue }: { setInputValue: (value: string) =>
     )
 
     return (
-        <div className="flex-1 flex flex-col justify-center items-center text-center p-4">
+        <div className="flex-1 flex flex-col justify-center items-center text-center p-4 h-full">
             <div className="w-full max-w-md">
                 <Carousel
                     plugins={[plugin.current]}
