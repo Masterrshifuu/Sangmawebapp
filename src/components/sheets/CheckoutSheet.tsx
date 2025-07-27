@@ -418,7 +418,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
         <DrawerContent className="h-full md:h-[90vh] flex flex-col p-0">
-            <DrawerHeader className="p-4 pt-4 border-b flex items-center justify-between">
+            <DrawerHeader className="p-4 pt-4 border-b flex items-center justify-between sticky top-0 bg-background z-10">
                 <DrawerClose asChild>
                     <Button variant="ghost" size="icon">
                         <ChevronLeft />
