@@ -33,7 +33,7 @@ export type ChatShoppingInput = z.infer<typeof ChatShoppingInputSchema>;
 
 // Define the required output structure for the AI
 const ChatShoppingOutputSchema = z.object({
-  response: z.string().describe('The AI response to the user query.'),
+  response: z.string().describe('The AI response to the user query. If a tool was used, this response should include the result from the tool.'),
   productList: z
     .array(z.string())
     .optional()
@@ -55,7 +55,7 @@ const chatShoppingPrompt = ai.definePrompt({
 Your goal is to provide a seamless and helpful shopping experience. You can search for products, add items to the cart, check the cart's contents, and even place orders.
 
 - **Always be conversational and friendly.**
-- **Product Search**: When a user asks for products, use the 'searchProducts' tool and immediately list the results in your response. Don't just say you are searching, show the results.
+- **Product Search**: When a user asks for products, you MUST use the 'searchProducts' tool. Do not just say you are searching. Your final response should be a friendly message that INCLUDES the JSON result from the tool. For example: "Here are some biscuits I found: [ ... JSON from tool ... ]"
 - **Adding to Cart**: If the user wants to add an item to their cart, use the 'addToCart' tool. You'll need the product ID and quantity.
 - **Viewing Cart**: If the user asks what's in their cart, use the 'getCart' tool.
 - **Placing Orders**: To place an order, use the 'placeOrder' tool.
@@ -82,17 +82,14 @@ const chatShoppingFlow = ai.defineFlow(
     outputSchema: ChatShoppingOutputSchema,
   },
   async (input) => {
-    // The prompt automatically handles the tool-calling loop.
     const llmResponse = await chatShoppingPrompt(input);
-    const finalResult = llmResponse.output;
+    const output = llmResponse.output;
 
-    if (finalResult) {
-      // If the model provided a structured output, use it.
-      return finalResult;
+    if (output) {
+      return output;
     } 
     
-    // Fallback: If the model did not provide a structured output (e.g., just text),
-    // create a valid output object from the raw text. This is crucial.
+    // Fallback in case the model doesn't return a structured output
     return {
       response: llmResponse.text,
       productList: [],

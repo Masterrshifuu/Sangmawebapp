@@ -43,7 +43,7 @@ export const searchProducts = ai.defineTool(
     }));
 
     if (searchResults.length === 0) {
-        return JSON.stringify({ message: `No products found matching "${query}".` });
+        return `I couldn't find any products matching "${query}". Try searching for something else!`;
     }
 
     return JSON.stringify(searchResults);

@@ -70,10 +70,11 @@ export async function getChatResponse(
   let productList: Product[] = [];
   try {
       // Look for a JSON array within the AI's response text.
-      const jsonMatch = result.response.match(/\[\s*{.*}\s*]/s);
+      // This regex is designed to find a JSON array of objects.
+      const jsonMatch = result.response.match(/\[\s*\{[\s\S]*?\}\s*]/);
       if (jsonMatch) {
           const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed) && parsed.every(item => item.id && item.name)) {
+          if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(item => item.id && item.name)) {
               // We have a list of products from a tool call. Fetch full data.
               const productIds = parsed.map(p => p.id);
               const productPromises = productIds.map(id => getProductById(id));
@@ -100,7 +101,7 @@ export async function getChatResponse(
   return {
     id: Date.now().toString(),
     role: "assistant",
-    content: result.response,
+    content: result.response.replace(/\[\s*\{[\s\S]*?\}\s*]/, '').trim(), // Clean the JSON from the response text
     // The `products` key is now populated from either a tool call or the fallback list.
     products: productList.length > 0 ? productList : undefined,
   };
