@@ -156,7 +156,7 @@ export default function AiChatPage() {
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      <main className="flex flex-1 flex-col">
+      <main className="flex flex-1 flex-col pb-16 md:pb-0">
         <header className="flex md:hidden items-center justify-between border-b p-2">
             <h1 className="text-lg font-semibold">AI Assistant</h1>
             <Button variant="ghost" size="icon">
@@ -188,7 +188,7 @@ export default function AiChatPage() {
             </div>
         </ScrollArea>
         
-        <div className="w-full max-w-4xl mx-auto p-4">
+        <div className="w-full max-w-4xl mx-auto p-4 bg-background md:bg-transparent fixed bottom-16 md:bottom-0 md:relative">
           <form onSubmit={handleSubmit} className="relative">
             <Textarea
               value={inputValue}
