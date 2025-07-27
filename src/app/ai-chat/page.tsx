@@ -26,7 +26,7 @@ const Sidebar = () => {
 
     return (
         <div className="flex flex-col h-full bg-secondary/30">
-            <div className="p-4 border-b h-[65px] flex items-center">
+            <div className="p-4 border-b flex items-center mt-8">
                  <Button variant="outline" className="w-full justify-start">
                     <Plus className="mr-2" /> New Chat
                 </Button>
