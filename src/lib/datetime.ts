@@ -22,7 +22,7 @@ export function getStoreStatus(): StoreStatus {
         if (hours >= 13 && hours < 18) {
             return { isOpen: true, message: 'Store is open!' };
         } else if (hours < 13) {
-            return { isOpen: false, message: 'We open at 1:00 PM on Sundays. You can place your order then.' };
+            return { isOpen: false, message: 'We open at 1:00 PM on Sundays. You can schedule your order for then.' };
         } else { // hours >= 18
             return { isOpen: false, message: "We're closed for the day. We'll be open tomorrow from 9:00 AM." };
         }
@@ -31,7 +31,7 @@ export function getStoreStatus(): StoreStatus {
         if (hours >= 9 && hours < 18) {
             return { isOpen: true, message: 'Store is open!' };
         } else if (hours < 9) {
-            return { isOpen: false, message: 'We open at 9:00 AM. You can place your order then.' };
+            return { isOpen: false, message: 'We open at 9:00 AM. You can schedule your order for then.' };
         } else { // hours >= 18
             const nextDayIsSunday = day === 6;
             const nextDayOpenTime = nextDayIsSunday ? '1:00 PM' : '9:00 AM';

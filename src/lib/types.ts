@@ -103,7 +103,7 @@ export interface Order {
     paymentMethod: string;
     
     // Status and Tracking
-    status: string; // e.g., 'Pending', 'Confirmed', 'OutForDelivery', 'Delivered', 'Cancelled'
+    status: string; // e.g., 'Pending', 'Confirmed', 'OutForDelivery', 'Delivered', 'Cancelled', 'Scheduled'
     active: boolean; // true if order is in-progress
     
     // Timestamps
