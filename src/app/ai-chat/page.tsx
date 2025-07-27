@@ -8,13 +8,14 @@ import { getChatResponse, getChatResponseWithImage } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowUp, Bot, ImagePlus, Menu, X } from 'lucide-react';
-import { Sheet, SheetContent, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { ArrowUp, Bot, ImagePlus, X, Home, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/hooks/use-cart';
 
-import { ChatSidebar } from '@/components/chat/ChatSidebar';
 import { ChatMessageDisplay } from '@/components/chat/ChatMessageDisplay';
 import { EmptyChat } from '@/components/chat/EmptyChat';
 import Image from 'next/image';
+import { CartSheet } from '@/components/sheets/CartSheet';
+import Link from 'next/link';
 
 type ChatMessage = AIState[number] & {
     productContext?: { name: string; description: string };
@@ -28,6 +29,7 @@ export default function AiChatPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { totalItems } = useCart();
 
   const scrollToBottom = () => {
     if (scrollAreaRef.current) {
@@ -116,26 +118,29 @@ export default function AiChatPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      <aside className="hidden md:flex flex-col w-64 border-r">
-          <ChatSidebar />
-      </aside>
-
       <main className="flex flex-1 flex-col">
         <header className="flex items-center justify-between border-b p-2 md:p-4 h-[65px]">
             <div className="flex items-center gap-2">
-                <Sheet>
-                    <SheetTrigger asChild>
-                        <Button variant="ghost" size="icon" className="md:hidden">
-                            <Menu />
-                            <span className="sr-only">Open Menu</span>
-                        </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="p-0 w-64">
-                       <SheetTitle className="sr-only">Chat History</SheetTitle>
-                       <ChatSidebar />
-                    </SheetContent>
-                </Sheet>
-                 <div className="font-semibold"></div>
+                <CartSheet>
+                  <Button variant="ghost" size="icon" className="relative">
+                      <ShoppingCart />
+                      <span className="sr-only">Open Cart</span>
+                      {totalItems > 0 && (
+                        <span className="absolute top-0 right-0 w-4 h-4 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center">
+                            {totalItems}
+                        </span>
+                      )}
+                  </Button>
+                </CartSheet>
+            </div>
+            <div className="font-semibold font-headline text-lg">AI Assistant</div>
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" asChild>
+                  <Link href="/">
+                    <Home />
+                    <span className="sr-only">Home</span>
+                  </Link>
+                </Button>
             </div>
         </header>
 
@@ -164,7 +169,7 @@ export default function AiChatPage() {
                 </div>
             </ScrollArea>
             
-            <div className="w-full max-w-4xl mx-auto p-4 bg-background/80 backdrop-blur-sm md:bg-transparent pb-20 md:pb-4">
+            <div className="w-full max-w-4xl mx-auto p-4 bg-background/80 backdrop-blur-sm md:bg-transparent pb-4 md:pb-4">
               <form onSubmit={handleSubmit} className="relative">
                 {imagePreview && (
                   <div className="relative mb-2 w-24 h-24 p-1 border rounded-lg">

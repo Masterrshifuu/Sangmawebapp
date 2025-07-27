@@ -12,6 +12,10 @@ export function BottomNavbar() {
   const pathname = usePathname();
   const { totalItems } = useCart();
 
+  if (pathname.startsWith('/ai-chat')) {
+    return null;
+  }
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 h-16 bg-background/70 backdrop-blur-sm border-t z-50 md:hidden">
       <div className="grid h-full" style={{ gridTemplateColumns: `repeat(${navItems.length}, 1fr)`}}>
