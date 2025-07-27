@@ -2,7 +2,7 @@
 'use client';
 
 import { useState } from 'react';
-import type { AIState, Product } from '@/lib/types';
+import type { AIState } from '@/lib/types';
 import { getChatResponse } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
@@ -134,7 +134,7 @@ export default function AiChatPage() {
                   <span className="sr-only">Send</span>
                 </Button>
               </form>
-              <p className="text-xs text-center text-muted-foreground mt-2">
+              <p className="text-xs text-center text-muted-foreground mt-2 transform scale-90 origin-center">
                 AI responses may not always be accurate. Check product details for final information.
               </p>
             </div>
