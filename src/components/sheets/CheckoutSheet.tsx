@@ -7,7 +7,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useLocation } from '@/hooks/use-location';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { verifyPayment, VerifyPaymentInput } from '@/ai/flows/verify-payment-flow';
 import type { Order } from '@/lib/types';
@@ -116,54 +116,71 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
     setIsPlacingOrder(true);
 
-    const isScheduled = !storeStatus.isOpen;
-
-    const orderData: Order = {
-      userId: user.uid,
-      userName: user.displayName || 'Anonymous',
-      userEmail: user.email || '',
-      userPhone: user.phoneNumber || '',
-      createdAt: serverTimestamp(),
-      deliveryAddress: location,
-      items: cart.map(item => ({
-        id: item.product.id,
-        name: item.product.name,
-        price: item.product.mrp || item.product.price,
-        quantity: item.quantity,
-        imageUrl: item.product.imageUrl
-      })),
-      paymentMethod,
-      status: isScheduled ? 'Scheduled' : 'Pending',
-      totalAmount: finalTotal,
-      active: !isScheduled, // An order is active unless it's scheduled for later
-      extraTimeInMinutes: 0,
-      extraReasons: []
-    };
-
     try {
-      await addDoc(collection(db, 'orders'), orderData);
-      
-      await incrementUserStat(user.uid, 'totalOrders');
+        await runTransaction(db, async (transaction) => {
+            const counterRef = doc(db, 'counters', 'orders');
+            const counterDoc = await transaction.get(counterRef);
 
-      toast({
-        title: isScheduled ? 'Order Scheduled!' : 'Order Placed Successfully!',
-        description: isScheduled ? 'Your order has been scheduled for the next opening time.' : 'Thank you for your purchase. You can track your order in the tracking section.',
-      });
+            if (!counterDoc.exists()) {
+                throw new Error("Order counter document does not exist!");
+            }
 
-      clearCart();
-      onOpenChange(false);
-      router.push('/?order=success');
+            const newOrderCount = counterDoc.data().current_count + 1;
+            const newOrderId = `SMM${String(newOrderCount).padStart(6, '0')}`;
+
+            const isScheduled = !storeStatus.isOpen;
+
+            const orderData: Order = {
+                id: newOrderId,
+                userId: user.uid,
+                userName: user.displayName || 'Anonymous',
+                userEmail: user.email || '',
+                userPhone: user.phoneNumber || '',
+                createdAt: serverTimestamp(),
+                deliveryAddress: location,
+                items: cart.map(item => ({
+                    id: item.product.id,
+                    name: item.product.name,
+                    price: item.product.mrp || item.product.price,
+                    quantity: item.quantity,
+                    imageUrl: item.product.imageUrl
+                })),
+                paymentMethod,
+                status: isScheduled ? 'Scheduled' : 'Pending',
+                totalAmount: finalTotal,
+                active: !isScheduled, // An order is active unless it's scheduled for later
+                extraTimeInMinutes: 0,
+                extraReasons: []
+            };
+            
+            const newOrderRef = doc(db, 'orders', newOrderId);
+            transaction.set(newOrderRef, orderData);
+            transaction.update(counterRef, { current_count: newOrderCount });
+        });
+
+        await incrementUserStat(user.uid, 'totalOrders');
+
+        toast({
+            title: !storeStatus.isOpen ? 'Order Scheduled!' : 'Order Placed Successfully!',
+            description: !storeStatus.isOpen ? 'Your order has been scheduled for the next opening time.' : 'Thank you for your purchase. You can track your order in the tracking section.',
+        });
+
+        clearCart();
+        onOpenChange(false);
+        router.push('/my-orders');
+
     } catch (error) {
-      console.error("Error placing order: ", error);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to Place Order',
-        description: 'There was an error while placing your order. Please try again.',
-      });
+        console.error("Error placing order: ", error);
+        toast({
+            variant: 'destructive',
+            title: 'Failed to Place Order',
+            description: 'There was an error while placing your order. Please try again.',
+        });
     } finally {
-      setIsPlacingOrder(false);
+        setIsPlacingOrder(false);
     }
   };
+
 
   const handleUpiVerification = async () => {
     if (!screenshotFile) {
