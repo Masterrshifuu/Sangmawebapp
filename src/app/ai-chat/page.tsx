@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ProductCard } from '@/components/product-card';
-import Image from 'next/image';
 import { ArrowUp, Bot, Plus, Menu } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
@@ -26,9 +25,9 @@ const Sidebar = () => {
     const { location } = useLocation();
 
     return (
-        <div className="flex flex-col h-full bg-secondary/30 p-2">
-            <div className="p-2">
-                <Button variant="outline" className="w-full justify-start">
+        <div className="flex flex-col h-full bg-secondary/30">
+            <div className="p-4 border-b h-[65px] flex items-center">
+                 <Button variant="outline" className="w-full justify-start">
                     <Plus className="mr-2" /> New Chat
                 </Button>
             </div>
@@ -161,7 +160,7 @@ export default function AiChatPage() {
       </aside>
 
       <main className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b p-2 md:p-4">
+        <header className="flex items-center justify-between border-b p-2 md:p-4 h-[65px]">
             <div className="flex items-center gap-2">
                 <Sheet>
                     <SheetTrigger asChild>
@@ -175,6 +174,7 @@ export default function AiChatPage() {
                        <Sidebar />
                     </SheetContent>
                 </Sheet>
+                 <div className="font-semibold"></div>
             </div>
             <Button variant="outline" size="sm" className="hidden md:flex">
                 <Plus className="mr-2 h-4 w-4" /> New Chat
