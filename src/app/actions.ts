@@ -3,7 +3,7 @@
 
 import { chatShopping, ChatShoppingOutput } from "@/ai/flows/chat-shopping";
 import { itemRecommendation } from "@/ai/flows/item-recommendation";
-import { getProducts } from "@/lib/products";
+import { getProducts, getProductById } from "@/lib/products";
 import type { Product, AIState, UserData } from "@/lib/types";
 import { getUserData } from "@/lib/user";
 import { auth } from "@/lib/firebase";
@@ -65,14 +65,32 @@ export async function getChatResponse(
     userProfile: userProfile ? JSON.stringify(userProfile) : undefined,
   });
 
-  // Since the AI tools now return full product info within the response text,
-  // we no longer need to fetch products separately based on a productList.
-  // The 'products' field in the response will be used for any fallback recommendations
-  // where the AI didn't use a tool.
-
+  // The AI's textual response might contain a JSON string from a tool.
+  // We need to parse this to extract product data if it exists.
   let productList: Product[] = [];
-  // This part handles cases where the AI *doesn't* use a tool but provides general recommendations.
-  if (result.productList && result.productList.length > 0) {
+  try {
+      // Look for a JSON array within the AI's response text.
+      const jsonMatch = result.response.match(/\[\s*{.*}\s*]/s);
+      if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          if (Array.isArray(parsed) && parsed.every(item => item.id && item.name)) {
+              // We have a list of products from a tool call. Fetch full data.
+              const productIds = parsed.map(p => p.id);
+              const productPromises = productIds.map(id => getProductById(id));
+              const productResults = await Promise.all(productPromises);
+              productList = productResults
+                  .filter(res => res.product !== null)
+                  .map(res => res.product as Product);
+          }
+      }
+  } catch (e) {
+      // It's okay if parsing fails, it just means there was no JSON to parse.
+      console.log("No product JSON found in AI response, or it was invalid.");
+  }
+  
+  // This part handles cases where the AI *doesn't* use a tool but provides general recommendations
+  // via the `productList` field. This is a good fallback.
+  if (productList.length === 0 && result.productList && result.productList.length > 0) {
     const { products: allProducts, error } = await getProducts();
     if (!error) {
       productList = allProducts.filter(p => result.productList!.some(rp => p.name.toLowerCase().includes(rp.toLowerCase())));
@@ -83,8 +101,7 @@ export async function getChatResponse(
     id: Date.now().toString(),
     role: "assistant",
     content: result.response,
-    // The `products` key is now mainly for non-tool-based recommendations.
-    // The UI will still render any products mentioned in the `content`.
+    // The `products` key is now populated from either a tool call or the fallback list.
     products: productList.length > 0 ? productList : undefined,
   };
 }

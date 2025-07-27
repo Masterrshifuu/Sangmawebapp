@@ -89,13 +89,13 @@ const chatShoppingFlow = ai.defineFlow(
     if (finalResult) {
       // If the model provided a structured output, use it.
       return finalResult;
-    } else {
-      // If the model did not provide a structured output (e.g., just text after a tool call),
-      // create a valid output object from the raw text. This is a crucial fallback.
-      return {
-        response: llmResponse.text,
-        productList: [],
-      };
-    }
+    } 
+    
+    // Fallback: If the model did not provide a structured output (e.g., just text),
+    // create a valid output object from the raw text. This is crucial.
+    return {
+      response: llmResponse.text,
+      productList: [],
+    };
   }
 );
