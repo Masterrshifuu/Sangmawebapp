@@ -23,6 +23,7 @@ export function ProductCard({ product }: { product: Product }) {
                         fill
                         className="object-contain group-hover:scale-105 transition-transform duration-300"
                         sizes="(max-width: 768px) 50vw, 25vw"
+                        data-ai-hint={!product.imageUrl ? product.category.toLowerCase() : undefined}
                     />
                 </div>
             </Link>
