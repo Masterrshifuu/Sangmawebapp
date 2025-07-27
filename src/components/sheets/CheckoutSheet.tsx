@@ -7,7 +7,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useLocation } from '@/hooks/use-location';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, runTransaction, serverTimestamp, increment } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { verifyPayment, VerifyPaymentInput } from '@/ai/flows/verify-payment-flow';
 import type { Order } from '@/lib/types';
