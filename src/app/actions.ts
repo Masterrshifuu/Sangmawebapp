@@ -56,7 +56,7 @@ export async function getChatResponse(
     userProfile = await getUserData(userId);
   }
 
-  // Call the AI flow. The flow now handles tools, so it might search for products itself.
+  // 1. Call the AI flow with the user's query.
   const result: ChatShoppingOutput = await chatShopping({ 
     query, 
     orderHistory, 
@@ -65,44 +65,33 @@ export async function getChatResponse(
     userProfile: userProfile ? JSON.stringify(userProfile) : undefined,
   });
 
-  // The AI's textual response might contain a JSON string from a tool.
-  // We need to parse this to extract product data if it exists.
   let productList: Product[] = [];
-  try {
-      // Look for a JSON array within the AI's response text.
-      // This regex is designed to find a JSON array of objects.
-      const jsonMatch = result.response.match(/\[\s*\{[\s\S]*?\}\s*]/);
-      if (jsonMatch) {
-          const parsed = JSON.parse(jsonMatch[0]);
-          if (Array.isArray(parsed) && parsed.length > 0 && parsed.every(item => item.id && item.name)) {
-              // We have a list of products from a tool call. Fetch full data.
-              const productIds = parsed.map(p => p.id);
-              const productPromises = productIds.map(id => getProductById(id));
-              const productResults = await Promise.all(productPromises);
-              productList = productResults
-                  .filter(res => res.product !== null)
-                  .map(res => res.product as Product);
-          }
-      }
-  } catch (e) {
-      // It's okay if parsing fails, it just means there was no JSON to parse.
-      console.log("No product JSON found in AI response, or it was invalid.");
-  }
   
-  // This part handles cases where the AI *doesn't* use a tool but provides general recommendations
-  // via the `productList` field. This is a good fallback.
-  if (productList.length === 0 && result.productList && result.productList.length > 0) {
+  // 2. Check if the AI returned a list of product names in the `productList` field.
+  if (result.productList && result.productList.length > 0) {
+    // 3. Fetch all products from the database.
     const { products: allProducts, error } = await getProducts();
-    if (!error) {
-      productList = allProducts.filter(p => result.productList!.some(rp => p.name.toLowerCase().includes(rp.toLowerCase())));
+    if (!error && allProducts.length > 0) {
+       // 4. Filter the database products to find the ones the AI suggested by name.
+      const fuse = new Fuse(allProducts, { keys: ['name'], threshold: 0.3 });
+      const matchedProducts = new Set<Product>();
+
+      result.productList.forEach(productName => {
+        const matches = fuse.search(productName);
+        if (matches.length > 0) {
+          matchedProducts.add(matches[0].item);
+        }
+      });
+      productList = Array.from(matchedProducts);
     }
   }
 
+
+  // 5. Return a complete object with the AI text and the full product data.
   return {
     id: Date.now().toString(),
     role: "assistant",
-    content: result.response.replace(/\[\s*\{[\s\S]*?\}\s*]/, '').trim(), // Clean the JSON from the response text
-    // The `products` key is now populated from either a tool call or the fallback list.
+    content: result.response,
     products: productList.length > 0 ? productList : undefined,
   };
 }

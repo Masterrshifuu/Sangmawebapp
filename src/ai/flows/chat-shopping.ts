@@ -11,7 +11,6 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
-import { searchProducts, addToCart, getCart, placeOrder, getUserProfile } from './chat-tools';
 
 const ChatShoppingInputSchema = z.object({
   query: z.string().describe('The user query about products or orders.'),
@@ -33,11 +32,11 @@ export type ChatShoppingInput = z.infer<typeof ChatShoppingInputSchema>;
 
 // Define the required output structure for the AI
 const ChatShoppingOutputSchema = z.object({
-  response: z.string().describe('The AI response to the user query. If a tool was used, this response should include the result from the tool.'),
+  response: z.string().describe('The AI response to the user query. This should be a friendly, conversational response.'),
   productList: z
     .array(z.string())
     .optional()
-    .describe('Recommended list of product names if the AI does not use a tool.'),
+    .describe('A list of exactly matching product names if the user asks for products. This list will be used to fetch product data from the database.'),
 });
 export type ChatShoppingOutput = z.infer<typeof ChatShoppingOutputSchema>;
 
@@ -50,18 +49,17 @@ const chatShoppingPrompt = ai.definePrompt({
   name: 'chatShoppingPrompt',
   input: {schema: ChatShoppingInputSchema},
   output: {schema: ChatShoppingOutputSchema},
-  tools: [searchProducts, addToCart, getCart, placeOrder, getUserProfile],
   prompt: `You are Sangma, a friendly and highly capable shopping assistant for Sangma Megha Mart.
-Your goal is to provide a seamless and helpful shopping experience. You can search for products, add items to the cart, check the cart's contents, and even place orders.
+Your goal is to provide a seamless and helpful shopping experience.
 
 - **Always be conversational and friendly.**
-- **Product Search**: When a user asks for products, you MUST use the 'searchProducts' tool. Do not just say you are searching. Your final response should be a friendly message that INCLUDES the JSON result from the tool. For example: "Here are some biscuits I found: [ ... JSON from tool ... ]"
-- **Adding to Cart**: If the user wants to add an item to their cart, use the 'addToCart' tool. You'll need the product ID and quantity.
-- **Viewing Cart**: If the user asks what's in their cart, use the 'getCart' tool.
-- **Placing Orders**: To place an order, use the 'placeOrder' tool.
-- **User Information**: Before placing an order, check if the user has a delivery address and phone number using the 'getUserProfile' tool. If they are missing, you MUST ask the user for this information before proceeding.
-- **Recommendations**: If you are not using a tool, you can provide general recommendations and fill the productList field.
-- **User Context**: The user's ID is {{userId}}. The user's profile (including address and phone) is in the following JSON string: {{{userProfile}}}.
+- **Product Recommendations**: If the user asks for products (e.g., "show me biscuits", "any healthy snacks?"), your primary goal is to populate the 'productList' field with relevant product names. Your 'response' text should be a friendly message like "Here are some biscuits I found for you!". Do not list the products in the response text itself; put them in the productList field.
+- **Be Specific**: When populating 'productList', use specific product names that you believe exist, like "Parle-G Gold Biscuits" or "Britannia NutriChoice Biscuits".
+- **Context is Key**: Use the user's order history and current product view to make smarter recommendations.
+- **General Chat**: If the user is just chatting, have a normal conversation and leave the 'productList' field empty.
+
+User's ID: {{userId}}
+User's Profile Data: {{{userProfile}}}
 
 {{#if productContext}}
 The user is currently looking at the following product:
@@ -82,16 +80,15 @@ const chatShoppingFlow = ai.defineFlow(
     outputSchema: ChatShoppingOutputSchema,
   },
   async (input) => {
-    const llmResponse = await chatShoppingPrompt(input);
-    const output = llmResponse.output;
-
+    const { output } = await chatShoppingPrompt(input);
+    
     if (output) {
       return output;
-    } 
-    
+    }
+
     // Fallback in case the model doesn't return a structured output
     return {
-      response: llmResponse.text,
+      response: "I'm sorry, I had a little trouble thinking. Could you try asking that again?",
       productList: [],
     };
   }
