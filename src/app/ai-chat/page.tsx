@@ -2,13 +2,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import type { AIState, Product } from '@/lib/types';
+import type { AIState } from '@/lib/types';
 import { getChatResponse, getChatResponseWithImage } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { ArrowUp, Bot, ImagePlus, X, Home, ShoppingCart, Menu } from 'lucide-react';
+import { ArrowUp, Bot, ImagePlus, X, Home, ShoppingCart, PanelLeft } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 
 import { ChatMessageDisplay } from '@/components/chat/ChatMessageDisplay';
@@ -16,6 +16,8 @@ import { EmptyChat } from '@/components/chat/EmptyChat';
 import Image from 'next/image';
 import { CartSheet } from '@/components/sheets/CartSheet';
 import Link from 'next/link';
+import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
 type ChatMessage = AIState[number] & {
     productContext?: { name: string; description: string };
@@ -118,10 +120,17 @@ export default function AiChatPage() {
     <div className="relative flex flex-col h-screen bg-background">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b bg-background p-2 md:p-4 h-[65px]">
             <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon">
-                    <Menu />
-                    <span className="sr-only">Menu</span>
-                </Button>
+                <Drawer direction="left">
+                    <DrawerTrigger asChild>
+                         <Button variant="ghost" size="icon">
+                            <PanelLeft />
+                            <span className="sr-only">Open Menu</span>
+                        </Button>
+                    </DrawerTrigger>
+                    <DrawerContent className="h-full w-64 p-0">
+                        <ChatSidebar />
+                    </DrawerContent>
+                </Drawer>
                 <CartSheet>
                   <Button variant="ghost" size="icon" className="relative">
                       <ShoppingCart />
