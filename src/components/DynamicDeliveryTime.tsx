@@ -5,13 +5,23 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getStoreStatus } from '@/lib/datetime';
 
 export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
     const [deliveryTime, setDeliveryTime] = useState('');
     const [isTomorrow, setIsTomorrow] = useState(false);
+    const [storeIsOpen, setStoreIsOpen] = useState(true);
   
     useEffect(() => {
       const calculateDeliveryTime = () => {
+        const storeStatus = getStoreStatus();
+        setStoreIsOpen(storeStatus.isOpen);
+
+        if (!storeStatus.isOpen) {
+            setDeliveryTime('');
+            return;
+        }
+
         const now = new Date();
         const currentHour = now.getHours();
 
@@ -32,13 +42,8 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
       return () => clearInterval(intervalId);
     }, []);
 
-    if (!deliveryTime) {
-        return (
-            <div className={cn("flex items-center gap-1 text-xs text-green-600 font-medium", className)}>
-                <Clock className="w-3 h-3" />
-                <span>Calculating...</span>
-            </div>
-        );
+    if (!storeIsOpen || !deliveryTime) {
+        return null;
     }
   
     return (
