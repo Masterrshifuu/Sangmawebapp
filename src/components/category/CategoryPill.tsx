@@ -24,7 +24,7 @@ export function CategoryPill({ category }: { category: ShowcaseCategory }) {
 
   return (
     <Link 
-      href={`/category/${category.name.toLowerCase()}`} 
+      href={`/category/${category.name.toLowerCase().replace(/ & /g, '-and-')}`} 
       className={cn(
         "group flex flex-col items-center justify-start text-center p-2 rounded-lg border shadow-sm",
         "h-full transition-shadow hover:shadow-md"

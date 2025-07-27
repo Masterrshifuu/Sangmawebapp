@@ -23,7 +23,7 @@ export function BestsellerCard({ category }: { category: BestsellerCategory }) {
       </div>
       <div className="mt-2 flex justify-between items-center">
         <h3 className="font-semibold text-base group-hover:underline">{category.name}</h3>
-        <Link href={`/category/${category.name.toLowerCase()}`} className="text-sm font-medium text-accent-foreground hover:underline">
+        <Link href={`/category/${category.name.toLowerCase().replace(/ & /g, '-and-')}`} className="text-sm font-medium text-accent-foreground hover:underline">
           View All &gt;
         </Link>
       </div>

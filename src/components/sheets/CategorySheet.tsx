@@ -75,7 +75,7 @@ export function CategorySheet({ children }: { children: React.ReactNode }) {
                         {categories.map(category => (
                             <DrawerClose key={category.name} asChild>
                                 <Link
-                                    href={`/category/${category.name.toLowerCase()}`}
+                                    href={`/category/${category.name.toLowerCase().replace(/ & /g, '-and-')}`}
                                     className="group flex flex-col items-center text-center gap-2 transition-transform active:scale-95"
                                 >
                                     <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted/30 border group-hover:shadow-md transition-shadow">
