@@ -74,7 +74,8 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   const orderStatusHierarchy = [
     'pending',
     'confirmed',
-    'outfordelivery',
+    'packed',
+    'out_for_delivery',
     'delivered',
   ];
   const currentStatusIndex = orderStatusHierarchy.findIndex(
@@ -85,25 +86,31 @@ const TrackingTimeline = ({ status }: { status: string }) => {
     {
       icon: Package,
       title: 'Order Placed',
-      status: 'Pending',
+      status: 'pending',
       description: 'We have received your order.',
     },
     {
       icon: CheckCircle2,
       title: 'Order Confirmed',
-      status: 'Confirmed',
+      status: 'confirmed',
       description: 'Your order has been confirmed.',
+    },
+    {
+      icon: Package,
+      title: 'Packed',
+      status: 'packed',
+      description: 'Your items are being packed.',
     },
     {
       icon: Truck,
       title: 'Out for Delivery',
-      status: 'OutForDelivery',
+      status: 'out_for_delivery',
       description: 'Your order is on its way.',
     },
     {
       icon: Home,
       title: 'Delivered',
-      status: 'Delivered',
+      status: 'delivered',
       description: 'Your order has been delivered.',
     },
   ];
@@ -111,7 +118,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   return (
     <div className="space-y-4">
       {steps.map((step, index) => {
-        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s.toLowerCase() === step.status.toLowerCase().replace(/[\s_]/g, ''));
+        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s === step.status);
         const isCompleted = stepStatusIndex < currentStatusIndex;
         const isCurrent = stepStatusIndex === currentStatusIndex;
 
@@ -160,7 +167,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
 };
 
 const NoActiveOrderCard = () => (
-      <div className="space-y-4">
+    <div className="space-y-4">
         <div className="p-4 rounded-lg border text-center">
             <h3 className="text-lg font-semibold">No Active Orders</h3>
             <p className="text-sm text-muted-foreground">Place a new order to track it here!</p>
@@ -169,7 +176,7 @@ const NoActiveOrderCard = () => (
             <p className="text-sm">Next Estimated Delivery</p>
             <DynamicDeliveryTime className="text-3xl font-bold !text-accent-foreground justify-center" />
         </div>
-      </div>
+    </div>
 )
 
 const CountdownTimer = ({ order }: { order: Order}) => {
