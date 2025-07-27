@@ -78,7 +78,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
     'delivered',
   ];
   const currentStatusIndex = orderStatusHierarchy.findIndex(
-    s => s.toLowerCase() === status?.toLowerCase().replace(/\s/g, '')
+    s => s.toLowerCase() === status?.toLowerCase().replace(/[\s_]/g, '')
   );
 
   const steps = [
@@ -111,7 +111,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   return (
     <div className="space-y-4">
       {steps.map((step, index) => {
-        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s.toLowerCase() === step.status.toLowerCase().replace(/\s/g, ''));
+        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s.toLowerCase() === step.status.toLowerCase().replace(/[\s_]/g, ''));
         const isCompleted = stepStatusIndex < currentStatusIndex;
         const isCurrent = stepStatusIndex === currentStatusIndex;
 

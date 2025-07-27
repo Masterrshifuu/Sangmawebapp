@@ -22,6 +22,8 @@ const statusStyles: { [key: string]: string } = {
     out_for_delivery: 'bg-orange-100 text-orange-800',
     delivered: 'bg-green-100 text-green-800',
     cancelled: 'bg-red-100 text-red-800',
+    pending: 'bg-gray-100 text-gray-800',
+    scheduled: 'bg-purple-100 text-purple-800',
   };
   
 
@@ -29,6 +31,7 @@ const OrderCard = ({ order }: { order: Order }) => {
   const createdAt = (order.createdAt as unknown as Timestamp).toDate();
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
+  const status = order.status || 'Pending';
 
   return (
     <div className="bg-card rounded-lg border shadow-sm">
@@ -38,8 +41,8 @@ const OrderCard = ({ order }: { order: Order }) => {
             <p className="font-bold text-sm">Order #{order.id?.substring(0, 8)}</p>
             <p className="text-xs text-muted-foreground">{format(createdAt, 'PPP, p')}</p>
           </div>
-          <span className={cn('text-xs font-semibold px-2 py-1 rounded-full', statusStyles[order.status.toLowerCase()] || 'bg-gray-100 text-gray-800')}>
-            {order.status.replace(/_/g, ' ').toUpperCase()}
+          <span className={cn('text-xs font-semibold px-2 py-1 rounded-full', statusStyles[status.toLowerCase().replace(/ /g, '_')] || 'bg-gray-100 text-gray-800')}>
+            {status.replace(/_/g, ' ').toUpperCase()}
           </span>
         </div>
       </div>
