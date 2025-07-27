@@ -121,13 +121,13 @@ export default function MyOrdersPage() {
       
       try {
         const ordersRef = collection(db, 'orders');
-        // Query only by userId to avoid needing a composite index
+        // Query only by userId to avoid needing a composite index.
         const q = query(ordersRef, where('userId', '==', user.uid));
         const querySnapshot = await getDocs(q);
 
         const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
         
-        // Sort the orders by date on the client-side
+        // Sort the orders by date on the client-side to prevent index errors.
         const sortedOrders = fetchedOrders.sort((a, b) => {
             const dateA = (a.createdAt as unknown as Timestamp).toDate();
             const dateB = (b.createdAt as unknown as Timestamp).toDate();
