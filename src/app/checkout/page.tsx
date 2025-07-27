@@ -3,6 +3,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
 import { useLocation } from '@/hooks/use-location';
 import { useAuth } from '@/hooks/use-auth';
@@ -20,31 +21,24 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, ChevronLeft, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '../ui/drawer';
-import { ScrollArea } from '../ui/scroll-area';
 import { getStoreStatus } from '@/lib/datetime';
 import { incrementUserStat } from '@/lib/user';
-import { Checkbox } from '../ui/checkbox';
-
-interface CheckoutSheetProps {
-    open: boolean;
-    onOpenChange: (open: boolean) => void;
-}
+import { Checkbox } from '@/components/ui/checkbox';
+import Header from '@/components/header';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const CheckoutPageSkeleton = () => (
-    <div className="p-4">
-        <div className="animate-pulse space-y-8">
-            <div className="space-y-2">
-                <div className="h-8 w-1/2 bg-muted rounded"></div>
-                <div className="h-4 w-1/3 bg-muted rounded"></div>
-            </div>
-            <div className="h-64 bg-muted rounded-lg"></div>
-            <div className="h-48 bg-muted rounded-lg"></div>
+    <div className="animate-pulse space-y-8 p-4">
+        <div className="space-y-2">
+            <Skeleton className="h-8 w-1/2 bg-muted rounded" />
+            <Skeleton className="h-4 w-1/3 bg-muted rounded" />
         </div>
+        <Skeleton className="h-64 w-full bg-muted rounded-lg" />
+        <Skeleton className="h-48 w-full bg-muted rounded-lg" />
     </div>
 )
 
-export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
+export default function CheckoutPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
@@ -58,43 +52,27 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   const [isVerifying, setIsVerifying] = useState(false);
   const [storeStatus, setStoreStatus] = useState(getStoreStatus());
   const [scheduleForNextDay, setScheduleForNextDay] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    // Re-check store status when the sheet opens
-    if (open) {
-        const currentStatus = getStoreStatus();
-        setStoreStatus(currentStatus);
-        // If store is closed, automatically check the schedule box
-        if (!currentStatus.isOpen) {
-            setScheduleForNextDay(true);
-        }
-
-        const statusInterval = setInterval(() => {
-            setStoreStatus(getStoreStatus());
-        }, 1000 * 30); // check every 30 seconds
-        return () => clearInterval(statusInterval);
+    setIsClient(true);
+    const currentStatus = getStoreStatus();
+    setStoreStatus(currentStatus);
+    if (!currentStatus.isOpen) {
+        setScheduleForNextDay(true);
     }
-  }, [open]);
+
+    const statusInterval = setInterval(() => {
+        setStoreStatus(getStoreStatus());
+    }, 1000 * 30);
+    return () => clearInterval(statusInterval);
+  }, []);
 
   useEffect(() => {
-    // Reset state when the sheet is closed
-    if (!open) {
-        setPaymentMethod('cod');
-        setScreenshotFile(null);
-        setScreenshotPreview(null);
-        setIsPlacingOrder(false);
-        setIsVerifying(false);
-        setScheduleForNextDay(false);
+    if (isClient && cart.length === 0 && !authLoading) {
+        router.replace('/');
     }
-  }, [open]);
-
-  // Safely close the sheet if the cart becomes empty while it's open
-  useEffect(() => {
-    if (open && cart.length === 0 && !authLoading) {
-        onOpenChange(false);
-    }
-  }, [open, cart.length, onOpenChange, authLoading]);
-
+  }, [isClient, cart.length, authLoading, router]);
 
   const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, location), [totalPrice, location]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
@@ -142,11 +120,10 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
             const counterRef = doc(db, 'counters', 'orders');
             const counterDoc = await transaction.get(counterRef);
 
-            let newOrderCount = 1; // Default if counter doesn't exist
+            let newOrderCount = 1;
             if (counterDoc.exists() && typeof counterDoc.data().current_count === 'number') {
                 newOrderCount = counterDoc.data().current_count + 1;
             } else {
-                 // The counter doc doesn't exist or is invalid, we should probably log this
                  console.error("Order counter document does not exist or is malformed!");
             }
 
@@ -171,7 +148,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
                 paymentMethod,
                 status: isScheduled ? 'Scheduled' : 'Pending',
                 totalAmount: finalTotal,
-                active: !isScheduled, // An order is active unless it's scheduled for later
+                active: !isScheduled,
                 extraTimeInMinutes: 0,
                 extraReasons: []
             };
@@ -189,7 +166,6 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
         });
 
         clearCart();
-        onOpenChange(false);
         router.push('/my-orders');
 
     } catch (error) {
@@ -203,7 +179,6 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
         setIsPlacingOrder(false);
     }
   };
-
 
   const handleUpiVerification = async () => {
     if (!screenshotFile) {
@@ -251,7 +226,6 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
             variant: 'destructive',
             title: 'You must be logged in to place an order.',
         });
-        // Optionally, trigger auth flow
         return;
     }
     if (paymentMethod === 'cod') {
@@ -262,9 +236,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   };
 
   const renderContent = () => {
-    if (authLoading) return <CheckoutPageSkeleton />;
-    
-    if (cart.length === 0 && !authLoading) {
+    if (!isClient || authLoading || (cart.length === 0 && !authLoading)) {
       return <CheckoutPageSkeleton />;
     }
     
@@ -273,7 +245,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
             <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 text-center">
                 <h2 className="text-2xl font-bold">Unserviceable Location</h2>
                 <p className="text-muted-foreground mt-2">We do not deliver to your selected location.</p>
-                <Button onClick={() => onOpenChange(false)} className="mt-4">Go Back</Button>
+                <Button onClick={() => router.back()} className="mt-4">Go Back</Button>
             </div>
         )
     }
@@ -413,29 +385,24 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
             </Button>
         </form>
     );
-  }
+  };
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="h-full md:h-[90vh] flex flex-col p-0">
-            <DrawerHeader className="p-4 pt-4 border-b flex items-center justify-between sticky top-0 bg-background z-10">
-                <DrawerClose asChild>
-                    <Button variant="ghost" size="icon">
-                        <ChevronLeft />
-                        <span className="sr-only">Back</span>
-                    </Button>
-                </DrawerClose>
-                <DrawerTitle className="flex-1 text-center">Checkout</DrawerTitle>
-                <div className="w-10" />
-            </DrawerHeader>
-            <ScrollArea className="flex-1">
-                <div className="p-4">
-                    {renderContent()}
-                </div>
-            </ScrollArea>
-        </DrawerContent>
-    </Drawer>
+    <div className="flex flex-col h-screen bg-background">
+        <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
+            <Button variant="ghost" size="icon" asChild>
+                <Link href="/" aria-label="Go back">
+                    <ChevronLeft />
+                </Link>
+            </Button>
+            <h1 className="flex-1 text-center text-lg font-semibold font-headline">Checkout</h1>
+            <div className="w-10" />
+        </header>
+        <main className="flex-1 overflow-y-auto">
+            <div className="container mx-auto max-w-2xl p-4">
+                {renderContent()}
+            </div>
+        </main>
+    </div>
   );
 }
-
-    

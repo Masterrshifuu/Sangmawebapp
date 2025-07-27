@@ -19,13 +19,14 @@ import { CartItemCard } from '@/components/cart/CartItemCard';
 import { useLocation } from '@/hooks/use-location';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { Separator } from '@/components/ui/separator';
-import { CheckoutSheet } from './CheckoutSheet';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function CartSheet({ children }: { children: React.ReactNode }) {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { location } = useLocation();
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const router = useRouter();
 
   const deliveryCharge = useMemo(() => {
     if (cart.length === 0) return 0;
@@ -37,7 +38,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
 
   const handleProceedToCheckout = () => {
     setIsCartOpen(false);
-    setIsCheckoutOpen(true);
+    router.push('/checkout');
   };
 
   return (
@@ -125,7 +126,6 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
           )}
         </DrawerContent>
       </Drawer>
-      <CheckoutSheet open={isCheckoutOpen} onOpenChange={setIsCheckoutOpen} />
     </>
   );
 }
