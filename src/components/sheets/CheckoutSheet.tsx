@@ -7,7 +7,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useLocation } from '@/hooks/use-location';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, doc, runTransaction, serverTimestamp, increment } from 'firebase/firestore';
+import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { verifyPayment, VerifyPaymentInput } from '@/ai/flows/verify-payment-flow';
 import type { Order } from '@/lib/types';
@@ -62,7 +62,13 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   useEffect(() => {
     // Re-check store status when the sheet opens
     if (open) {
-        setStoreStatus(getStoreStatus());
+        const currentStatus = getStoreStatus();
+        setStoreStatus(currentStatus);
+        // If store is closed, automatically check the schedule box
+        if (!currentStatus.isOpen) {
+            setScheduleForNextDay(true);
+        }
+
         const statusInterval = setInterval(() => {
             setStoreStatus(getStoreStatus());
         }, 1000 * 30); // check every 30 seconds
@@ -112,7 +118,14 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
 
   const placeOrder = async (isVerified: boolean = false) => {
     if (!user || deliveryCharge === null) return;
-    if (!storeStatus.isOpen && !scheduleForNextDay) return;
+    if (!storeStatus.isOpen && !scheduleForNextDay) {
+        toast({
+            variant: 'destructive',
+            title: 'Store is currently closed',
+            description: 'Please schedule your order for the next opening time to proceed.',
+        });
+        return;
+    }
 
     setIsPlacingOrder(true);
 
@@ -121,13 +134,15 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
             const counterRef = doc(db, 'counters', 'orders');
             const counterDoc = await transaction.get(counterRef);
 
-            if (!counterDoc.exists()) {
-                throw new Error("Order counter document does not exist!");
+            let newOrderCount = 1; // Default if counter doesn't exist
+            if (counterDoc.exists() && typeof counterDoc.data().current_count === 'number') {
+                newOrderCount = counterDoc.data().current_count + 1;
+            } else {
+                 // The counter doc doesn't exist or is invalid, we should probably log this
+                 console.error("Order counter document does not exist or is malformed!");
             }
 
-            const newOrderCount = counterDoc.data().current_count + 1;
             const newOrderId = `SMM${String(newOrderCount).padStart(6, '0')}`;
-
             const isScheduled = !storeStatus.isOpen;
 
             const orderData: Order = {
