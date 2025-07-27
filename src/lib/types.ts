@@ -64,6 +64,10 @@ export type AIState = {
     role: 'user' | 'assistant';
     content: string;
     products?: Product[];
+    attachments?: {
+        contentType: 'image' | 'video';
+        url: string;
+    }[];
 }[];
 
 export interface Ad {
