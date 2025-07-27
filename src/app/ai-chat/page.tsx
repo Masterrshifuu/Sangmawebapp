@@ -175,7 +175,6 @@ export default function AiChatPage() {
                        <Sidebar />
                     </SheetContent>
                 </Sheet>
-                <h1 className="text-lg font-semibold">AI Assistant</h1>
             </div>
             <Button variant="outline" size="sm" className="hidden md:flex">
                 <Plus className="mr-2 h-4 w-4" /> New Chat
@@ -228,7 +227,7 @@ export default function AiChatPage() {
                     disabled={!inputValue.trim() || isLoading}
                     className="absolute right-2 bottom-2 h-8 w-8 bg-accent hover:bg-accent/80 disabled:bg-muted"
                 >
-                  <ArrowUp className="h-5 w-5" />
+                  <ArrowUp className="h-5 w-5 text-black" />
                   <span className="sr-only">Send</span>
                 </Button>
               </form>
