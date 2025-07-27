@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, query, where, orderBy, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import type { Order } from '@/lib/types';
 import Header from '@/components/header';
@@ -118,20 +118,23 @@ export default function MyOrdersPage() {
       
       try {
         const ordersRef = collection(db, 'orders');
-        // This query now requires a composite index on (userId, createdAt)
-        const q = query(ordersRef, where('userId', '==', user.uid), orderBy('createdAt', 'desc'));
+        // Query only by userId to avoid needing a composite index
+        const q = query(ordersRef, where('userId', '==', user.uid));
         const querySnapshot = await getDocs(q);
 
         const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
         
-        setOrders(fetchedOrders);
+        // Sort the orders by date on the client-side
+        const sortedOrders = fetchedOrders.sort((a, b) => {
+            const dateA = (a.createdAt as unknown as Timestamp).toDate();
+            const dateB = (b.createdAt as unknown as Timestamp).toDate();
+            return dateB.getTime() - dateA.getTime();
+        });
+
+        setOrders(sortedOrders);
       } catch (err: any) {
         console.error("Error fetching orders:", err);
-        if (err.code === 'failed-precondition') {
-             setError("This query requires a Firestore index. Please check the browser console for a link to create it, or check the 'Console Error' in the preview window.");
-        } else {
-             setError("Failed to fetch your orders. Please try again later.");
-        }
+        setError("Failed to fetch your orders. Please try again later.");
       } finally {
         setLoading(false);
       }
