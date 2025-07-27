@@ -115,6 +115,7 @@ export interface Order {
     createdAt: Timestamp | FieldValue;
     deliveryStartTime?: Timestamp | FieldValue; // Set when status becomes 'OutForDelivery'
     expectedDeliveryTime?: Timestamp | FieldValue; // deliveryStartTime + 35 min + extraTime
+    cancelledAt?: Timestamp | FieldValue;
     
     // Delays
     extraTimeInMinutes: number;

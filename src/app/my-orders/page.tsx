@@ -12,8 +12,10 @@ import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PackageOpen } from 'lucide-react';
+import { PackageOpen, XCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { cancelOrder } from '@/app/actions';
 
 const statusStyles: { [key: string]: string } = {
     placed: 'bg-blue-100 text-blue-800',
@@ -27,11 +29,33 @@ const statusStyles: { [key: string]: string } = {
   };
   
 
-const OrderCard = ({ order }: { order: Order }) => {
+const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCancel: (orderId: string) => void; }) => {
+  const { toast } = useToast();
+  const [isCancelling, setIsCancelling] = useState(false);
   const createdAt = (order.createdAt as unknown as Timestamp).toDate();
   const totalItems = order.items.reduce((acc, item) => acc + item.quantity, 0);
   const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
   const status = order.status || 'Pending';
+
+  const isCancellable = () => {
+    const now = new Date();
+    const minutesSinceOrder = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+    const cancellableStatuses = ['pending', 'confirmed', 'packed', 'scheduled'];
+    return minutesSinceOrder < 5 && cancellableStatuses.includes(status.toLowerCase().replace(/ /g, '_'));
+  };
+
+  const handleCancelOrder = async () => {
+    if (!order.id || !isCancellable()) return;
+    setIsCancelling(true);
+    const result = await cancelOrder(order.id);
+    if (result.success) {
+        toast({ title: "Order Cancelled", description: "Your order has been successfully cancelled." });
+        onOrderCancel(order.id); // Notify parent to update the list
+    } else {
+        toast({ variant: 'destructive', title: "Cancellation Failed", description: result.message });
+    }
+    setIsCancelling(false);
+  };
 
   return (
     <div className="bg-card rounded-lg border shadow-sm">
@@ -66,9 +90,23 @@ const OrderCard = ({ order }: { order: Order }) => {
       </div>
       <div className="p-4 bg-muted/30 rounded-b-lg flex justify-between items-center">
         <p className="text-sm font-semibold">Total: INR {totalAmount.toFixed(2)}</p>
-        <Button size="sm" variant="outline" asChild>
-            <Link href="#">View Details</Link>
-        </Button>
+        <div>
+            {isCancellable() ? (
+                <Button 
+                    size="sm" 
+                    variant="destructive"
+                    onClick={handleCancelOrder}
+                    disabled={isCancelling}
+                >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+                </Button>
+            ) : (
+                <Button size="sm" variant="outline" asChild>
+                    <Link href="#">View Details</Link>
+                </Button>
+            )}
+        </div>
       </div>
     </div>
   );
@@ -144,6 +182,16 @@ export default function MyOrdersPage() {
     fetchOrders();
   }, [user]);
 
+  const handleOrderCancellation = (cancelledOrderId: string) => {
+    setOrders(prevOrders => 
+        prevOrders.map(order => 
+            order.id === cancelledOrderId 
+                ? { ...order, status: 'Cancelled', active: false } 
+                : order
+        )
+    );
+  };
+
   return (
     <>
       <Header />
@@ -173,7 +221,7 @@ export default function MyOrdersPage() {
         {!loading && !error && orders.length > 0 && (
           <div className="space-y-4">
             {orders.map(order => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard key={order.id} order={order} onOrderCancel={handleOrderCancellation} />
             ))}
           </div>
         )}

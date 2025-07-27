@@ -18,6 +18,7 @@ import {
   Truck,
   Home,
   Timer,
+  XCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -28,14 +29,15 @@ import {
   Timestamp,
   query,
   where,
-  orderBy,
-  limit,
+  onSnapshot,
 } from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
 import { format, addMinutes } from 'date-fns';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
 import { DynamicDeliveryTime } from '../DynamicDeliveryTime';
+import { cancelOrder } from '@/app/actions';
+import { useToast } from '@/hooks/use-toast';
 
 const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
   const firstItem = items[0];
@@ -77,7 +79,19 @@ const TrackingTimeline = ({ status }: { status: string }) => {
     'packed',
     'out_for_delivery',
     'delivered',
+    'scheduled',
   ];
+
+  const cancelled = status?.toLowerCase() === 'cancelled';
+  if (cancelled) {
+    return (
+        <div className="p-4 rounded-lg border bg-red-50 text-red-800 text-center">
+            <h3 className="font-semibold">Order Cancelled</h3>
+            <p className="text-sm">This order has been cancelled.</p>
+        </div>
+    )
+  }
+
   const currentStatusIndex = orderStatusHierarchy.findIndex(
     s => s === status?.toLowerCase().replace(/ /g, '_')
   );
@@ -182,6 +196,8 @@ const NoActiveOrderCard = () => (
 const CountdownTimer = ({ order }: { order: Order}) => {
     const [timeLeft, setTimeLeft] = useState('');
     const [eta, setEta] = useState('');
+    const [isCancelling, setIsCancelling] = useState(false);
+    const { toast } = useToast();
 
     const calculateTimeLeft = useCallback(() => {
         const orderTimestamp = order.createdAt as unknown as Timestamp;
@@ -216,13 +232,48 @@ const CountdownTimer = ({ order }: { order: Order}) => {
         return () => clearInterval(intervalId);
     }, [calculateTimeLeft]);
 
+    const isCancellable = () => {
+        if (!order.createdAt) return false;
+        const createdAt = (order.createdAt as unknown as Timestamp).toDate();
+        const now = new Date();
+        const minutesSinceOrder = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+        const cancellableStatuses = ['pending', 'confirmed', 'packed', 'scheduled'];
+        return minutesSinceOrder < 5 && cancellableStatuses.includes(order.status.toLowerCase().replace(/ /g, '_'));
+    };
+
+    const handleCancelOrder = async () => {
+        if (!order.id || !isCancellable()) return;
+        setIsCancelling(true);
+        const result = await cancelOrder(order.id);
+        if (result.success) {
+            toast({ title: "Order Cancelled", description: "Your order has been successfully cancelled." });
+            // The onSnapshot listener will handle the UI update automatically
+        } else {
+            toast({ variant: 'destructive', title: "Cancellation Failed", description: result.message });
+        }
+        setIsCancelling(false);
+    };
+
     return (
-        <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
-            <p className="text-sm">Estimated Delivery by {eta}</p>
-            <p className="text-3xl font-bold flex items-center justify-center gap-2">
-                <Timer />
-                {timeLeft}
-            </p>
+        <div className="space-y-4">
+            <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
+                <p className="text-sm">Estimated Delivery by {eta}</p>
+                <p className="text-3xl font-bold flex items-center justify-center gap-2">
+                    <Timer />
+                    {timeLeft}
+                </p>
+            </div>
+            {isCancellable() && (
+                 <Button 
+                    variant="destructive" 
+                    className="w-full"
+                    onClick={handleCancelOrder}
+                    disabled={isCancelling}
+                >
+                    <XCircle className="mr-2 h-4 w-4" />
+                    {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+                </Button>
+            )}
         </div>
     )
 };
@@ -238,56 +289,51 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
+      if (!currentUser) {
+        setLoading(false);
+        setActiveOrder(null);
+      }
     });
     return () => unsubscribe();
   }, []);
   
-  const fetchOrders = useCallback(async (userId: string) => {
-    setLoading(true);
-    setError(null);
-    setActiveOrder(null);
-
-    try {
-      const ordersRef = collection(db, 'orders');
-      const q = query(
-        ordersRef, 
-        where('userId', '==', userId), 
-        where('active', '==', true)
-      );
-      const querySnapshot = await getDocs(q);
-      
-      if (querySnapshot.empty) {
-        setLoading(false);
-        return;
-      }
-      
-      const activeOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-
-      // Sort on the client to find the most recent one
-      activeOrders.sort((a, b) => {
-        const dateA = (a.createdAt as unknown as Timestamp).toDate();
-        const dateB = (b.createdAt as unknown as Timestamp).toDate();
-        return dateB.getTime() - dateA.getTime();
-      });
-
-      setActiveOrder(activeOrders[0]);
-
-    } catch (err: any) {
-      console.error('Error fetching order:', err);
-      setError('An error occurred while fetching your order. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-  
   useEffect(() => {
-    if (open && user) {
-        fetchOrders(user.uid);
-    } else if (open && !user) {
-        setLoading(false);
-        setActiveOrder(null);
+    if (!open || !user) {
+        if (!user) setLoading(false);
+        return;
     }
-  }, [open, user, fetchOrders]);
+    
+    setLoading(true);
+
+    const ordersRef = collection(db, 'orders');
+    const q = query(
+        ordersRef, 
+        where('userId', '==', user.uid), 
+        where('active', '==', true)
+    );
+      
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        if (querySnapshot.empty) {
+            setActiveOrder(null);
+        } else {
+            const activeOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+            activeOrders.sort((a, b) => {
+                const dateA = (a.createdAt as unknown as Timestamp).toDate();
+                const dateB = (b.createdAt as unknown as Timestamp).toDate();
+                return dateB.getTime() - dateA.getTime();
+            });
+            setActiveOrder(activeOrders[0]);
+        }
+        setLoading(false);
+    }, (err) => {
+        console.error('Error with real-time order listener:', err);
+        setError('An error occurred while tracking your order.');
+        setLoading(false);
+    });
+
+    return () => unsubscribe();
+
+  }, [open, user]);
 
 
   return (

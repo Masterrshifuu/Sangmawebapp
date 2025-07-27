@@ -6,8 +6,9 @@ import { itemRecommendation } from "@/ai/flows/item-recommendation";
 import { getProducts, getProductById } from "@/lib/products";
 import type { Product, AIState, UserData } from "@/lib/types";
 import { getUserData } from "@/lib/user";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import Fuse from 'fuse.js';
+import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
 
 
 // This is a new type to handle the optional product context in chat history
@@ -141,4 +142,23 @@ export async function getChatResponseWithImage(
         content: chatResult.response,
         products: matchedProducts,
     };
+}
+
+export async function cancelOrder(orderId: string): Promise<{ success: boolean, message: string }> {
+    if (!orderId) {
+        return { success: false, message: 'Order ID is required.' };
+    }
+
+    try {
+        const orderRef = doc(db, 'orders', orderId);
+        await updateDoc(orderRef, {
+            status: 'Cancelled',
+            active: false,
+            cancelledAt: serverTimestamp(),
+        });
+        return { success: true, message: 'Order has been cancelled.' };
+    } catch (error) {
+        console.error('Error cancelling order:', error);
+        return { success: false, message: 'Failed to cancel the order.' };
+    }
 }
