@@ -79,7 +79,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
     'delivered',
   ];
   const currentStatusIndex = orderStatusHierarchy.findIndex(
-    s => s.toLowerCase() === status?.toLowerCase()
+    s => s === status?.toLowerCase().replace(/ /g, '_')
   );
 
   const steps = [
@@ -128,9 +128,9 @@ const TrackingTimeline = ({ status }: { status: string }) => {
               <div
                 className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center',
-                  isCompleted || isCurrent
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-muted-foreground'
+                  isCompleted && 'bg-primary text-primary-foreground',
+                  isCurrent && 'bg-accent text-accent-foreground animate-pulse',
+                  !isCompleted && !isCurrent && 'bg-muted text-muted-foreground'
                 )}
               >
                 <step.icon className="w-5 h-5" />
