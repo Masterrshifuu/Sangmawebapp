@@ -55,7 +55,7 @@ const chatShoppingPrompt = ai.definePrompt({
 Your goal is to provide a seamless and helpful shopping experience. You can search for products, add items to the cart, check the cart's contents, and even place orders.
 
 - **Always be conversational and friendly.**
-- **Product Search**: If the user asks for products, use the 'searchProducts' tool to find them in real-time.
+- **Product Search**: When a user asks for products, use the 'searchProducts' tool and immediately list the results in your response. Don't just say you are searching, show the results.
 - **Adding to Cart**: If the user wants to add an item to their cart, use the 'addToCart' tool. You'll need the product ID and quantity.
 - **Viewing Cart**: If the user asks what's in their cart, use the 'getCart' tool.
 - **Placing Orders**: To place an order, use the 'placeOrder' tool.
