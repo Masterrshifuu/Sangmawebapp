@@ -21,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useEffect } from 'react';
 
 const AccountSkeleton = () => (
     <>
@@ -84,6 +85,14 @@ export default function AccountPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
 
+  useEffect(() => {
+    // Redirect if not loading and no user is found
+    if (!loading && !user) {
+      router.push('/');
+    }
+  }, [user, loading, router]);
+
+
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -93,13 +102,7 @@ export default function AccountPage() {
     }
   };
 
-  if (loading) {
-    return <AccountSkeleton />;
-  }
-
-  if (!user) {
-    // Optionally, redirect to a login page if you have one
-    router.push('/');
+  if (loading || !user) {
     return <AccountSkeleton />;
   }
   
