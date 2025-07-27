@@ -47,11 +47,25 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
         '    // Allow anyone to read products and their reviews\n' +
         '    match /products/{productId} {\n' +
         '      allow read: if true;\n' +
+        '      allow update: if request.auth != null; // Allow logged-in users to update (e.g., for ratings)\n' +
         '      match /reviews/{reviewId} {\n' +
         '        allow read: if true;\n' +
+        '        allow create: if request.auth != null; // Allow logged-in users to create reviews\n' +
         '      }\n' +
         '    }\n' +
         '    // Add other rules for collections like orders, userdata, etc. below\n' +
+        '    match /userdata/{userId} {\n' +
+        '       allow read, write: if request.auth != null && request.auth.uid == userId;\n' +
+        '    }\n' +
+        '    match /orders/{orderId} {\n' +
+        '       allow read, create: if request.auth != null;\n' +
+        '    }\n' +
+        '    match /counters/{counterId} {\n' +
+        '       allow read, write: if request.auth != null;\n' +
+        '    }\n' +
+        '    match /ads/{adId} {\n' +
+        '       allow read: if true;\n' +
+        '    }\n' +
         '  }\n' +
         '}\n';
     } else if (error.code === 'unauthenticated') {
