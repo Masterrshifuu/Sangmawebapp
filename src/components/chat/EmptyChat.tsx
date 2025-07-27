@@ -1,7 +1,6 @@
 
 'use client';
 
-import { Bot } from "lucide-react";
 import * as React from 'react';
 import Autoplay from "embla-carousel-autoplay"
 import {
@@ -9,6 +8,7 @@ import {
     CarouselContent,
     CarouselItem,
   } from "@/components/ui/carousel"
+import { AnimatedBotIcon } from './AnimatedBotIcon';
 
 const suggestions = [
     "What are some healthy snacks?",
@@ -34,11 +34,11 @@ export const EmptyChat = ({ setInputValue }: { setInputValue: (value: string) =>
 
     return (
         <div className="flex-1 flex flex-col justify-center items-center text-center p-4">
-            <div className="w-full max-w-2xl">
-                <Bot className="mx-auto h-12 w-12 mb-4" />
+            <div className="w-full max-w-2xl flex flex-col items-center">
+                <AnimatedBotIcon className="mb-4" />
                 <h2 className="text-2xl font-semibold">How can I help you today?</h2>
             </div>
-            <div className="mt-12 w-full max-w-2xl">
+            <div className="mt-12 w-full max-w-md">
                 <Carousel
                     plugins={[plugin.current]}
                     className="w-full"
@@ -52,7 +52,7 @@ export const EmptyChat = ({ setInputValue }: { setInputValue: (value: string) =>
                 >
                     <CarouselContent className="-mt-4 h-[100px]">
                         {suggestions.map((s, i) => (
-                             <CarouselItem key={i} className="pt-4">
+                             <CarouselItem key={i} className="pt-4 basis-auto">
                                 <PromptSuggestion text={s} onClick={setInputValue} />
                             </CarouselItem>
                         ))}
