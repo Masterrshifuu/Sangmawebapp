@@ -8,48 +8,53 @@ import { cn } from '@/lib/utils';
 import { getStoreStatus } from '@/lib/datetime';
 
 export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
-    const [deliveryTime, setDeliveryTime] = useState('');
-    const [isTomorrow, setIsTomorrow] = useState(false);
-    const [storeIsOpen, setStoreIsOpen] = useState(true);
-  
+    const [deliveryInfo, setDeliveryInfo] = useState({ text: '', isEstimate: false });
+
     useEffect(() => {
-      const calculateDeliveryTime = () => {
-        const storeStatus = getStoreStatus();
-        setStoreIsOpen(storeStatus.isOpen);
+        const calculateDeliveryTime = () => {
+            const storeStatus = getStoreStatus();
 
-        if (!storeStatus.isOpen) {
-            setDeliveryTime('');
-            return;
-        }
+            if (storeStatus.isOpen) {
+                const now = new Date();
+                // If it's 6 PM (18:00) or later, show next day's delivery
+                if (now.getHours() >= 18) {
+                     const nextDayStatus = getStoreStatus(); // This will give next day's info
+                     if (nextDayStatus.nextOpenTime) {
+                         const firstDelivery = new Date(nextDayStatus.nextOpenTime);
+                         firstDelivery.setMinutes(firstDelivery.getMinutes() + 35);
+                         setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'p')}`, isEstimate: true });
+                     } else {
+                         setDeliveryInfo({ text: '', isEstimate: false });
+                     }
+                } else {
+                    now.setMinutes(now.getMinutes() + 35);
+                    setDeliveryInfo({ text: `Delivery by ${format(now, 'p')}`, isEstimate: false });
+                }
+            } else {
+                if (storeStatus.nextOpenTime) {
+                    const firstDelivery = new Date(storeStatus.nextOpenTime);
+                    firstDelivery.setMinutes(firstDelivery.getMinutes() + 35);
+                    setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'p')}`, isEstimate: true });
+                } else {
+                    setDeliveryInfo({ text: '', isEstimate: false });
+                }
+            }
+        };
 
-        const now = new Date();
-        const currentHour = now.getHours();
+        calculateDeliveryTime();
+        const intervalId = setInterval(calculateDeliveryTime, 60000); // Update every minute
 
-        // If it's 6 PM (18:00) or later
-        if (currentHour >= 18) {
-            setDeliveryTime('Tomorrow 9:30 am');
-            setIsTomorrow(true);
-        } else {
-            now.setMinutes(now.getMinutes() + 35);
-            setDeliveryTime(format(now, 'p')); // Formats to "4:30 PM"
-            setIsTomorrow(false);
-        }
-      };
-  
-      calculateDeliveryTime();
-      const intervalId = setInterval(calculateDeliveryTime, 60000); // Update every minute
-  
-      return () => clearInterval(intervalId);
+        return () => clearInterval(intervalId);
     }, []);
 
-    if (!storeIsOpen || !deliveryTime) {
+    if (!deliveryInfo.text) {
         return null;
     }
-  
+
     return (
-      <div className={cn("flex items-center gap-2 text-green-600 font-medium", className)}>
-        <Clock className="w-5 h-5" />
-        <span>{isTomorrow ? deliveryTime : `Delivery by ${deliveryTime}`}</span>
-      </div>
+        <div className={cn("flex items-center gap-2 text-sm", deliveryInfo.isEstimate ? "text-muted-foreground" : "text-green-600 font-medium", className)}>
+            <Clock className="w-4 h-4" />
+            <span>{deliveryInfo.text}</span>
+        </div>
     );
 };
