@@ -56,7 +56,7 @@ export async function getChatResponse(
     userProfile = await getUserData(userId);
   }
 
-  // 1. Call the AI flow with the user's query and optional product context
+  // Call the AI flow. The flow now handles tools, so it might search for products itself.
   const result: ChatShoppingOutput = await chatShopping({ 
     query, 
     orderHistory, 
@@ -65,22 +65,26 @@ export async function getChatResponse(
     userProfile: userProfile ? JSON.stringify(userProfile) : undefined,
   });
 
+  // Since the AI tools now return full product info within the response text,
+  // we no longer need to fetch products separately based on a productList.
+  // The 'products' field in the response will be used for any fallback recommendations
+  // where the AI didn't use a tool.
+
   let productList: Product[] = [];
-  // 2. Check if the AI returned a list of product names
+  // This part handles cases where the AI *doesn't* use a tool but provides general recommendations.
   if (result.productList && result.productList.length > 0) {
-    // 3. Fetch all products from the database
     const { products: allProducts, error } = await getProducts();
     if (!error) {
-       // 4. Filter the database products to find the ones the AI suggested
       productList = allProducts.filter(p => result.productList!.some(rp => p.name.toLowerCase().includes(rp.toLowerCase())));
     }
   }
 
-  // 5. Return a complete object with the AI text and the full product data
   return {
     id: Date.now().toString(),
     role: "assistant",
     content: result.response,
+    // The `products` key is now mainly for non-tool-based recommendations.
+    // The UI will still render any products mentioned in the `content`.
     products: productList.length > 0 ? productList : undefined,
   };
 }
