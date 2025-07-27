@@ -20,7 +20,7 @@ const suggestions = [
 const PromptSuggestion = ({ text, onClick }: { text: string, onClick: (text: string) => void }) => (
     <button
         onClick={() => onClick(text)}
-        className="p-4 border rounded-lg text-left hover:bg-secondary transition-colors w-full h-full"
+        className="p-4 border border-accent/50 bg-background shadow-sm rounded-lg text-left hover:bg-secondary transition-colors w-full h-full"
     >
         <p className="font-semibold">{text}</p>
         <p className="text-sm text-muted-foreground">Get a response from the AI</p>
