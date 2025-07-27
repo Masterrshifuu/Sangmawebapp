@@ -72,13 +72,13 @@ const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
 
 const TrackingTimeline = ({ status }: { status: string }) => {
   const orderStatusHierarchy = [
-    'Pending',
-    'Confirmed',
-    'OutForDelivery',
-    'Delivered',
+    'pending',
+    'confirmed',
+    'outfordelivery',
+    'delivered',
   ];
   const currentStatusIndex = orderStatusHierarchy.findIndex(
-    s => s.toLowerCase() === status?.toLowerCase()
+    s => s.toLowerCase() === status?.toLowerCase().replace(/\s/g, '')
   );
 
   const steps = [
@@ -111,7 +111,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   return (
     <div className="space-y-4">
       {steps.map((step, index) => {
-        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s.toLowerCase() === step.status.toLowerCase());
+        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s.toLowerCase() === step.status.toLowerCase().replace(/\s/g, ''));
         const isCompleted = stepStatusIndex < currentStatusIndex;
         const isCurrent = stepStatusIndex === currentStatusIndex;
 
@@ -158,14 +158,6 @@ const TrackingTimeline = ({ status }: { status: string }) => {
     </div>
   );
 };
-
-const NoOrderState = () => (
-    <div className="flex flex-col items-center justify-center text-center p-8 space-y-4 h-full">
-        <Logo className="opacity-50" />
-        <p className="text-muted-foreground">No active orders</p>
-    </div>
-);
-
 
 const NoActiveOrderCard = () => (
       <div className="space-y-4">
