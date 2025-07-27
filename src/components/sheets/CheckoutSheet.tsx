@@ -264,7 +264,7 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
   const renderContent = () => {
     if (authLoading) return <CheckoutPageSkeleton />;
     
-    if (cart.length === 0) {
+    if (cart.length === 0 && !authLoading) {
       return <CheckoutPageSkeleton />;
     }
     
@@ -437,3 +437,5 @@ export function CheckoutSheet({ open, onOpenChange }: CheckoutSheetProps) {
     </Drawer>
   );
 }
+
+    
