@@ -14,7 +14,7 @@ export default function RefundPolicyPage() {
             <h2 className="text-xl font-semibold font-headline">Cancellations</h2>
             <p>
               You can cancel your order free of charge within{' '}
-              <strong>2 minutes</strong> of placing it. After 2 minutes, the
+              <strong>5 minutes</strong> of placing it. After 5 minutes, the
               order is considered confirmed and cannot be canceled as our team
               has already started preparing it for dispatch.
             </p>
