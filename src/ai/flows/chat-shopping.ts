@@ -12,6 +12,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import { searchProducts, addToCart, getCart, placeOrder, getUserProfile } from './chat-tools';
+import { run } from 'genkit';
 
 const ChatShoppingInputSchema = z.object({
   query: z.string().describe('The user query about products or orders.'),
@@ -81,22 +82,24 @@ const chatShoppingFlow = ai.defineFlow(
     inputSchema: ChatShoppingInputSchema,
     outputSchema: ChatShoppingOutputSchema,
   },
-  async input => {
-    const {output} = await chatShoppingPrompt(input);
-    
-    // If the model returns a direct output (no tool call), return it.
-    if (output) {
-      return output;
-    }
+  async (input) => {
+    // Let the model run with potential tool calls.
+    // The `run` function handles the entire loop of tool requests and execution.
+    const llmResponse = await run('chat-shopping-run', () => chatShoppingPrompt(input));
 
-    // If the model calls a tool, the response will be handled by Genkit's tool loop.
-    // We can provide a generic response if needed, but often the tool's output is sufficient.
-    // For this implementation, we'll assume the final response from the LLM after tool use is what we want.
-    // The `.text()` method will contain the final summarized response from the model.
-    const llmResponse = await chatShoppingPrompt(input);
-    return {
-      response: llmResponse.text,
-      productList: [],
-    };
+    // The final result from the model after all tool calls are resolved.
+    const finalResult = llmResponse.output;
+
+    if (finalResult) {
+      // If the model provided a structured output, use it.
+      return finalResult;
+    } else {
+      // If the model did not provide a structured output (e.g., just text after a tool call),
+      // create a valid output object.
+      return {
+        response: llmResponse.text,
+        productList: [],
+      };
+    }
   }
 );
