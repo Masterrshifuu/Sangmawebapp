@@ -114,7 +114,7 @@ export default function AiChatPage() {
                 <Textarea
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
-                  placeholder="Ask about products, deals, or get recipe ideas..."
+                  placeholder="Ask about products.."
                   className="pr-12 py-3 h-12 min-h-12 resize-none focus-visible:ring-1 focus-visible:ring-accent"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
