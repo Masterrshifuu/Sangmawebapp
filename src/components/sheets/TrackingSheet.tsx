@@ -252,9 +252,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
       const q = query(
         ordersRef, 
         where('userId', '==', userId), 
-        where('active', '==', true),
-        orderBy('createdAt', 'desc'),
-        limit(1)
+        where('active', '==', true)
       );
       const querySnapshot = await getDocs(q);
       
@@ -263,16 +261,20 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
         return;
       }
       
-      const foundActiveOrder = { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as Order;
-      setActiveOrder(foundActiveOrder);
+      const activeOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+
+      // Sort on the client to find the most recent one
+      activeOrders.sort((a, b) => {
+        const dateA = (a.createdAt as unknown as Timestamp).toDate();
+        const dateB = (b.createdAt as unknown as Timestamp).toDate();
+        return dateB.getTime() - dateA.getTime();
+      });
+
+      setActiveOrder(activeOrders[0]);
 
     } catch (err: any) {
       console.error('Error fetching order:', err);
-      if (err.code === 'failed-precondition') {
-             setError("This query requires a Firestore index. Please check the browser console for a link to create it, or check the 'Console Error' in the preview window.");
-        } else {
-             setError('An error occurred while fetching your order. Please try again later.');
-        }
+      setError('An error occurred while fetching your order. Please try again later.');
     } finally {
       setLoading(false);
     }
