@@ -8,12 +8,22 @@ import { cn } from '@/lib/utils';
 
 export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
     const [deliveryTime, setDeliveryTime] = useState('');
+    const [isTomorrow, setIsTomorrow] = useState(false);
   
     useEffect(() => {
       const calculateDeliveryTime = () => {
         const now = new Date();
-        now.setMinutes(now.getMinutes() + 35);
-        setDeliveryTime(format(now, 'p')); // Formats to "4:30 PM"
+        const currentHour = now.getHours();
+
+        // If it's 6 PM (18:00) or later
+        if (currentHour >= 18) {
+            setDeliveryTime('Tomorrow 9:30 am');
+            setIsTomorrow(true);
+        } else {
+            now.setMinutes(now.getMinutes() + 35);
+            setDeliveryTime(format(now, 'p')); // Formats to "4:30 PM"
+            setIsTomorrow(false);
+        }
       };
   
       calculateDeliveryTime();
@@ -34,7 +44,7 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
     return (
       <div className={cn("flex items-center gap-2 text-green-600 font-medium", className)}>
         <Clock className="w-5 h-5" />
-        <span>Delivery by {deliveryTime}</span>
+        <span>{isTomorrow ? deliveryTime : `Delivery by ${deliveryTime}`}</span>
       </div>
     );
 };
