@@ -37,10 +37,11 @@ export default function CategoryPage() {
     const { products, loading } = useProducts();
     const categoryNameSlug = params.name as string;
 
-    // Decode the slug back to the original category name format for filtering
     const categoryName = useMemo(() => {
         if (!categoryNameSlug) return '';
-        const name = categoryNameSlug.replace(/-and-/g, ' & ');
+        // Decode the slug back to the original category name format for filtering
+        const decodedSlug = decodeURIComponent(categoryNameSlug);
+        const name = decodedSlug.replace(/-and-/g, ' & ');
         // Capitalize first letter of each word for display
         return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
     }, [categoryNameSlug]);
@@ -55,11 +56,15 @@ export default function CategoryPage() {
     if (loading) {
         return <CategoryPageSkeleton />;
     }
-
+    
+    // This condition should trigger a 404 if the category slug is valid but yields no products
     if (!loading && categoryProducts.length === 0) {
-        // This will render a 404 page if no products are found for the category
-        // This is useful for preventing empty pages or pages for non-existent categories
-        notFound();
+        // We check if the category itself exists in the product list to differentiate
+        // between an empty category and a non-existent one.
+        const categoryExists = products.some(p => p.category.toLowerCase() === categoryName.toLowerCase());
+        if (!categoryExists) {
+             notFound();
+        }
     }
 
     return (
@@ -67,11 +72,17 @@ export default function CategoryPage() {
             <Header />
             <main className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold font-headline mb-6">{categoryName}</h1>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                    {categoryProducts.map(product => (
-                        <ProductCard key={product.id} product={product} />
-                    ))}
-                </div>
+                {categoryProducts.length > 0 ? (
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                        {categoryProducts.map(product => (
+                            <ProductCard key={product.id} product={product} />
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center py-16">
+                        <p className="text-muted-foreground">No products found in this category yet.</p>
+                    </div>
+                )}
             </main>
         </>
     )
