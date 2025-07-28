@@ -8,6 +8,19 @@ import HomeContent from '@/components/pages/home/HomeContent';
 import { ProductsProvider } from '@/hooks/use-products';
 
 const Home = () => {
+    const router = useRouter();
+    const { user, loading } = useAuth();
+
+    useEffect(() => {
+        if (!loading && !user) {
+            router.replace('/login');
+        }
+    }, [user, loading, router]);
+    
+    if (loading || !user) {
+        return <HomePageSkeleton />;
+    }
+    
     return (
         <ProductsProvider>
             <HomeContent />
@@ -16,14 +29,5 @@ const Home = () => {
 };
 
 export default function HomePage() {
-  const { loading } = useAuth();
-
-  // We show a skeleton while the auth state is loading.
-  // Once loaded, HomeContent will render. It's designed to handle both
-  // logged-in and guest users gracefully.
-  if (loading) {
-    return <HomePageSkeleton />;
-  }
-
   return <Home />;
 }

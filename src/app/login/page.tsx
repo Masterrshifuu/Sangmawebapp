@@ -217,12 +217,6 @@ export default function LoginPage() {
                 <SignUpForm />
             </TabsContent>
         </Tabs>
-
-        <Button variant="link" asChild className="mt-4 text-muted-foreground">
-            <Link href="/">
-                Skip for now
-            </Link>
-        </Button>
       </div>
     </main>
   );
