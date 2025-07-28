@@ -1,8 +1,7 @@
 
 import { Accordion, AccordionItem } from '@/components/ui/accordion';
-import { AccountListItem } from './AccountListItem';
+import { AccordionListItem, LinkListItem } from './ListItems';
 import type { NavItem } from './accountNavItems';
-import Link from 'next/link';
 
 interface AccountSectionProps {
     title: string;
@@ -16,7 +15,7 @@ export const AccountSection = ({ title, items }: AccountSectionProps) => (
         <Accordion type="single" collapsible className="w-full space-y-2">
             {items.map((item, index) => (
                 <AccordionItem key={item.label} value={`item-${index}`} className="border-b-0">
-                    <AccountListItem {...item} />
+                    <AccordionListItem {...item} />
                 </AccordionItem>
             ))}
         </Accordion>
@@ -29,7 +28,7 @@ export const LegalSection = ({ title, items }: AccountSectionProps) => (
         <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">{title}</h2>
         <div className="space-y-2">
             {items.map(item => (
-                <AccountListItem key={item.label} {...item} />
+                <LinkListItem key={item.label} {...item} />
             ))}
         </div>
     </section>
