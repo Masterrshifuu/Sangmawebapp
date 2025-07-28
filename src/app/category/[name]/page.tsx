@@ -5,7 +5,7 @@ import Header from '@/components/header';
 import { ProductCard } from '@/components/product-card';
 import type { Metadata } from 'next';
 
-type Props = {
+type CategoryPageProps = {
     params: { name: string }
 }
 
@@ -17,7 +17,7 @@ function capitalizeWords(name: string): string {
     return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
     const categoryName = decodeCategoryName(params.name);
     const displayCategoryName = capitalizeWords(categoryName);
   
@@ -28,7 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     }
 }
 
-export default async function CategoryPage({ params }: { params: { name: string } }) {
+export default async function CategoryPage({ params }: CategoryPageProps) {
     const categoryNameSlug = params.name;
 
     if (!categoryNameSlug) {
