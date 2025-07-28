@@ -3,6 +3,30 @@ import { notFound } from 'next/navigation';
 import { getProducts } from '@/lib/products';
 import Header from '@/components/header';
 import { ProductCard } from '@/components/product-card';
+import type { Metadata } from 'next';
+
+type Props = {
+    params: { name: string }
+}
+
+function decodeCategoryName(slug: string): string {
+    return decodeURIComponent(slug).replace(/-and-/g, ' & ');
+}
+
+function capitalizeWords(name: string): string {
+    return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+    const categoryName = decodeCategoryName(params.name);
+    const displayCategoryName = capitalizeWords(categoryName);
+  
+    return {
+      title: `${displayCategoryName} - All Products`,
+      description: `Browse and order from a wide range of products in the ${displayCategoryName} category at Sangma Megha Mart.`,
+      keywords: [displayCategoryName, 'buy online', 'Sangma Megha Mart', 'grocery Tura'],
+    }
+}
 
 export default async function CategoryPage({ params }: { params: { name: string } }) {
     const categoryNameSlug = params.name;
@@ -14,10 +38,9 @@ export default async function CategoryPage({ params }: { params: { name: string 
     const { products } = await getProducts();
     
     // Decode the slug back to the original category name format for filtering
-    const decodedSlug = decodeURIComponent(categoryNameSlug);
-    const categoryName = decodedSlug.replace(/-and-/g, ' & ');
+    const categoryName = decodeCategoryName(categoryNameSlug);
     // Capitalize first letter of each word for display
-    const displayCategoryName = categoryName.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    const displayCategoryName = capitalizeWords(categoryName);
 
     const categoryProducts = products.filter(p => p.category.toLowerCase() === categoryName.toLowerCase());
 

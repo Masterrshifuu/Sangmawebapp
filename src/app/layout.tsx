@@ -17,8 +17,21 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Sangma Megha Mart',
-  description: 'Your one-stop shop for everything you need.',
+  metadataBase: new URL('https://sangmameghamart.com'),
+  title: {
+    default: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
+    template: '%s | Sangma Megha Mart',
+  },
+  description: 'Your one-stop shop for all your grocery needs in Tura, Meghalaya. Fast delivery from Chandmari. Order online now!',
+  keywords: ['Sangma Megha Mart', 'online grocery tura', 'meghalaya grocery', 'fast delivery', 'tura shopping'],
+  openGraph: {
+    title: 'Sangma Megha Mart',
+    description: 'The easiest way to shop for groceries in Tura.',
+    url: 'https://sangmameghamart.com',
+    siteName: 'Sangma Megha Mart',
+    locale: 'en_US',
+    type: 'website',
+  }
 };
 
 export default function RootLayout({

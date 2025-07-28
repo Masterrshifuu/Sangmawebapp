@@ -3,6 +3,7 @@
 
 import { useRef, useEffect } from 'react';
 import { useChatHandler } from '@/hooks/use-chat-handler';
+import type { Metadata } from 'next';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -18,6 +19,10 @@ import Link from 'next/link';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
+export const metadata: Metadata = {
+    title: 'Sangma AI Assistant',
+    description: 'Ask our AI anything about our products, get recommendations, and receive help with your shopping. Your personal grocery expert.',
+}
 
 export default function AiChatPage() {
   const {
@@ -73,7 +78,7 @@ export default function AiChatPage() {
                   </Button>
                 </CartSheet>
             </div>
-            <div className="font-semibold font-headline text-lg">Sangma</div>
+            <div className="font-semibold font-headline text-lg">Sangma AI</div>
             <div className="flex items-center gap-2">
                 <Button variant="ghost" size="icon" asChild>
                   <Link href="/">
