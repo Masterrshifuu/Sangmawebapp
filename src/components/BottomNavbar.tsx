@@ -37,7 +37,8 @@ export function BottomNavbar() {
   }, [lastScrollY]);
 
 
-  if (pathname.startsWith('/ai-chat') || pathname.startsWith('/checkout')) {
+  const hiddenPaths = ['/ai-chat', '/checkout', '/login', '/signup/phone'];
+  if (hiddenPaths.some(path => pathname.startsWith(path))) {
     return null;
   }
 

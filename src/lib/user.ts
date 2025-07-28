@@ -1,7 +1,7 @@
 
 'use client';
 
-import { db, auth, updateCurrentUser } from './firebase';
+import { db } from './firebase';
 import {
   doc,
   getDoc,
@@ -23,7 +23,6 @@ export async function getUserData(uid: string): Promise<UserData> {
   const userDocSnap = await getDoc(userDocRef);
 
   if (userDocSnap.exists()) {
-    // TODO: update login stats
     return userDocSnap.data() as UserData;
   } else {
     // If the document doesn't exist, create it.
@@ -88,22 +87,21 @@ export async function incrementUserStat(uid: string, stat: keyof Omit<UserData, 
 }
 
 /**
- * Updates the user's phone number in both Firebase Auth and Firestore.
- * @param user The current Firebase user object.
+ * Updates the user's phone number in their Firestore userdata document.
+ * @param uid The user's unique ID.
  * @param phoneNumber The new phone number to save.
  */
 export async function updateUserPhoneNumber(uid: string, phoneNumber: string): Promise<void> {
     if (!uid) throw new Error("User not found to update phone number.");
     
     try {
-        // Update Firestore document
         const userDocRef = doc(db, 'userdata', uid);
         await updateDoc(userDocRef, {
             phoneNumber: phoneNumber
         });
     } catch (error) {
         console.error("Error updating phone number in Firestore:", error);
-        // If the document doesn't exist, create it.
+        // If the document doesn't exist, create it. This is crucial for new sign-ups.
         const userDocSnap = await getDoc(doc(db, 'userdata', uid));
         if (!userDocSnap.exists()) {
             await setDoc(doc(db, 'userdata', uid), { phoneNumber }, { merge: true });
