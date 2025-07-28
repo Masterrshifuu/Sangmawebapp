@@ -8,6 +8,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { BottomNavbar } from '@/components/BottomNavbar';
 import { AdsProvider } from '@/hooks/use-ads';
 import 'leaflet/dist/leaflet.css';
+import { ProductsProvider } from '@/hooks/use-products';
 
 const ptSans = PT_Sans({
   subsets: ['latin'],
@@ -39,15 +40,17 @@ export default function RootLayout({
     >
       <body className="antialiased">
         <AuthWrapper>
-          <AdsProvider>
-            <div className="flex flex-col min-h-screen">
-              <div className="flex-grow">
-                {children}
+          <ProductsProvider>
+            <AdsProvider>
+              <div className="flex flex-col min-h-screen">
+                <div className="flex-grow">
+                  {children}
+                </div>
+                <Toaster />
+                <BottomNavbar />
               </div>
-              <Toaster />
-              <BottomNavbar />
-            </div>
-          </AdsProvider>
+            </AdsProvider>
+          </ProductsProvider>
         </AuthWrapper>
       </body>
     </html>

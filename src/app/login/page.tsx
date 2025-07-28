@@ -28,6 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import Link from 'next/link';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -217,6 +218,11 @@ export default function LoginPage() {
             </TabsContent>
         </Tabs>
 
+        <Button variant="link" asChild className="mt-4 text-muted-foreground">
+            <Link href="/">
+                Skip for now
+            </Link>
+        </Button>
       </div>
     </main>
   );

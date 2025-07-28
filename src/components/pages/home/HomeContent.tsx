@@ -1,9 +1,8 @@
 
+'use client';
+
 import Link from 'next/link';
-import { getHomePageData } from '@/lib/home';
-import { getProducts } from '@/lib/products';
-import { getAds } from '@/lib/ads';
-import type { Ad, Product } from '@/lib/types';
+import type { Ad, Product, BestsellerCategory, ShowcaseCategory } from '@/lib/types';
 import Header from '@/components/header';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
@@ -11,6 +10,10 @@ import { BestsellerCard } from '@/components/BestsellerCard';
 import { CarouselItem } from '@/components/ui/carousel';
 import { AdCard } from '@/components/AdCard';
 import { ProductCard } from '@/components/product-card';
+import { useProducts } from '@/hooks/use-products';
+import { useAds } from '@/hooks/use-ads';
+import { getHomePageData } from '@/lib/home';
+import { HomePageSkeleton } from './HomePageSkeleton';
 
 type FeedItem = Product | Ad;
 
@@ -46,9 +49,13 @@ function createJustForYouFeed(products: Product[], ads: Ad[]): FeedItem[] {
   return content;
 }
 
-export default async function HomeContent() {
-  const { products, error } = await getProducts();
-  const { ads } = await getAds();
+export default function HomeContent() {
+  const { products, loading: productsLoading, error } = useProducts();
+  const { ads, loading: adsLoading } = useAds();
+
+  if (productsLoading || adsLoading) {
+      return <HomePageSkeleton />;
+  }
 
   if (error) {
     return (
@@ -76,11 +83,13 @@ export default async function HomeContent() {
     )
   }
 
-  const homePageData = getHomePageData(products);
+  const { showcaseCategories, bestsellerCategories }: {
+      showcaseCategories: ShowcaseCategory[];
+      bestsellerCategories: BestsellerCategory[];
+  } = getHomePageData(products);
+
   const justForYouContent = createJustForYouFeed(products, ads);
   
-  const { showcaseCategories, bestsellerCategories } = homePageData;
-
   return (
     <>
       <Header />
