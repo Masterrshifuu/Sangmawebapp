@@ -16,10 +16,34 @@ const notoSans = Noto_Sans({
   variable: '--font-sans',
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sangma-megha-mart.com';
+
 export const metadata: Metadata = {
   title: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
   description: 'Your one-stop shop for online grocery in Tura. Order fresh vegetables, snacks, and household essentials from Sangma Megha Mart for fast delivery.',
   keywords: ['Sangmamart', 'Sangma Megha mart', 'Sangma Mart', 'Tura Mart', 'Tura Grocery', 'Online Grocery Tura'],
+  openGraph: {
+    type: 'website',
+    locale: 'en_IN',
+    url: siteUrl,
+    siteName: 'Sangma Megha Mart',
+    title: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
+    description: 'Fast delivery of fresh groceries in Tura, Meghalaya.',
+    images: [
+      {
+        url: `${siteUrl}/adog.png`,
+        width: 1200,
+        height: 630,
+        alt: 'Sangma Megha Mart',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
+    description: 'Fast delivery of fresh groceries in Tura, Meghalaya.',
+    images: [`${siteUrl}/adog.png`],
+  },
 };
 
 export default function RootLayout({
