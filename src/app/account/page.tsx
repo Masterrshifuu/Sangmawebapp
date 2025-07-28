@@ -6,13 +6,13 @@ import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, ChevronLeft } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import Header from '@/components/header';
 import { AccountSection, LegalSection } from '@/components/pages/account/AccountSection';
 import { LinkListItem } from '@/components/pages/account/ListItems';
 import { getLegalItems, getGeneralItems, getSecurityItems, myOrdersItem } from '@/components/pages/account/accountNavItems';
+import Link from 'next/link';
 
 
 export default function AccountPage() {
@@ -35,11 +35,24 @@ export default function AccountPage() {
   
   const legalItems = getLegalItems();
   
+  // A simple header for the account page
+  const AccountHeader = ({ title }: { title: string }) => (
+    <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
+        <Button variant="ghost" size="icon" asChild>
+            <Link href="/" aria-label="Go back home">
+                <ChevronLeft />
+            </Link>
+        </Button>
+        <h1 className="flex-1 text-center text-lg font-semibold font-headline">{title}</h1>
+        <div className="w-10" />
+    </header>
+  );
+
   if (!user) {
     // Logged-out view
     return (
         <>
-            <Header />
+            <AccountHeader title="My Account" />
             <main className="flex-1 pb-24 md:pb-0 bg-background">
                 <div className="p-6 text-center" style={{ backgroundColor: '#faf368' }}>
                      <h1 className="text-xl font-bold font-headline text-black">
@@ -66,7 +79,7 @@ export default function AccountPage() {
 
   return (
     <>
-      <Header />
+      <AccountHeader title="My Account" />
       <main className="flex-1 pb-24 md:pb-0 bg-background">
         <div className="p-6" style={{ backgroundColor: '#faf368' }}>
           <div className="flex items-center gap-4">
