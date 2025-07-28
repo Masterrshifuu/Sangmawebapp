@@ -33,7 +33,7 @@ export function ProfileDetailsForm({ user }: { user: User }) {
     setLoading(true);
     setError('');
     setSuccess('');
-    const result = await updateName(user, data.name);
+    const result = await updateName(data.name);
     if (result.success) {
         setSuccess('Profile updated successfully!');
         // This won't visually update the header immediately without a page refresh

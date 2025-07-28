@@ -12,7 +12,11 @@ import { doc, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
 import type { User } from 'firebase/auth';
 import type { Address } from './types';
 
-export async function updateName(user: User, newName: string) {
+export async function updateName(newName: string) {
+    const user = auth.currentUser;
+    if (!user) {
+        return { success: false, error: 'User not authenticated.' };
+    }
     try {
         await updateProfile(user, { displayName: newName });
         return { success: true };
