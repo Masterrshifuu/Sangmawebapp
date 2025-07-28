@@ -71,14 +71,3 @@ export default async function CategoryPage({ params }: { params: { name: string 
         </>
     )
 }
-
-// Generate static paths for categories to improve build times and performance
-export async function generateStaticParams() {
-    const { products } = await getProducts();
-
-    const categoryNames = new Set(products.map(p => p.category));
-
-    return Array.from(categoryNames).map(name => ({
-        name: encodeURIComponent(name.toLowerCase().replace(/ & /g, '-and-')),
-    }));
-}
