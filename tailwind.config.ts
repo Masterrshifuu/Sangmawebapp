@@ -18,7 +18,7 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-inter)"],
+        sans: ["var(--font-pt-sans)"],
         headline: ["var(--font-poppins)"],
       },
       colors: {

@@ -1,9 +1,8 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import type { AIState } from '@/lib/types';
-import { getChatResponse, getChatResponseWithImage } from '@/app/actions';
+import { useRef, useEffect } from 'react';
+import { useChatHandler } from '@/hooks/use-chat-handler';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -19,19 +18,22 @@ import Link from 'next/link';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
-type ChatMessage = AIState[number] & {
-    productContext?: { name: string; description: string };
-};
 
 export default function AiChatPage() {
-  const [inputValue, setInputValue] = useState('');
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const {
+    messages,
+    inputValue,
+    isLoading,
+    imagePreview,
+    fileInputRef,
+    handleInputChange,
+    handleImageChange,
+    clearImage,
+    handleSubmit
+  } = useChatHandler();
+
   const { totalItems } = useCart();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -40,81 +42,6 @@ export default function AiChatPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isLoading]);
-
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const clearImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    if(fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
-
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleSubmit = async (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if ((!inputValue.trim() && !imageFile) || isLoading) return;
-
-    setIsLoading(true);
-
-    let userMessage: ChatMessage = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: inputValue || "Here's an image.", // Provide default text if only image is present
-    };
-    
-    // Add image to user message if present
-    if (imagePreview) {
-        userMessage.attachments = [{ contentType: 'image', url: imagePreview }];
-    }
-    
-    const newMessages: ChatMessage[] = [...messages, userMessage];
-    setMessages(newMessages);
-
-    // Clear inputs after submitting
-    setInputValue('');
-    clearImage();
-
-    try {
-        let responseMessage;
-        if (imageFile) {
-            const imageDataUri = await fileToDataUri(imageFile);
-            responseMessage = await getChatResponseWithImage(newMessages, imageDataUri);
-        } else {
-            responseMessage = await getChatResponse(newMessages);
-        }
-        setMessages(currentMessages => [...currentMessages, responseMessage]);
-    } catch (error) {
-        console.error("Failed to get chat response:", error);
-        const errorMessage: ChatMessage = {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: 'Sorry, I encountered an error. Please try again.'
-        };
-        setMessages(currentMessages => [...currentMessages, errorMessage]);
-    } finally {
-        setIsLoading(false);
-    }
-  };
 
   return (
     <div className="relative flex flex-col h-screen bg-background">
@@ -161,7 +88,7 @@ export default function AiChatPage() {
             <div className="max-w-4xl mx-auto px-4 pb-32">
                 {messages.length === 0 && !isLoading ? (
                     <div className="min-h-[calc(100vh-210px)] flex items-center">
-                         <EmptyChat setInputValue={setInputValue} />
+                         <EmptyChat setInputValue={handleInputChange} />
                     </div>
                 ) : (
                     <div className="divide-y">
@@ -204,7 +131,7 @@ export default function AiChatPage() {
                     <div className="relative flex items-center">
                         <Textarea
                           value={inputValue}
-                          onChange={(e) => setInputValue(e.target.value)}
+                          onChange={(e) => handleInputChange(e.target.value)}
                           placeholder="Ask about products.."
                           className="pr-20 py-3 h-12 min-h-12 resize-none focus-visible:ring-1 focus-visible:ring-accent"
                           onKeyDown={(e) => {
@@ -235,7 +162,7 @@ export default function AiChatPage() {
                             <Button 
                                 type="submit" 
                                 size="icon"
-                                disabled={(!inputValue.trim() && !imageFile) || isLoading}
+                                disabled={(!inputValue.trim() && !imagePreview) || isLoading}
                                 className="h-8 w-8 bg-accent hover:bg-accent/80 disabled:bg-muted"
                             >
                               <ArrowUp className="h-5 w-5 text-black" />

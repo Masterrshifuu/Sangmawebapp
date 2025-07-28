@@ -17,7 +17,6 @@ export interface Product {
     tags?: string[];
     isBestseller?: boolean;
     stock: number;
-    reviews?: Review[];
 }
 
 export interface User {

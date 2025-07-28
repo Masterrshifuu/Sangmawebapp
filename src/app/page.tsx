@@ -1,50 +1,22 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
-import Header from '@/components/header';
-import { getHomePageData } from '@/lib/home';
-import { CategoryShowcase } from '@/components/category/CategoryShowcase';
+import { useMemo } from 'react';
 import { useProducts } from '@/hooks/use-products';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useAds } from '@/hooks/use-ads';
+import type { Ad, Product } from '@/lib/types';
+import { getHomePageData } from '@/lib/home';
+import Header from '@/components/header';
 import Link from 'next/link';
+import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { BestsellerCard } from '@/components/BestsellerCard';
 import { CarouselItem } from '@/components/ui/carousel';
-import { useAds } from '@/hooks/use-ads';
 import { AdCard } from '@/components/AdCard';
 import { ProductCard } from '@/components/product-card';
-import type { Ad, Product } from '@/lib/types';
+import { HomePageSkeleton } from '@/components/pages/home/HomePageSkeleton';
 
 type FeedItem = Product | Ad;
-
-const HomePageSkeleton = () => (
-    <>
-        <Header />
-        <main className="flex-1 pb-16 md:pb-0 py-6 space-y-8">
-            <section>
-                <Skeleton className="h-8 w-48 mb-4 ml-4" />
-                <div className="flex gap-4 overflow-x-auto pb-4 px-4">
-                    {[...Array(4)].map((_, i) => (
-                        <div key={i} className="flex flex-col items-center space-y-2 flex-shrink-0">
-                            <Skeleton className="w-20 h-20 rounded-lg" />
-                            <Skeleton className="h-4 w-16" />
-                        </div>
-                    ))}
-                </div>
-            </section>
-             <section>
-                <Skeleton className="h-8 w-32 mb-4 ml-4" />
-                <div className="flex gap-4 overflow-x-auto pb-4 px-4">
-                    {[...Array(3)].map((_, i) => (
-                        <Skeleton key={i} className="w-80 h-72 rounded-lg flex-shrink-0" />
-                    ))}
-                </div>
-            </section>
-        </main>
-    </>
-);
-
 
 export default function Home() {
   const { products, error, loading } = useProducts();

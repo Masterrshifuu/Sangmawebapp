@@ -6,80 +6,14 @@ import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import Link from 'next/link';
-import {
-  ChevronRight,
-  User,
-  LogOut,
-  FileText,
-  Shield,
-  MapPin,
-  Package,
-  Headphones,
-  RefreshCw,
-  LogIn,
-} from 'lucide-react';
+import { LogIn, LogOut } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
-import { Skeleton } from '@/components/ui/skeleton';
+import { AccountPageSkeleton } from '@/components/pages/account/AccountPageSkeleton';
+import { AccountSection } from '@/components/pages/account/AccountSection';
+import { getLegalItems, getGeneralItems, getSecurityItems } from '@/components/pages/account/accountNavItems';
 
-const AccountSkeleton = () => (
-    <>
-        <Header />
-        <main className="flex-1 pb-16 md:pb-0">
-             <div className="p-6 bg-accent/20">
-                <div className="flex items-center gap-4">
-                    <Skeleton className="h-20 w-20 rounded-full" />
-                    <div className="space-y-2">
-                        <Skeleton className="h-6 w-32 rounded" />
-                        <Skeleton className="h-4 w-48 rounded" />
-                    </div>
-                </div>
-            </div>
-            <div className="p-4 space-y-6">
-                {[...Array(3)].map((_, i) => (
-                    <div key={i} className="space-y-2">
-                        <Skeleton className="h-5 w-24 rounded" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-12 w-full rounded-lg" />
-                            <Skeleton className="h-12 w-full rounded-lg" />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </main>
-    </>
-);
-
-
-const AccountListItem = ({
-  icon: Icon,
-  label,
-  href,
-  onClick,
-}: {
-  icon: React.ElementType;
-  label: string;
-  href?: string;
-  onClick?: () => void;
-}) => {
-  const content = (
-    <div
-      className="flex items-center p-4 bg-card rounded-lg transition-all duration-200 active:bg-accent/20"
-      onClick={onClick}
-    >
-      <Icon className="w-6 h-6 mr-4 text-accent" />
-      <span className="flex-1 font-medium text-foreground">{label}</span>
-      <ChevronRight className="w-5 h-5 text-muted-foreground" />
-    </div>
-  );
-
-  if (href) {
-    return <Link href={href}>{content}</Link>;
-  }
-
-  return <button className="w-full text-left">{content}</button>;
-};
 
 export default function AccountPage() {
   const { user, loading } = useAuth();
@@ -95,15 +29,11 @@ export default function AccountPage() {
   };
 
   if (loading) {
-    return <AccountSkeleton />;
+    return <AccountPageSkeleton />;
   }
   
-  const legalItems = [
-    { icon: FileText, label: 'Terms & Conditions', href: '/terms' },
-    { icon: RefreshCw, label: 'Refund & Cancellation Policy', href: '/refund-policy' },
-    { icon: Headphones, label: 'Help Center', href: '#' },
-  ];
-
+  const legalItems = getLegalItems();
+  
   if (!user) {
     // Logged-out view
     return (
@@ -121,13 +51,8 @@ export default function AccountPage() {
                     </Button>
                 </div>
 
-                 <div className="p-4 space-y-6">
-                    <section>
-                        <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">LEGAL & HELP</h2>
-                         <div className="space-y-2">
-                            {legalItems.map(item => <AccountListItem key={item.label} {...item} />)}
-                        </div>
-                    </section>
+                <div className="p-4 space-y-6">
+                    <AccountSection title="LEGAL & HELP" items={legalItems} />
                 </div>
             </main>
         </>
@@ -135,15 +60,8 @@ export default function AccountPage() {
   }
   
   // Logged-in view
-  const generalItems = [
-    { icon: Package, label: 'My Orders', href: '/my-orders' },
-    { icon: MapPin, label: 'Address Book', href: '#' },
-  ];
-  
-  const securityItems = [
-    { icon: User, label: 'Profile Details', href: '#' },
-    { icon: Shield, label: 'Change Password', href: '#' },
-  ];
+  const generalItems = getGeneralItems();
+  const securityItems = getSecurityItems();
 
   return (
     <>
@@ -158,6 +76,7 @@ export default function AccountPage() {
                     width={80}
                     height={80}
                     className="object-cover"
+                    data-ai-hint="user avatar"
                 />
             </div>
             <div>
@@ -170,26 +89,9 @@ export default function AccountPage() {
         </div>
 
         <div className="p-4 space-y-6">
-            <section>
-                <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">GENERAL</h2>
-                <div className="space-y-2">
-                    {generalItems.map(item => <AccountListItem key={item.label} {...item} />)}
-                </div>
-            </section>
-            
-            <section>
-                <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">ACCOUNT & SECURITY</h2>
-                 <div className="space-y-2">
-                    {securityItems.map(item => <AccountListItem key={item.label} {...item} />)}
-                </div>
-            </section>
-
-            <section>
-                <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">LEGAL & HELP</h2>
-                 <div className="space-y-2">
-                    {legalItems.map(item => <AccountListItem key={item.label} {...item} />)}
-                </div>
-            </section>
+            <AccountSection title="GENERAL" items={generalItems} />
+            <AccountSection title="ACCOUNT & SECURITY" items={securityItems} />
+            <AccountSection title="LEGAL & HELP" items={legalItems} />
         
             <div className="pt-4">
                 <Button variant="outline" className="w-full text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive" onClick={handleLogout}>

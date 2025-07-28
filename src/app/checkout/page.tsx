@@ -24,19 +24,12 @@ import Image from 'next/image';
 import { getStoreStatus } from '@/lib/datetime';
 import { incrementUserStat } from '@/lib/user';
 import { Checkbox } from '@/components/ui/checkbox';
-import Header from '@/components/header';
-import { Skeleton } from '@/components/ui/skeleton';
+import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
+import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
+import { StoreClosedWarning } from '@/components/pages/checkout/StoreClosedWarning';
+import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
+import { UnserviceableLocation } from '@/components/pages/checkout/UnserviceableLocation';
 
-const CheckoutPageSkeleton = () => (
-    <div className="animate-pulse space-y-8 p-4">
-        <div className="space-y-2">
-            <Skeleton className="h-8 w-1/2 bg-muted rounded" />
-            <Skeleton className="h-4 w-1/3 bg-muted rounded" />
-        </div>
-        <Skeleton className="h-64 w-full bg-muted rounded-lg" />
-        <Skeleton className="h-48 w-full bg-muted rounded-lg" />
-    </div>
-)
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -241,13 +234,7 @@ export default function CheckoutPage() {
     }
     
     if (deliveryCharge === null) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] p-4 text-center">
-                <h2 className="text-2xl font-bold">Unserviceable Location</h2>
-                <p className="text-muted-foreground mt-2">We do not deliver to your selected location.</p>
-                <Button onClick={() => router.back()} className="mt-4">Go Back</Button>
-            </div>
-        )
+        return <UnserviceableLocation />;
     }
 
     const canPlaceOrder = storeStatus.isOpen || scheduleForNextDay;
@@ -255,54 +242,19 @@ export default function CheckoutPage() {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
              {!storeStatus.isOpen && (
-                <Card className="border-yellow-400 bg-yellow-50">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-yellow-800">
-                           <AlertCircle /> Store Closed
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-yellow-700 space-y-4">
-                        <p>{storeStatus.message}</p>
-                        <div className="flex items-center space-x-2 p-3 bg-yellow-100 rounded-md">
-                            <Checkbox id="schedule" checked={scheduleForNextDay} onCheckedChange={(checked) => setScheduleForNextDay(!!checked)} />
-                            <label htmlFor="schedule" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                Yes, schedule my order for the next available slot.
-                            </label>
-                        </div>
-                    </CardContent>
-                </Card>
+                <StoreClosedWarning
+                    message={storeStatus.message}
+                    scheduleForNextDay={scheduleForNextDay}
+                    setScheduleForNextDay={setScheduleForNextDay}
+                />
              )}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Order Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="space-y-2 text-sm max-h-32 overflow-y-auto">
-                        {cart.map(item => (
-                            <div key={item.product.id} className="flex justify-between">
-                                <span className="text-muted-foreground flex-1 truncate pr-2">{item.product.name} x {item.quantity}</span>
-                                <span>INR {(item.product.mrp * item.quantity).toFixed(2)}</span>
-                            </div>
-                        ))}
-                    </div>
-                    <Separator />
-                    <div className="space-y-2 text-sm font-medium">
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Subtotal</span>
-                            <span>INR {totalPrice.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                            <span className="text-muted-foreground">Delivery Fee</span>
-                            <span>{deliveryCharge === 0 ? 'FREE' : `INR ${deliveryCharge.toFixed(2)}`}</span>
-                        </div>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between font-bold text-lg">
-                        <span>Total Amount</span>
-                        <span>INR {finalTotal.toFixed(2)}</span>
-                    </div>
-                </CardContent>
-            </Card>
+            
+            <OrderSummary
+                cart={cart}
+                totalPrice={totalPrice}
+                deliveryCharge={deliveryCharge}
+                finalTotal={finalTotal}
+            />
 
             <Card>
                 <CardHeader>
@@ -323,50 +275,15 @@ export default function CheckoutPage() {
                                 <p className="text-sm text-muted-foreground">Pay with cash when your order arrives.</p>
                             </div>
                         </Label>
-                        <Label htmlFor="upi" className={`flex items-start gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${canPlaceOrder ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
-                             <RadioGroupItem value="upi" id="upi" disabled={!canPlaceOrder} />
-                            <div className="flex-1">
-                                <p className="font-semibold">Pay with UPI</p>
-                                <p className="text-sm text-muted-foreground">Scan the QR code and upload a screenshot of your payment.</p>
-                                {paymentMethod === 'upi' && canPlaceOrder && (
-                                    <div className="mt-4 space-y-4">
-                                        <div className="bg-white p-2 rounded-md max-w-[200px] mx-auto">
-                                             <Image 
-                                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=YOUR_UPI_ID@OKBANK&pn=Sangma%20Megha%20Mart&am=${finalTotal.toFixed(2)}&cu=INR`}
-                                                alt="UPI QR Code"
-                                                width={200}
-                                                height={200}
-                                                className="w-full h-full"
-                                                data-ai-hint="QR code"
-                                            />
-                                        </div>
-                                        {screenshotPreview && (
-                                            <div className="mt-2 text-center">
-                                                <Image src={screenshotPreview} alt="Screenshot preview" width={150} height={300} className="rounded-md mx-auto border" />
-                                            </div>
-                                        )}
-                                        <Label htmlFor="screenshot-upload" className="w-full">
-                                            <div className="mt-2 flex justify-center items-center px-6 py-4 border-2 border-dashed rounded-md cursor-pointer hover:border-primary">
-                                                <div className="text-center">
-                                                    <Upload className="mx-auto h-8 w-8 text-muted-foreground"/>
-                                                    <p className="mt-1 text-sm text-muted-foreground">
-                                                        {screenshotFile ? 'Change screenshot' : 'Upload payment screenshot'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <Input 
-                                                id="screenshot-upload" 
-                                                type="file" 
-                                                className="sr-only" 
-                                                accept="image/*"
-                                                onChange={handleScreenshotChange}
-                                                disabled={isVerifying || isPlacingOrder}
-                                            />
-                                        </Label>
-                                    </div>
-                                )}
-                            </div>
-                        </Label>
+                        <UpiPayment
+                            paymentMethod={paymentMethod}
+                            canPlaceOrder={canPlaceOrder}
+                            finalTotal={finalTotal}
+                            screenshotPreview={screenshotPreview}
+                            screenshotFile={screenshotFile}
+                            handleScreenshotChange={handleScreenshotChange}
+                            isVerifying={isVerifying || isPlacingOrder}
+                        />
                     </RadioGroup>
                 </CardContent>
             </Card>

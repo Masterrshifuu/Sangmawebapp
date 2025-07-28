@@ -48,7 +48,7 @@ export const EmptyChat = ({ setInputValue }: { setInputValue: (value: string) =>
                     <CarouselContent className="-mt-4 h-[100px]">
                         {suggestions.map((s, i) => (
                              <CarouselItem key={i} className="pt-4 basis-auto">
-                                <PromptSuggestion text={s} onClick={setInputValue} />
+                                <PromptSuggestion text={s} onClick={(text) => setInputValue(text)} />
                             </CarouselItem>
                         ))}
                     </CarouselContent>
