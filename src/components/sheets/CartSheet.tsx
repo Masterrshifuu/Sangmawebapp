@@ -9,6 +9,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
   DrawerClose,
+  DrawerFooter,
 } from '@/components/ui/drawer';
 import { ChevronLeft, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
