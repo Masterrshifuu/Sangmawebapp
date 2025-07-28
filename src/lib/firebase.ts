@@ -6,6 +6,7 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
+  updateCurrentUser,
   type Auth,
 } from "firebase/auth";
 
@@ -29,6 +30,7 @@ export {
     auth, 
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    updateProfile
+    updateProfile,
+    updateCurrentUser
 };
 export type { Auth };

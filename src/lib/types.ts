@@ -40,6 +40,7 @@ export interface UserData {
     dislikes: number;
     lastLogin: FieldValue;
     loginCount: number;
+    phoneNumber: string | null;
 }
 
 export interface BestsellerImage {

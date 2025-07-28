@@ -1,7 +1,7 @@
 
 'use client';
 
-import { db } from './firebase';
+import { db, auth, updateCurrentUser } from './firebase';
 import {
   doc,
   getDoc,
@@ -35,6 +35,7 @@ export async function getUserData(uid: string): Promise<UserData> {
       dislikes: 0,
       lastLogin: serverTimestamp(),
       loginCount: 1,
+      phoneNumber: null,
     };
     await setDoc(userDocRef, newUserData);
     return { ...newUserData, lastLogin: new Date() }; // Return with JS Date for immediate use
@@ -70,7 +71,7 @@ export async function updateUserCart(uid: string, cart: CartItem[]): Promise<voi
  * @param stat The field to increment (e.g., 'totalOrders').
  * @param value The amount to increment by (defaults to 1).
  */
-export async function incrementUserStat(uid: string, stat: keyof UserData, value: number = 1): Promise<void> {
+export async function incrementUserStat(uid: string, stat: keyof Omit<UserData, 'cart' | 'lastLogin' | 'phoneNumber'>, value: number = 1): Promise<void> {
     const userDocRef = doc(db, 'userdata', uid);
     try {
         await updateDoc(userDocRef, {
@@ -82,6 +83,30 @@ export async function incrementUserStat(uid: string, stat: keyof UserData, value
         const userDocSnap = await getDoc(userDocRef);
         if (!userDocSnap.exists()) {
             await setDoc(doc(db, 'userdata', uid), { [stat]: value }, { merge: true });
+        }
+    }
+}
+
+/**
+ * Updates the user's phone number in both Firebase Auth and Firestore.
+ * @param user The current Firebase user object.
+ * @param phoneNumber The new phone number to save.
+ */
+export async function updateUserPhoneNumber(uid: string, phoneNumber: string): Promise<void> {
+    if (!uid) throw new Error("User not found to update phone number.");
+    
+    try {
+        // Update Firestore document
+        const userDocRef = doc(db, 'userdata', uid);
+        await updateDoc(userDocRef, {
+            phoneNumber: phoneNumber
+        });
+    } catch (error) {
+        console.error("Error updating phone number in Firestore:", error);
+        // If the document doesn't exist, create it.
+        const userDocSnap = await getDoc(doc(db, 'userdata', uid));
+        if (!userDocSnap.exists()) {
+            await setDoc(doc(db, 'userdata', uid), { phoneNumber }, { merge: true });
         }
     }
 }

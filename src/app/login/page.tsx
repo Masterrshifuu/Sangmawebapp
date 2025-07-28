@@ -117,8 +117,8 @@ const SignUpForm = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
             await updateProfile(userCredential.user, { displayName: data.name });
             
-            toast({ title: 'Account Created!', description: 'Welcome! You are now logged in.' });
-            router.push('/');
+            toast({ title: 'Account Created!', description: "Let's add your phone number for deliveries." });
+            router.push('/signup/phone'); // Redirect to the new phone number page
         } catch (error: any) {
             console.error('Sign up error:', error);
             const description = error.code === 'auth/email-already-in-use'
