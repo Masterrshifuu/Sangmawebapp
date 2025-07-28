@@ -74,16 +74,16 @@ const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
 };
 
 const TrackingTimeline = ({ status }: { status: string }) => {
-  const normalizedStatus = status?.toLowerCase().replace(/ /g, '_') || 'pending';
+  const normalizedStatus = status || 'Pending';
   const orderStatusHierarchy = [
-    'pending',
-    'confirmed',
-    'packed',
-    'out_for_delivery',
-    'delivered',
+    'Pending',
+    'Confirmed',
+    'Packed',
+    'OutForDelivery',
+    'Delivered',
   ];
 
-  if (normalizedStatus === 'cancelled') {
+  if (normalizedStatus === 'Cancelled') {
     return (
         <div className="p-4 rounded-lg border bg-red-50 text-red-800 text-center">
             <h3 className="font-semibold">Order Cancelled</h3>
@@ -91,7 +91,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
         </div>
     )
   }
-   if (normalizedStatus === 'scheduled') {
+   if (normalizedStatus === 'Scheduled') {
     return (
         <div className="p-4 rounded-lg border bg-purple-50 text-purple-800 text-center">
             <h3 className="font-semibold">Order Scheduled</h3>
@@ -106,31 +106,31 @@ const TrackingTimeline = ({ status }: { status: string }) => {
     {
       icon: Package,
       title: 'Order Placed',
-      status: 'pending',
+      status: 'Pending',
       description: 'We have received your order.',
     },
     {
       icon: CheckCircle2,
       title: 'Order Confirmed',
-      status: 'confirmed',
+      status: 'Confirmed',
       description: 'Your order has been confirmed.',
     },
     {
       icon: Package,
       title: 'Packed',
-      status: 'packed',
+      status: 'Packed',
       description: 'Your items are being packed.',
     },
     {
       icon: Truck,
       title: 'Out for Delivery',
-      status: 'out_for_delivery',
+      status: 'OutForDelivery',
       description: 'Your order is on its way.',
     },
     {
       icon: Home,
       title: 'Delivered',
-      status: 'delivered',
+      status: 'Delivered',
       description: 'Your order has been delivered.',
     },
   ];
@@ -233,7 +233,7 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     }, [order]);
 
     useEffect(() => {
-        if (order.status.toLowerCase() === 'delivered' || order.status.toLowerCase() === 'cancelled') {
+        if (order.status === 'Delivered' || order.status === 'Cancelled') {
             return;
         }
         calculateTimeLeft();
@@ -246,8 +246,8 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
         const createdAt = (order.createdAt as unknown as Timestamp).toDate();
         const now = new Date();
         const minutesSinceOrder = (now.getTime() - createdAt.getTime()) / (1000 * 60);
-        const cancellableStatuses = ['pending', 'confirmed', 'packed', 'scheduled'];
-        return minutesSinceOrder < 5 && cancellableStatuses.includes(order.status.toLowerCase().replace(/ /g, '_'));
+        const cancellableStatuses = ['Pending', 'Confirmed', 'Packed', 'Scheduled'];
+        return minutesSinceOrder < 5 && cancellableStatuses.includes(order.status);
     };
 
     const handleCancelOrder = async () => {
@@ -256,17 +256,14 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
         const result = await cancelOrder(order.id);
         if (result.success) {
             toast({ title: "Order Cancelled", description: "Your order has been successfully cancelled." });
-            // The onSnapshot listener will handle the UI update automatically
         } else {
             toast({ variant: 'destructive', title: "Cancellation Failed", description: result.message });
         }
         setIsCancelling(false);
     };
 
-    if (order.status.toLowerCase() === 'delivered') {
+    if (order.status === 'Delivered') {
         const createdAt = (order.createdAt as unknown as Timestamp).toDate();
-        // Assuming a `deliveredAt` field would be set. If not, we can't calculate this.
-        // For now, let's pretend `cancelledAt` is `deliveredAt` for calculation purposes if it exists
         const deliveredAt = (order.cancelledAt as unknown as Timestamp)?.toDate() || new Date(); 
         const deliveryDuration = differenceInMinutes(deliveredAt, createdAt);
 
@@ -280,7 +277,7 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
         )
     }
 
-    if (order.status.toLowerCase() === 'cancelled') {
+    if (order.status === 'Cancelled') {
         return (
             <div className="p-4 rounded-lg bg-red-100 text-red-800 text-center space-y-1">
                 <p className="text-sm font-semibold flex items-center justify-center gap-2"><XCircle />Order Cancelled</p>
