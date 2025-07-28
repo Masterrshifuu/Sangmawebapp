@@ -58,9 +58,10 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: var(--font-pt-sans), sans-serif;
+    font-family: var(--font-sans), sans-serif;
   }
   .font-headline {
-    font-family: var(--font-poppins), sans-serif;
+    font-family: var(--font-sans), sans-serif;
+    font-weight: 700;
   }
 }
