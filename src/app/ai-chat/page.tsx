@@ -16,7 +16,7 @@ import { EmptyChat } from '@/components/chat/EmptyChat';
 import Image from 'next/image';
 import { CartSheet } from '@/components/sheets/CartSheet';
 import Link from 'next/link';
-import { Drawer, DrawerContent, DrawerTrigger } from '@/components/ui/drawer';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerTrigger } from '@/components/ui/drawer';
 import { ChatSidebar } from '@/components/chat/ChatSidebar';
 
 type ChatMessage = AIState[number] & {
@@ -128,6 +128,9 @@ export default function AiChatPage() {
                         </Button>
                     </DrawerTrigger>
                     <DrawerContent className="h-full w-64 p-0">
+                        <DrawerHeader>
+                            <DrawerTitle className="sr-only">Chat Menu</DrawerTitle>
+                        </DrawerHeader>
                         <ChatSidebar />
                     </DrawerContent>
                 </Drawer>
