@@ -4,14 +4,14 @@ import { AccordionListItem, LinkListItem } from './ListItems';
 import type { NavItem } from './accountNavItems';
 
 interface AccountSectionProps {
-    title: string;
+    title?: string;
     items: NavItem[];
 }
 
 // Section that uses an accordion for its items
 export const AccountSection = ({ title, items }: AccountSectionProps) => (
     <section>
-        <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">{title}</h2>
+        {title && <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">{title}</h2>}
         <Accordion type="single" collapsible className="w-full space-y-2">
             {items.map((item, index) => (
                 <AccordionItem key={item.label} value={`item-${index}`} className="border-b-0">

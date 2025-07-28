@@ -6,12 +6,13 @@ import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, Package } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
 import { AccountSection, LegalSection } from '@/components/pages/account/AccountSection';
-import { getLegalItems, getGeneralItems, getSecurityItems } from '@/components/pages/account/accountNavItems';
+import { LinkListItem } from '@/components/pages/account/ListItems';
+import { getLegalItems, getGeneralItems, getSecurityItems, myOrdersItem } from '@/components/pages/account/accountNavItems';
 
 
 export default function AccountPage() {
@@ -89,7 +90,14 @@ export default function AccountPage() {
         </div>
 
         <div className="p-4 space-y-6">
-            <AccountSection title="GENERAL" items={generalItems} />
+            <section>
+                <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">GENERAL</h2>
+                <div className="space-y-2">
+                    <LinkListItem {...myOrdersItem} />
+                    <AccountSection items={generalItems} />
+                </div>
+            </section>
+            
             <AccountSection title="ACCOUNT & SECURITY" items={securityItems} />
             <LegalSection title="LEGAL & HELP" items={legalItems} />
         

@@ -23,12 +23,13 @@ export const getLegalItems = (): NavItem[] => [
     { icon: Headphones, label: 'Help Center', content: 'For help, please contact us at support@sangma.com' },
 ];
   
+export const myOrdersItem: NavItem = { 
+    icon: Package, 
+    label: 'My Orders', 
+    href: '/my-orders'
+};
+
 export const getGeneralItems = (): NavItem[] => [
-    { 
-        icon: Package, 
-        label: 'My Orders', 
-        content: "View your order history." // Simple string placeholder
-    },
     { icon: MapPin, label: 'Address Book', content: 'You can manage your saved addresses during checkout.' },
 ];
   
