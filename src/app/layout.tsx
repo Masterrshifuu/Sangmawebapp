@@ -9,6 +9,7 @@ import { BottomNavbar } from '@/components/BottomNavbar';
 import { AdsProvider } from '@/hooks/use-ads';
 import 'leaflet/dist/leaflet.css';
 import { ProductsProvider } from '@/hooks/use-products';
+import { JsonLdSchema } from '@/components/JsonLdSchema';
 
 const notoSans = Noto_Sans({
   subsets: ['latin'],
@@ -45,6 +46,9 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn(notoSans.variable)}
     >
+      <head>
+        <JsonLdSchema />
+      </head>
       <body className="antialiased">
         <AuthWrapper>
           <ProductsProvider>
