@@ -153,12 +153,13 @@ export async function cancelOrder(orderId: string): Promise<{ success: boolean, 
         const orderRef = doc(db, 'orders', orderId);
         await updateDoc(orderRef, {
             status: 'Cancelled',
-            active: false,
             cancelledAt: serverTimestamp(),
+            // 'active' is now managed by a Cloud Function or manually by staff
+            // to prevent violating security rules.
         });
         return { success: true, message: 'Order has been cancelled.' };
     } catch (error) {
         console.error('Error cancelling order:', error);
-        return { success: false, message: 'Failed to cancel the order.' };
+        return { success: false, message: 'Failed to cancel the order. Please check permissions or try again.' };
     }
 }
