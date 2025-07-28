@@ -34,11 +34,10 @@ export interface CartItem {
 
 export interface Address {
     id: string;
-    type: 'Home' | 'Work' | 'Other';
-    line1: string;
-    line2?: string;
-    city: string;
-    pincode: string;
+    area: string;
+    landmark?: string;
+    region: 'North Tura' | 'South Tura' | 'Tura NEHU';
+    phone: string;
     isDefault?: boolean;
 }
 
