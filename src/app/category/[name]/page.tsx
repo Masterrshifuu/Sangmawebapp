@@ -17,17 +17,6 @@ function capitalizeWords(name: string): string {
     return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
-    const categoryName = decodeCategoryName(params.name);
-    const displayCategoryName = capitalizeWords(categoryName);
-  
-    return {
-      title: `${displayCategoryName} - All Products`,
-      description: `Browse and order from a wide range of products in the ${displayCategoryName} category at Sangma Megha Mart.`,
-      keywords: [displayCategoryName, 'buy online', 'Sangma Megha Mart', 'grocery Tura'],
-    }
-}
-
 export default async function CategoryPage({ params }: CategoryPageProps) {
     const categoryNameSlug = params.name;
 
