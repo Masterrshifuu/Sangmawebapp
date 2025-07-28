@@ -126,6 +126,7 @@ export interface Review {
     id: string;
     userId: string;
     userName: string;
+    productId: string;
     rating: number;
     comment: string;
     createdAt: string; // Stored as ISO string

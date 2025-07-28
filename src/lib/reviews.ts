@@ -1,4 +1,6 @@
 
+'use client';
+
 import { db } from './firebase';
 import { 
     collection, 
@@ -8,6 +10,7 @@ import {
     runTransaction,
     serverTimestamp,
     query,
+    where,
     orderBy
 } from 'firebase/firestore';
 import type { Review } from './types';
@@ -16,8 +19,8 @@ import { incrementUserStat } from './user';
 // Get all reviews for a specific product
 export async function getReviews(productId: string): Promise<Review[]> {
     try {
-        const reviewsRef = collection(db, `products/${productId}/reviews`);
-        const q = query(reviewsRef, orderBy('createdAt', 'desc'));
+        const reviewsRef = collection(db, 'reviews');
+        const q = query(reviewsRef, where('productId', '==', productId), orderBy('createdAt', 'desc'));
         const querySnapshot = await getDocs(q);
         return querySnapshot.docs.map(doc => ({
             id: doc.id,
@@ -36,7 +39,7 @@ export async function addReview(
     reviewData: { userId: string; userName: string; rating: number; comment: string; }
 ): Promise<Review> {
     const productRef = doc(db, 'products', productId);
-    const reviewsRef = collection(db, `products/${productId}/reviews`);
+    const reviewsRef = collection(db, `reviews`);
 
     try {
         let newReview: Review | null = null;
@@ -63,11 +66,11 @@ export async function addReview(
 
             // Add new review document
             const newReviewRef = doc(reviewsRef); // Create a new doc reference with a generated ID
-            const timestamp = serverTimestamp();
             
             const reviewWithTimestamp = {
                 ...reviewData,
-                createdAt: timestamp,
+                productId: productId,
+                createdAt: serverTimestamp(),
             };
 
             transaction.set(newReviewRef, reviewWithTimestamp);
@@ -76,6 +79,7 @@ export async function addReview(
             newReview = {
                 id: newReviewRef.id,
                 ...reviewData,
+                productId: productId,
                 createdAt: new Date().toISOString() // Use current date for immediate optimistic update
             };
         });
