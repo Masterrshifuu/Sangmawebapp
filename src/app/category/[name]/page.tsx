@@ -5,10 +5,6 @@ import Header from '@/components/header';
 import { ProductCard } from '@/components/product-card';
 import type { Metadata } from 'next';
 
-type CategoryPageProps = {
-    params: { name: string }
-}
-
 function decodeCategoryName(slug: string): string {
     return decodeURIComponent(slug).replace(/-and-/g, ' & ');
 }
@@ -17,7 +13,7 @@ function capitalizeWords(name: string): string {
     return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params }: { params: { name: string } }) {
     const categoryNameSlug = params.name;
 
     if (!categoryNameSlug) {
