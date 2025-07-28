@@ -58,7 +58,7 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
         '       allow read, write: if request.auth != null && request.auth.uid == userId;\n' +
         '    }\n' +
         '    match /orders/{orderId} {\n' +
-        '       allow read, create: if request.auth != null;\n' +
+        '       allow read, create, update: if request.auth != null;\n' +
         '    }\n' +
         '    match /counters/{counterId} {\n' +
         '       allow read, write: if request.auth != null;\n' +

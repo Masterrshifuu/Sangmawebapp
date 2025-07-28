@@ -56,7 +56,7 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
         console.error("Error fetching products from Firestore:", err);
         let errorMessage = `Firestore error: ${err.message}.`;
         if ((err as any).code === 'permission-denied') {
-            errorMessage += ' Please check your Firestore security rules.';
+            errorMessage += ' Please check your Firestore security rules. For development, you can allow reads on the products collection.';
         }
         setError(errorMessage);
         setLoading(false);
