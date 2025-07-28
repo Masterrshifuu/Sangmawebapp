@@ -5,7 +5,6 @@ import { PT_Sans, Poppins } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
-import { ProductsProvider } from '@/hooks/use-products';
 import { BottomNavbar } from '@/components/BottomNavbar';
 import { AdsProvider } from '@/hooks/use-ads';
 import 'leaflet/dist/leaflet.css';
@@ -40,17 +39,15 @@ export default function RootLayout({
     >
       <body className="antialiased">
         <AuthWrapper>
-          <ProductsProvider>
-            <AdsProvider>
-              <div className="flex flex-col min-h-screen">
-                <div className="flex-grow">
-                  {children}
-                </div>
-                <Toaster />
-                <BottomNavbar />
+          <AdsProvider>
+            <div className="flex flex-col min-h-screen">
+              <div className="flex-grow">
+                {children}
               </div>
-            </AdsProvider>
-          </ProductsProvider>
+              <Toaster />
+              <BottomNavbar />
+            </div>
+          </AdsProvider>
         </AuthWrapper>
       </body>
     </html>

@@ -1,13 +1,10 @@
 
-'use client';
-
-import { useMemo } from 'react';
-import { useProducts } from '@/hooks/use-products';
-import { useAds } from '@/hooks/use-ads';
-import type { Ad, Product } from '@/lib/types';
-import { getHomePageData } from '@/lib/home';
-import Header from '@/components/header';
 import Link from 'next/link';
+import { getHomePageData } from '@/lib/home';
+import { getProducts } from '@/lib/products';
+import { getAds } from '@/lib/ads';
+import type { Ad, Product } from '@/lib/types';
+import Header from '@/components/header';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { BestsellerCard } from '@/components/BestsellerCard';
@@ -18,46 +15,41 @@ import { HomePageSkeleton } from '@/components/pages/home/HomePageSkeleton';
 
 type FeedItem = Product | Ad;
 
-export default function Home() {
-  const { products, error, loading } = useProducts();
-  const { ads, loading: adsLoading } = useAds();
+// Helper to check if an item is an Ad
+const isAd = (item: FeedItem): item is Ad => {
+  return 'mediaType' in item;
+};
 
-  const homePageData = useMemo(() => {
-    if (products.length > 0) {
-      return getHomePageData(products);
-    }
-    return null;
-  }, [products]);
-
-  const justForYouContent = useMemo(() => {
-    if (products.length === 0 || ads.length === 0) {
-      return products;
-    }
-  
-    const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
-    const content: FeedItem[] = [...shuffledProducts];
-    const adInterval = 5; // Insert an ad every 5 products
-  
-    // Use a copy of ads and shuffle them to vary their order
-    const shuffledAds = [...ads].sort(() => 0.5 - Math.random());
-    
-    for (let i = 0; i < shuffledAds.length; i++) {
-      const ad = shuffledAds[i];
-      const insertionIndex = (i + 1) * adInterval;
-      if (insertionIndex < content.length) {
-        content.splice(insertionIndex, 0, ad);
-      } else {
-        content.push(ad);
-      }
-    }
-  
-    return content;
-  }, [products, ads]);
-
-
-  if (loading || adsLoading) {
-    return <HomePageSkeleton />;
+// Function to create the "Just For You" feed by interleaving ads with products
+function createJustForYouFeed(products: Product[], ads: Ad[]): FeedItem[] {
+  if (products.length === 0) {
+    return ads; // Or return empty if no products means no feed
   }
+  if (ads.length === 0) {
+    return products;
+  }
+
+  const shuffledProducts = [...products].sort(() => 0.5 - Math.random());
+  const content: FeedItem[] = [...shuffledProducts];
+  const adInterval = 5; // Insert an ad every 5 products
+  const shuffledAds = [...ads].sort(() => 0.5 - Math.random());
+
+  for (let i = 0; i < shuffledAds.length; i++) {
+    const ad = shuffledAds[i];
+    const insertionIndex = (i + 1) * adInterval;
+    if (insertionIndex < content.length) {
+      content.splice(insertionIndex, 0, ad);
+    } else {
+      content.push(ad);
+    }
+  }
+
+  return content;
+}
+
+export default async function Home() {
+  const { products, error } = await getProducts();
+  const { ads } = await getAds();
 
   if (error) {
     return (
@@ -70,7 +62,7 @@ export default function Home() {
     );
   }
 
-  if (products.length === 0 && !loading) {
+  if (products.length === 0) {
     return (
       <>
         <Header />
@@ -85,15 +77,10 @@ export default function Home() {
     )
   }
 
-  if (!homePageData) {
-    return <HomePageSkeleton />;
-  }
+  const homePageData = getHomePageData(products);
+  const justForYouContent = createJustForYouFeed(products, ads);
   
   const { showcaseCategories, bestsellerCategories } = homePageData;
-
-  const isAd = (item: FeedItem): item is Ad => {
-    return 'mediaType' in item;
-  };
 
   return (
     <>
@@ -134,9 +121,9 @@ export default function Home() {
                     <h2 className="text-2xl font-bold font-headline">Just For You</h2>
                 </div>
                 <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    {justForYouContent.map((item) => (
+                    {justForYouContent.map((item, index) => (
                         isAd(item) ? (
-                            <AdCard key={item.id} ad={item} />
+                            <AdCard key={item.id || `ad-${index}`} ad={item} />
                         ) : (
                             <ProductCard key={item.id} product={item} />
                         )

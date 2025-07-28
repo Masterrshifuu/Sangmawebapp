@@ -47,7 +47,7 @@ export function CategorySheet({ children }: { children: React.ReactNode }) {
       }
     });
 
-    return Array.from(categoryMap.values());
+    return Array.from(categoryMap.values()).sort((a,b) => a.name.localeCompare(b.name));
   }, [products]);
 
   return (
@@ -75,7 +75,7 @@ export function CategorySheet({ children }: { children: React.ReactNode }) {
                         {categories.map(category => (
                             <DrawerClose key={category.name} asChild>
                                 <Link
-                                    href={`/category/${category.name.toLowerCase().replace(/ & /g, '-and-')}`}
+                                    href={`/category/${encodeURIComponent(category.name.toLowerCase().replace(/ & /g, '-and-'))}`}
                                     className="group flex flex-col items-center text-center gap-2 transition-transform active:scale-95"
                                 >
                                     <div className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted/30 border group-hover:shadow-md transition-shadow">
@@ -83,7 +83,7 @@ export function CategorySheet({ children }: { children: React.ReactNode }) {
                                             src={category.imageUrl || 'https://placehold.co/200x200.png'}
                                             alt={category.name}
                                             fill
-                                            className="object-contain"
+                                            className="object-contain p-2"
                                             sizes="(max-width: 768px) 33vw, 20vw"
                                         />
                                     </div>

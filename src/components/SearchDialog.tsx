@@ -11,19 +11,21 @@ import {
 import { Input } from './ui/input';
 import { Search } from 'lucide-react';
 import { ScrollArea } from './ui/scroll-area';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Suspense } from 'react';
 import type { Product } from '@/lib/types';
-import { useProducts } from '@/hooks/use-products';
 import { ProductCard } from './product-card';
 import Fuse from 'fuse.js';
 import { useMediaQuery } from '@/hooks/use-media-query';
 import { useDebounce } from '@/hooks/use-debounce';
+import { useProducts } from '@/hooks/use-products';
 
 const RecommendedProducts = ({ products, onProductClick }: { products: Product[], onProductClick?: () => void }) => {
     // Show a few random products as "recommended"
     const recommended = useMemo(() => {
         return [...products].sort(() => 0.5 - Math.random()).slice(0, 4);
     }, [products]);
+
+    if (products.length === 0) return null;
 
     return (
         <div className="py-4">
@@ -45,7 +47,7 @@ const SearchContent = ({ query, onProductClick }: { query: string, onProductClic
     const debouncedQuery = useDebounce(query, 300);
 
     const fuse = useMemo(() => new Fuse(allProducts, {
-        keys: ['name', 'category', 'description'],
+        keys: ['name', 'category', 'description', 'tags'],
         threshold: 0.3,
         minMatchCharLength: 2,
     }), [allProducts]);
@@ -86,19 +88,15 @@ const SearchContent = ({ query, onProductClick }: { query: string, onProductClic
 
 interface SearchDialogProps {
     children: React.ReactNode;
-    query: string;
-    setQuery: (query: string) => void;
-    isSearchFocused: boolean;
-    setIsSearchFocused: (isFocused: boolean) => void;
 }
 
-export function SearchDialog({ children, query, setQuery, isSearchFocused, setIsSearchFocused }: SearchDialogProps) {
+export function SearchDialog({ children }: SearchDialogProps) {
     const [open, setOpen] = useState(false);
+    const [query, setQuery] = useState('');
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const handleProductClick = () => {
         setOpen(false);
-        setIsSearchFocused(false);
     }
     
     // This is the mobile view, which uses the Drawer
@@ -119,7 +117,9 @@ export function SearchDialog({ children, query, setQuery, isSearchFocused, setIs
                             />
                         </div>
                     </DrawerHeader>
-                    <SearchContent query={query} onProductClick={handleProductClick} />
+                    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+                         <SearchContent query={query} onProductClick={handleProductClick} />
+                    </Suspense>
                 </DrawerContent>
             </Drawer>
         );
@@ -130,5 +130,3 @@ export function SearchDialog({ children, query, setQuery, isSearchFocused, setIs
     // It only returns the trigger for the mobile drawer.
     return <>{children}</>;
 }
-
-SearchDialog.Content = SearchContent;
