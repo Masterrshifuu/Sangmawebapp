@@ -18,7 +18,6 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2, Upload, ChevronLeft, AlertCircle } from 'lucide-react';
 import Image from 'next/image';
 import { getStoreStatus } from '@/lib/datetime';
@@ -36,7 +35,6 @@ export default function CheckoutPage() {
   const { user, loading: authLoading } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
   const { location } = useLocation();
-  const { toast } = useToast();
   
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi'>('cod');
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
@@ -89,20 +87,12 @@ export default function CheckoutPage() {
 
   const placeOrder = async (isVerified: boolean = false) => {
     if (!user || deliveryCharge === null) {
-        toast({
-            variant: 'destructive',
-            title: 'Login Required',
-            description: 'Please log in to place an order.',
-        });
+        console.error('Login Required or unserviceable location.');
         return;
     };
 
     if (!storeStatus.isOpen && !scheduleForNextDay) {
-        toast({
-            variant: 'destructive',
-            title: 'Store is currently closed',
-            description: 'Please schedule your order for the next opening time to proceed.',
-        });
+        console.error('Store is currently closed and order not scheduled.');
         return;
     }
 
@@ -153,21 +143,11 @@ export default function CheckoutPage() {
 
         await incrementUserStat(user.uid, 'totalOrders');
 
-        toast({
-            title: !storeStatus.isOpen ? 'Order Scheduled!' : 'Order Placed Successfully!',
-            description: !storeStatus.isOpen ? 'Your order has been scheduled for the next opening time.' : 'Thank you for your purchase. You can track your order in the tracking section.',
-        });
-
         clearCart();
         router.push('/my-orders');
 
     } catch (error) {
         console.error("Error placing order: ", error);
-        toast({
-            variant: 'destructive',
-            title: 'Failed to Place Order',
-            description: 'There was an error while placing your order. Please try again.',
-        });
     } finally {
         setIsPlacingOrder(false);
     }
@@ -175,7 +155,7 @@ export default function CheckoutPage() {
 
   const handleUpiVerification = async () => {
     if (!screenshotFile) {
-        toast({ variant: 'destructive', title: 'Please upload a screenshot.' });
+        console.error('Please upload a screenshot.');
         return;
     }
     setIsVerifying(true);
@@ -188,25 +168,12 @@ export default function CheckoutPage() {
         const result = await verifyPayment(input);
         
         if (result.isPaymentVerified) {
-            toast({
-                title: 'Payment Verified!',
-                description: 'Your payment has been successfully verified. Placing your order now.',
-            });
             await placeOrder(true);
         } else {
-            toast({
-                variant: 'destructive',
-                title: 'Payment Verification Failed',
-                description: result.reason || 'The amount in the screenshot does not match the order total. Please try again.',
-            });
+            console.error(result.reason || 'The amount in the screenshot does not match the order total.');
         }
     } catch (error) {
         console.error("Verification error:", error);
-        toast({
-            variant: 'destructive',
-            title: 'Verification Error',
-            description: 'An unexpected error occurred during verification.',
-        });
     } finally {
         setIsVerifying(false);
     }
@@ -215,10 +182,7 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
-        toast({
-            variant: 'destructive',
-            title: 'You must be logged in to place an order.',
-        });
+        console.error('You must be logged in to place an order.');
         return;
     }
     if (paymentMethod === 'cod') {

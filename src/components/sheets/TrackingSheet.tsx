@@ -38,7 +38,6 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
 import { DynamicDeliveryTime } from '../DynamicDeliveryTime';
 import { cancelOrder } from '@/app/actions';
-import { useToast } from '@/hooks/use-toast';
 
 const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
   const firstItem = items[0];
@@ -203,7 +202,6 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     const [timeLeft, setTimeLeft] = useState('');
     const [eta, setEta] = useState('');
     const [isCancelling, setIsCancelling] = useState(false);
-    const { toast } = useToast();
 
     const calculateTimeLeft = useCallback(() => {
         const orderTimestamp = order.createdAt as unknown as Timestamp;
@@ -255,9 +253,9 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
         setIsCancelling(true);
         const result = await cancelOrder(order.id);
         if (result.success) {
-            toast({ title: "Order Cancelled", description: "Your order has been successfully cancelled." });
+            console.log("Order Cancelled");
         } else {
-            toast({ variant: 'destructive', title: "Cancellation Failed", description: result.message });
+            console.error("Cancellation Failed:", result.message);
         }
         setIsCancelling(false);
     };

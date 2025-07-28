@@ -5,7 +5,6 @@ import { useState } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import { addReview } from '@/lib/reviews';
 import type { Review } from '@/lib/types';
 import { StarRating } from './StarRating';
@@ -17,7 +16,6 @@ interface ReviewFormProps {
 
 export const ReviewForm = ({ productId, onReviewAdded }: ReviewFormProps) => {
     const { user } = useAuth();
-    const { toast } = useToast();
     const [rating, setRating] = useState(0);
     const [comment, setComment] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,11 +27,13 @@ export const ReviewForm = ({ productId, onReviewAdded }: ReviewFormProps) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (rating === 0) {
-            toast({ variant: 'destructive', title: 'Please select a rating.' });
+            // Optionally, provide visual feedback without a toast
+            console.error('Please select a rating.');
             return;
         }
         if (!comment.trim()) {
-            toast({ variant: 'destructive', title: 'Please enter a comment.' });
+            // Optionally, provide visual feedback without a toast
+            console.error('Please enter a comment.');
             return;
         }
         setIsSubmitting(true);
@@ -50,7 +50,7 @@ export const ReviewForm = ({ productId, onReviewAdded }: ReviewFormProps) => {
             setComment('');
         } catch (error) {
             console.error(error);
-            toast({ variant: 'destructive', title: 'Failed to submit review.' });
+            // Optionally, provide visual feedback without a toast
         } finally {
             setIsSubmitting(false);
         }

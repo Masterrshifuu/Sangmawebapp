@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { updateUserPhoneNumber } from '@/lib/user';
 
@@ -22,7 +21,6 @@ const phoneSchema = z.object({
 export default function AddPhonePage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -39,21 +37,15 @@ export default function AddPhonePage() {
 
   const onSubmit = async (data: z.infer<typeof phoneSchema>) => {
     if (!user) {
-      toast({ variant: 'destructive', title: 'You must be logged in.' });
+      console.error('User not found to update phone number.');
       return;
     }
     setLoading(true);
     try {
       await updateUserPhoneNumber(user.uid, data.phone);
-      toast({ title: 'Success!', description: 'Your phone number has been saved.' });
       router.push('/');
     } catch (error: any) {
       console.error('Phone number update error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Update Failed',
-        description: 'Could not save your phone number. Please try again.',
-      });
     } finally {
       setLoading(false);
     }

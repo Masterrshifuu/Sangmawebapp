@@ -14,7 +14,6 @@ import Link from 'next/link';
 import { CartQuantityControl } from '@/components/cart/CartQuantityControl';
 import { DynamicDeliveryTime } from '@/components/DynamicDeliveryTime';
 import { addReview } from '@/lib/reviews';
-import { useToast } from '@/hooks/use-toast';
 
 import { StarRating } from '@/components/pages/product/StarRating';
 import { ReviewForm } from '@/components/pages/product/ReviewForm';
@@ -38,7 +37,6 @@ export function ProductClientPage({
     recommendedProducts
 }: ProductClientPageProps) {
   const { cart, addItem } = useCart();
-  const { toast } = useToast();
 
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [currentProduct, setProduct] = useState<Product>(product);
@@ -51,7 +49,6 @@ export function ProductClientPage({
         const newRating = ((prev.rating || 0) * (prev.reviewCount || 0) + newReview.rating) / newReviewCount;
         return { ...prev, reviewCount: newReviewCount, rating: newRating };
     });
-    toast({ title: 'Review submitted!', description: 'Thank you for your feedback.' });
   }
 
   const cartItem = cart.find(item => item.product.id === currentProduct.id);

@@ -9,7 +9,6 @@ import { XCircle } from 'lucide-react';
 
 import type { Order } from '@/lib/types';
 import { cn } from '@/lib/utils';
-import { useToast } from '@/hooks/use-toast';
 import { cancelOrder } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 
@@ -26,7 +25,6 @@ const statusStyles: { [key: string]: string } = {
   
 
 export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCancel: (orderId: string) => void; }) => {
-  const { toast } = useToast();
   const [isCancelling, setIsCancelling] = useState(false);
   const createdAt = (order.createdAt as any).toDate();
   const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
@@ -44,10 +42,9 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
     setIsCancelling(true);
     const result = await cancelOrder(order.id);
     if (result.success) {
-        toast({ title: "Order Cancelled", description: "Your order has been successfully cancelled." });
         onOrderCancel(order.id); // Notify parent to update the list
     } else {
-        toast({ variant: 'destructive', title: "Cancellation Failed", description: result.message });
+        console.error("Cancellation Failed:", result.message);
     }
     setIsCancelling(false);
   };

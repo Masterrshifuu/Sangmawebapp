@@ -25,7 +25,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Link from 'next/link';
@@ -43,7 +42,6 @@ const signUpSchema = z.object({
 
 const LoginForm = () => {
     const [loading, setLoading] = useState(false);
-    const { toast } = useToast();
     const router = useRouter();
 
     const form = useForm<z.infer<typeof loginSchema>>({
@@ -55,15 +53,10 @@ const LoginForm = () => {
         setLoading(true);
         try {
             await signInWithEmailAndPassword(auth, data.email, data.password);
-            toast({ title: 'Success!', description: 'You are now logged in.' });
             router.push('/');
         } catch (error: any) {
             console.error('Login error:', error);
-            toast({
-                variant: 'destructive',
-                title: 'Login Failed',
-                description: 'Invalid email or password. Please try again.',
-            });
+            // Optionally, handle specific errors here, e.g., display a message
         } finally {
             setLoading(false);
         }
@@ -104,7 +97,6 @@ const LoginForm = () => {
 
 const SignUpForm = () => {
     const [loading, setLoading] = useState(false);
-    const { toast } = useToast();
     const router = useRouter();
 
     const form = useForm<z.infer<typeof signUpSchema>>({
@@ -117,19 +109,10 @@ const SignUpForm = () => {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
             await updateProfile(userCredential.user, { displayName: data.name });
-            
-            toast({ title: 'Account Created!', description: "Let's add your phone number for deliveries." });
-            router.push('/signup/phone'); // Redirect to the new phone number page
+            router.push('/signup/phone');
         } catch (error: any) {
             console.error('Sign up error:', error);
-            const description = error.code === 'auth/email-already-in-use'
-                ? 'This email is already registered. Please sign in.'
-                : 'An error occurred. Please try again.';
-            toast({
-                variant: 'destructive',
-                title: 'Sign Up Failed',
-                description,
-            });
+            // Optionally, handle specific errors here, e.g., display a message
         } finally {
             setLoading(false);
         }
