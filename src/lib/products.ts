@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { collection, getDocs, doc, getDoc, type Timestamp } from 'firebase/firestore';
+import { collection, getDocs, doc, getDoc, type Timestamp, query, where } from 'firebase/firestore';
 import type { Product } from './types';
 
 // Helper function to check if a value is a Firestore Timestamp
@@ -26,7 +26,9 @@ function processDoc(doc: any) {
 export async function getProducts(): Promise<{ products: Product[], error: string | null }> {
   try {
     const productsCollection = collection(db, 'products');
-    const productsSnapshot = await getDocs(productsCollection);
+    // Query to fetch only products with stock greater than 0
+    const q = query(productsCollection, where('stock', '>', 0));
+    const productsSnapshot = await getDocs(q);
     
     if (productsSnapshot.empty) {
       return { products: [], error: null };
@@ -76,6 +78,8 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
         '}\n';
     } else if (error.code === 'unauthenticated') {
         errorMessage += ' The request was not authenticated. Make sure your server environment is configured with the correct Firebase credentials.';
+    } else if (error.code === 'failed-precondition') {
+        errorMessage += ' The query requires an index. You can create it here: ' + (error.message.match(/https?:\/\/[^\s]+/)?.[0] || 'Check the Firebase console logs for the link.');
     }
     return { products: [], error: errorMessage };
   }
