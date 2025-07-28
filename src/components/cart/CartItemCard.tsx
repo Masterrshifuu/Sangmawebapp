@@ -26,10 +26,10 @@ export function CartItemCard({ item }: { item: CartItem }) {
         <Link href={`/product/${item.product.id}`}>
             <p className="font-semibold hover:underline">{item.product.name}</p>
         </Link>
-        <p className="text-sm text-muted-foreground">INR {price.toFixed(2)}</p>
+        <p className="text-sm text-muted-foreground">₹{price.toFixed(2)}</p>
       </div>
       <div className="flex flex-col items-end gap-2">
-        <p className="font-bold">INR {(price * item.quantity).toFixed(2)}</p>
+        <p className="font-bold">₹{(price * item.quantity).toFixed(2)}</p>
         <div className="w-24">
             <CartQuantityControl product={item.product} />
         </div>

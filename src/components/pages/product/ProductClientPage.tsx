@@ -101,7 +101,7 @@ export function ProductClientPage({
                 <div className="flex items-center justify-between p-4 border-t border-b rounded-lg bg-muted/30 mt-4">
                     <div>
                         {typeof currentProduct.mrp === 'number' && (
-                            <p className="text-2xl font-bold">INR {currentProduct.mrp.toFixed(2)}</p>
+                            <p className="text-2xl font-bold">₹{currentProduct.mrp.toFixed(2)}</p>
                         )}
                     </div>
                     <div className="w-36">

@@ -8,7 +8,6 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-  DrawerFooter,
   DrawerClose,
 } from '@/components/ui/drawer';
 import { ChevronLeft, ShoppingCart } from 'lucide-react';
@@ -82,13 +81,13 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
                 <div className="w-full space-y-2">
                   <div className="flex justify-between text-muted-foreground">
                     <span>Subtotal</span>
-                    <span>INR {totalPrice.toFixed(2)}</span>
+                    <span>₹{totalPrice.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between text-muted-foreground">
                     <span>Delivery Fee</span>
                     {isServiceable ? (
                       <span>
-                        {deliveryCharge === 0 ? 'FREE' : `INR ${deliveryCharge.toFixed(2)}`}
+                        {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
                       </span>
                     ) : (
                       <span className="text-destructive font-medium">Unserviceable</span>
@@ -99,7 +98,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
 
                   <div className="flex justify-between font-bold text-lg">
                     <span>Total Amount</span>
-                    <span>INR {finalTotal.toFixed(2)}</span>
+                    <span>₹{finalTotal.toFixed(2)}</span>
                   </div>
 
                   {!isServiceable && (

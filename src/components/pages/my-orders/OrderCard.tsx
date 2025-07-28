@@ -76,12 +76,12 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
               </Link>
               <p className="text-xs text-muted-foreground">Qty: {item.quantity}</p>
             </div>
-            <p className="text-sm font-medium">INR {(item.price * item.quantity).toFixed(2)}</p>
+            <p className="text-sm font-medium">₹{(item.price * item.quantity).toFixed(2)}</p>
           </div>
         ))}
       </div>
       <div className="p-4 bg-muted/30 rounded-b-lg flex justify-between items-center">
-        <p className="text-sm font-semibold">Total: INR {totalAmount.toFixed(2)}</p>
+        <p className="text-sm font-semibold">Total: ₹{totalAmount.toFixed(2)}</p>
         <div>
             {isCancellable() ? (
                 <Button 
