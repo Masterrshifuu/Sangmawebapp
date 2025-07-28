@@ -10,7 +10,6 @@ import { LogIn, LogOut } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
-import { AccountPageSkeleton } from '@/components/pages/account/AccountPageSkeleton';
 import { AccountSection } from '@/components/pages/account/AccountSection';
 import { getLegalItems, getGeneralItems, getSecurityItems } from '@/components/pages/account/accountNavItems';
 
@@ -29,7 +28,8 @@ export default function AccountPage() {
   };
 
   if (loading) {
-    return <AccountPageSkeleton />;
+    // This will be handled by loading.tsx
+    return null;
   }
   
   const legalItems = getLegalItems();

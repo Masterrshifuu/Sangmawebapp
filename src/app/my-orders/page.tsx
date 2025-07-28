@@ -10,11 +10,11 @@ import Header from '@/components/header';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PackageOpen } from 'lucide-react';
-import { OrdersSkeleton } from '@/components/pages/my-orders/OrdersSkeleton';
 import { OrderCard } from '@/components/pages/my-orders/OrderCard';
+import Loading from './loading';
 
 export default function MyOrdersPage() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,9 +50,12 @@ export default function MyOrdersPage() {
         setLoading(false);
       }
     };
+    
+    if (!authLoading) {
+        fetchOrders();
+    }
 
-    fetchOrders();
-  }, [user]);
+  }, [user, authLoading]);
 
   const handleOrderCancellation = (cancelledOrderId: string) => {
     setOrders(prevOrders => 
@@ -64,13 +67,15 @@ export default function MyOrdersPage() {
     );
   };
 
+  if (loading || authLoading) {
+    return <Loading />;
+  }
+
   return (
     <>
       <Header />
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold font-headline mb-6">My Orders</h1>
-
-        {loading && <OrdersSkeleton />}
         
         {error && (
             <div className="p-4 text-center text-red-500 bg-red-50 border border-red-200 rounded-lg">
@@ -79,7 +84,7 @@ export default function MyOrdersPage() {
             </div>
         )}
 
-        {!loading && !error && orders.length === 0 && (
+        {!error && orders.length === 0 && (
           <div className="text-center text-muted-foreground py-16">
             <PackageOpen className="mx-auto h-16 w-16 mb-4" />
             <h2 className="text-xl font-semibold text-foreground">No Orders Yet</h2>
@@ -90,7 +95,7 @@ export default function MyOrdersPage() {
           </div>
         )}
 
-        {!loading && !error && orders.length > 0 && (
+        {!error && orders.length > 0 && (
           <div className="space-y-4">
             {orders.map(order => (
               <OrderCard key={order.id} order={order} onOrderCancel={handleOrderCancellation} />

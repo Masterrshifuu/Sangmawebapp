@@ -3,19 +3,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { getProducts } from '@/lib/products';
 import Header from '@/components/header';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Suspense } from 'react';
-
-const CategoryGridSkeleton = () => (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
-        {[...Array(12)].map((_, i) => (
-            <div key={i} className="flex flex-col items-center gap-2">
-                <Skeleton className="w-full aspect-square rounded-lg" />
-                <Skeleton className="h-4 w-16" />
-            </div>
-        ))}
-    </div>
-);
+import Loading from './loading';
 
 async function CategoriesList() {
     const { products } = await getProducts();
@@ -63,7 +52,7 @@ export default function CategoriesPage() {
         <Header />
         <main className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold font-headline mb-6">All Categories</h1>
-            <Suspense fallback={<CategoryGridSkeleton />}>
+            <Suspense fallback={<Loading />}>
                 <CategoriesList />
             </Suspense>
         </main>
