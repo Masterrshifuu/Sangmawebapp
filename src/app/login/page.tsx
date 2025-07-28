@@ -1,41 +1,150 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { auth, googleProvider, appleProvider } from '@/lib/firebase';
-import { signInWithPopup } from 'firebase/auth';
+import {
+  auth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  type ConfirmationResult,
+} from '@/lib/firebase';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import Logo from '@/components/logo';
+import { Input } from '@/components/ui/input';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2 } from 'lucide-react';
+
+const phoneRegex = new RegExp(
+  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
+);
+
+const phoneSchema = z.object({
+  phone: z
+    .string()
+    .min(10, 'Phone number must be at least 10 digits')
+    .regex(phoneRegex, 'Invalid phone number'),
+});
+
+const otpSchema = z.object({
+  otp: z.string().min(6, 'OTP must be 6 digits'),
+});
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
+
+  const [confirmationResult, setConfirmationResult] =
+    useState<ConfirmationResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+
+  const phoneForm = useForm<z.infer<typeof phoneSchema>>({
+    resolver: zodResolver(phoneSchema),
+    defaultValues: { phone: '' },
+  });
+
+  const otpForm = useForm<z.infer<typeof otpSchema>>({
+    resolver: zodResolver(otpSchema),
+    defaultValues: { otp: '' },
+  });
 
   useEffect(() => {
-    if (!loading && user) {
-      router.replace('/'); // Redirect to home if already logged in
+    if (!authLoading && user) {
+      router.replace('/');
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
-  const handleSignIn = async (provider: typeof googleProvider | typeof appleProvider) => {
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        'recaptcha-container',
+        {
+          size: 'invisible',
+          callback: () => {
+            // reCAPTCHA solved, allow signInWithPhoneNumber.
+          },
+        }
+      );
+    }
+    return window.recaptchaVerifier;
+  };
+
+  const onSendOtp = async (data: z.infer<typeof phoneSchema>) => {
+    setLoading(true);
     try {
-      await signInWithPopup(auth, provider);
-      // The onAuthStateChanged listener in useAuth will handle the redirect
-    } catch (error) {
+      const recaptchaVerifier = setupRecaptcha();
+      // Ensure the phone number starts with +91 for India
+      const formattedPhone = data.phone.startsWith('+')
+        ? data.phone
+        : `+91${data.phone}`;
+      const result = await signInWithPhoneNumber(
+        auth,
+        formattedPhone,
+        recaptchaVerifier
+      );
+      setConfirmationResult(result);
+      setShowOtpInput(true);
+      toast({
+        title: 'OTP Sent',
+        description: `An OTP has been sent to ${formattedPhone}`,
+      });
+    } catch (error: any) {
       console.error('Authentication error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Failed to send OTP',
+        description:
+          error.message || 'Please check the phone number and try again.',
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (loading || user) {
+  const onVerifyOtp = async (data: z.infer<typeof otpSchema>) => {
+    if (!confirmationResult) return;
+    setLoading(true);
+    try {
+      await confirmationResult.confirm(data.otp);
+      // The onAuthStateChanged listener in useAuth will handle the redirect
+      toast({ title: 'Success!', description: 'You are now logged in.' });
+      otpForm.reset();
+      phoneForm.reset();
+    } catch (error: any) {
+      console.error('OTP Verification error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Invalid OTP',
+        description: 'The OTP you entered is incorrect. Please try again.',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (authLoading || user) {
     return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="animate-pulse">
-                <Logo />
-            </div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-pulse">
+          <Logo />
         </div>
+      </div>
     );
   }
 
@@ -43,18 +152,77 @@ export default function LoginPage() {
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8">
       <div className="max-w-md w-full text-center">
         <Logo className="justify-center mb-8" />
-        <h1 className="text-2xl font-bold font-headline mb-2">Welcome!</h1>
-        <p className="text-muted-foreground mb-8">Sign in or create an account to continue.</p>
-        <div className="space-y-4">
-            <Button className="w-full" size="lg" onClick={() => handleSignIn(googleProvider)}>
-                <svg className="mr-2 -ml-1 w-4 h-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="google" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 488 512"><path fill="currentColor" d="M488 261.8C488 403.3 391.1 504 248 504 110.8 504 0 393.2 0 256S110.8 8 248 8c66.8 0 126 21.2 172.9 60.4L337.9 162.6C301.6 129.1 270.8 112 248 112c-88.3 0-160 71.7-160 160s71.7 160 160 160c92.6 0 156.6-63.3 162.7-149.5H248v-85.3h236.1c2.3 12.7 3.9 26.9 3.9 41.4z"></path></svg>
-                Continue with Google
-            </Button>
-            <Button className="w-full" size="lg" onClick={() => handleSignIn(appleProvider)} variant="secondary">
-                <svg className="mr-2 -ml-1 w-4 h-4" aria-hidden="true" focusable="false" data-prefix="fab" data-icon="apple" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><path fill="currentColor" d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C39.2 141.6 0 184.2 0 241.2c0 61.6 31.5 112.9 80.9 142.8 28.8 17.5 60.8 26.9 96.4 26.9 23.3 0 45.9-7.5 64.9-22.1 34.4-25.9 50.7-65.7 51.2-66.2zM215.3 83.1c-19.4-19.4-44.9-31.5-70.1-31.5-26.9 0-52.9 10.7-71.5 31.5-17.5 19.4-29.7 44.9-31.5 70.1-2.8 35.5 19.7 74.3 19.7 88.5 0 15 19.7 49.4 19.7 76.4 19.4 19.4 44.9 31.5 70.1 31.5 26.9 0 52.9-10.7 71.5-31.5 17.5-19.4 29.7-44.9 31.5-70.1 2.8-35.5-19.7-74.3-19.7-88.5 0-15-19.7-49.4-19.7-76.4z"></path></svg>
-                Continue with Apple
-            </Button>
-        </div>
+        <h1 className="text-2xl font-bold font-headline mb-2">
+          {showOtpInput ? 'Enter OTP' : 'Welcome!'}
+        </h1>
+        <p className="text-muted-foreground mb-8">
+          {showOtpInput
+            ? 'Enter the 6-digit code sent to your phone.'
+            : 'Sign in or create an account with your phone number.'}
+        </p>
+
+        {!showOtpInput ? (
+          <Form {...phoneForm}>
+            <form
+              onSubmit={phoneForm.handleSubmit(onSendOtp)}
+              className="space-y-4 text-left"
+            >
+              <FormField
+                control={phoneForm.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="9876543210"
+                        type="tel"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? <Loader2 className="animate-spin" /> : 'Send OTP'}
+              </Button>
+            </form>
+          </Form>
+        ) : (
+          <Form {...otpForm}>
+            <form
+              onSubmit={otpForm.handleSubmit(onVerifyOtp)}
+              className="space-y-4 text-left"
+            >
+              <FormField
+                control={otpForm.control}
+                name="otp"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>OTP Code</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="123456"
+                        type="number"
+                        {...field}
+                        />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                {loading ? <Loader2 className="animate-spin" /> : 'Verify OTP'}
+              </Button>
+               <Button variant="link" size="sm" onClick={() => setShowOtpInput(false)} className="w-full">
+                    Change Phone Number
+                </Button>
+            </form>
+          </Form>
+        )}
+
+        <div id="recaptcha-container" className="mt-4"></div>
       </div>
     </main>
   );
