@@ -17,8 +17,9 @@ const notoSans = Noto_Sans({
 });
 
 export const metadata: Metadata = {
-  title: 'Sangma Megha Mart',
-  description: 'Online Grocery in Tura',
+  title: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
+  description: 'Your one-stop shop for online grocery in Tura. Order fresh vegetables, snacks, and household essentials from Sangma Megha Mart for fast delivery.',
+  keywords: ['Sangmamart', 'Sangma Megha mart', 'Sangma Mart', 'Tura Mart', 'Tura Grocery', 'Online Grocery Tura'],
 };
 
 export default function RootLayout({
