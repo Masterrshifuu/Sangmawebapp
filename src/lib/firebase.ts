@@ -3,13 +3,10 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { 
   getAuth, 
-  GoogleAuthProvider, 
-  OAuthProvider,
-  RecaptchaVerifier,
-  signInWithPopup,
-  signInWithPhoneNumber,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
   type Auth,
-  type ConfirmationResult
 } from "firebase/auth";
 
 const firebaseConfig = {
@@ -26,17 +23,12 @@ const app: FirebaseApp = !getApps().length ? initializeApp(firebaseConfig) : get
 const db: Firestore = getFirestore(app);
 const auth: Auth = getAuth(app);
 
-const googleProvider = new GoogleAuthProvider();
-const appleProvider = new OAuthProvider('apple.com');
-
 export { 
     app, 
     db, 
     auth, 
-    googleProvider, 
-    appleProvider,
-    RecaptchaVerifier,
-    signInWithPopup,
-    signInWithPhoneNumber,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    updateProfile
 };
-export type { ConfirmationResult };
+export type { Auth };

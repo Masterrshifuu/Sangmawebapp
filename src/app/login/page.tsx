@@ -6,9 +6,9 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import {
   auth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  type ConfirmationResult,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  updateProfile,
 } from '@/lib/firebase';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -27,116 +27,167 @@ import {
 } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const phoneRegex = new RegExp(
-  /^([+]?[\s0-9]+)?(\d{3}|[(]?[0-9]+[)])?([-]?[\s]?[0-9])+$/
-);
-
-const phoneSchema = z.object({
-  phone: z
-    .string()
-    .min(10, 'Phone number must be at least 10 digits')
-    .regex(phoneRegex, 'Invalid phone number'),
+const loginSchema = z.object({
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(1, 'Password is required'),
 });
 
-const otpSchema = z.object({
-  otp: z.string().min(6, 'OTP must be 6 digits'),
+const signUpSchema = z.object({
+  name: z.string().min(2, 'Name must be at least 2 characters'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
 });
+
+const LoginForm = () => {
+    const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const form = useForm<z.infer<typeof loginSchema>>({
+        resolver: zodResolver(loginSchema),
+        defaultValues: { email: '', password: '' },
+    });
+
+    const onSubmit = async (data: z.infer<typeof loginSchema>) => {
+        setLoading(true);
+        try {
+            await signInWithEmailAndPassword(auth, data.email, data.password);
+            toast({ title: 'Success!', description: 'You are now logged in.' });
+            router.push('/');
+        } catch (error: any) {
+            console.error('Login error:', error);
+            toast({
+                variant: 'destructive',
+                title: 'Login Failed',
+                description: 'Invalid email or password. Please try again.',
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-left">
+                <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl><Input placeholder="you@example.com" type="email" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl><Input placeholder="••••••••" type="password" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                    {loading ? <Loader2 className="animate-spin" /> : 'Sign In'}
+                </Button>
+            </form>
+        </Form>
+    );
+};
+
+const SignUpForm = () => {
+    const [loading, setLoading] = useState(false);
+    const { toast } = useToast();
+    const router = useRouter();
+
+    const form = useForm<z.infer<typeof signUpSchema>>({
+        resolver: zodResolver(signUpSchema),
+        defaultValues: { name: '', email: '', password: '' },
+    });
+
+    const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
+        setLoading(true);
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+            await updateProfile(userCredential.user, { displayName: data.name });
+            
+            toast({ title: 'Account Created!', description: 'Welcome! You are now logged in.' });
+            router.push('/');
+        } catch (error: any) {
+            console.error('Sign up error:', error);
+            const description = error.code === 'auth/email-already-in-use'
+                ? 'This email is already registered. Please sign in.'
+                : 'An error occurred. Please try again.';
+            toast({
+                variant: 'destructive',
+                title: 'Sign Up Failed',
+                description,
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+    
+    return (
+        <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 text-left">
+                <FormField
+                    control={form.control}
+                    name="name"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Full Name</FormLabel>
+                            <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Email</FormLabel>
+                            <FormControl><Input placeholder="you@example.com" type="email" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Password</FormLabel>
+                            <FormControl><Input placeholder="••••••••" type="password" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                <Button type="submit" className="w-full" size="lg" disabled={loading}>
+                    {loading ? <Loader2 className="animate-spin" /> : 'Create Account'}
+                </Button>
+            </form>
+        </Form>
+    );
+};
+
 
 export default function LoginPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const { toast } = useToast();
-
-  const [confirmationResult, setConfirmationResult] =
-    useState<ConfirmationResult | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [showOtpInput, setShowOtpInput] = useState(false);
-
-  const phoneForm = useForm<z.infer<typeof phoneSchema>>({
-    resolver: zodResolver(phoneSchema),
-    defaultValues: { phone: '' },
-  });
-
-  const otpForm = useForm<z.infer<typeof otpSchema>>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: { otp: '' },
-  });
-
+  
   useEffect(() => {
     if (!authLoading && user) {
       router.replace('/');
     }
   }, [user, authLoading, router]);
-
-  const setupRecaptcha = () => {
-    if (!window.recaptchaVerifier) {
-      window.recaptchaVerifier = new RecaptchaVerifier(
-        auth,
-        'recaptcha-container',
-        {
-          size: 'invisible',
-          callback: () => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
-          },
-        }
-      );
-    }
-    return window.recaptchaVerifier;
-  };
-
-  const onSendOtp = async (data: z.infer<typeof phoneSchema>) => {
-    setLoading(true);
-    try {
-      const recaptchaVerifier = setupRecaptcha();
-      // Ensure the phone number starts with +91 for India
-      const formattedPhone = data.phone.startsWith('+')
-        ? data.phone
-        : `+91${data.phone}`;
-      const result = await signInWithPhoneNumber(
-        auth,
-        formattedPhone,
-        recaptchaVerifier
-      );
-      setConfirmationResult(result);
-      setShowOtpInput(true);
-      toast({
-        title: 'OTP Sent',
-        description: `An OTP has been sent to ${formattedPhone}`,
-      });
-    } catch (error: any) {
-      console.error('Authentication error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Failed to send OTP',
-        description:
-          error.message || 'Please check the phone number and try again.',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const onVerifyOtp = async (data: z.infer<typeof otpSchema>) => {
-    if (!confirmationResult) return;
-    setLoading(true);
-    try {
-      await confirmationResult.confirm(data.otp);
-      // The onAuthStateChanged listener in useAuth will handle the redirect
-      toast({ title: 'Success!', description: 'You are now logged in.' });
-      otpForm.reset();
-      phoneForm.reset();
-    } catch (error: any) {
-      console.error('OTP Verification error:', error);
-      toast({
-        variant: 'destructive',
-        title: 'Invalid OTP',
-        description: 'The OTP you entered is incorrect. Please try again.',
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (authLoading || user) {
     return (
@@ -152,77 +203,20 @@ export default function LoginPage() {
     <main className="flex flex-col items-center justify-center min-h-screen bg-background p-8">
       <div className="max-w-md w-full text-center">
         <Logo className="justify-center mb-8" />
-        <h1 className="text-2xl font-bold font-headline mb-2">
-          {showOtpInput ? 'Enter OTP' : 'Welcome!'}
-        </h1>
-        <p className="text-muted-foreground mb-8">
-          {showOtpInput
-            ? 'Enter the 6-digit code sent to your phone.'
-            : 'Sign in or create an account with your phone number.'}
-        </p>
+        
+        <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            <TabsContent value="signin" className="pt-6">
+                <LoginForm />
+            </TabsContent>
+            <TabsContent value="signup" className="pt-6">
+                <SignUpForm />
+            </TabsContent>
+        </Tabs>
 
-        {!showOtpInput ? (
-          <Form {...phoneForm}>
-            <form
-              onSubmit={phoneForm.handleSubmit(onSendOtp)}
-              className="space-y-4 text-left"
-            >
-              <FormField
-                control={phoneForm.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="9876543210"
-                        type="tel"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin" /> : 'Send OTP'}
-              </Button>
-            </form>
-          </Form>
-        ) : (
-          <Form {...otpForm}>
-            <form
-              onSubmit={otpForm.handleSubmit(onVerifyOtp)}
-              className="space-y-4 text-left"
-            >
-              <FormField
-                control={otpForm.control}
-                name="otp"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>OTP Code</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="123456"
-                        type="number"
-                        {...field}
-                        />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? <Loader2 className="animate-spin" /> : 'Verify OTP'}
-              </Button>
-               <Button variant="link" size="sm" onClick={() => setShowOtpInput(false)} className="w-full">
-                    Change Phone Number
-                </Button>
-            </form>
-          </Form>
-        )}
-
-        <div id="recaptcha-container" className="mt-4"></div>
       </div>
     </main>
   );
