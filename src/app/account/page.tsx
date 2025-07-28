@@ -10,7 +10,7 @@ import { LogIn, LogOut } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';
-import { AccountSection } from '@/components/pages/account/AccountSection';
+import { AccountSection, LegalSection } from '@/components/pages/account/AccountSection';
 import { getLegalItems, getGeneralItems, getSecurityItems } from '@/components/pages/account/accountNavItems';
 
 
@@ -52,7 +52,7 @@ export default function AccountPage() {
                 </div>
 
                 <div className="p-4 space-y-6">
-                    <AccountSection title="LEGAL & HELP" items={legalItems} />
+                    <LegalSection title="LEGAL & HELP" items={legalItems} />
                 </div>
             </main>
         </>
@@ -91,7 +91,7 @@ export default function AccountPage() {
         <div className="p-4 space-y-6">
             <AccountSection title="GENERAL" items={generalItems} />
             <AccountSection title="ACCOUNT & SECURITY" items={securityItems} />
-            <AccountSection title="LEGAL & HELP" items={legalItems} />
+            <LegalSection title="LEGAL & HELP" items={legalItems} />
         
             <div className="pt-4">
                 <Button variant="outline" className="w-full text-destructive border-destructive/50 hover:bg-destructive/10 hover:text-destructive" onClick={handleLogout}>
