@@ -40,31 +40,37 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
     // Provide a more developer-friendly error message
     let errorMessage = `Firestore error: ${error.message}.`;
     if (error.code === 'permission-denied') {
-        errorMessage += ' Please update your Firestore security rules in the Firebase console to allow read access. For development, you can use these rules: \n\n' +
+        errorMessage = 'Your Firestore security rules are blocking access to the product data. This is a common setup step for new Firebase projects.\n\n' +
+        'To fix this, go to the Firestore Database section of your Firebase console, click on the "Rules" tab, and replace the existing rules with the following code. This will allow public read access for your catalog while securing user and order data.\n\n\n' +
+        '// Recommended Firestore Security Rules for Sangma Megha Mart\n' +
         'rules_version = \'2\';\n' +
         'service cloud.firestore {\n' +
-        '  match /databases/{database}/documents {\n' +
-        '    // Allow anyone to read products and their reviews\n' +
+        '  match /databases/{database}/documents {\n\n' +
+        '    // Products and their reviews should be publicly readable\n' +
         '    match /products/{productId} {\n' +
         '      allow read: if true;\n' +
-        '      allow update: if request.auth != null; // Allow logged-in users to update (e.g., for ratings)\n' +
+        '      allow update: if request.auth != null; // For updating ratings\n' +
         '      match /reviews/{reviewId} {\n' +
         '        allow read: if true;\n' +
-        '        allow create: if request.auth != null; // Allow logged-in users to create reviews\n' +
+        '        allow create: if request.auth != null; // Only logged-in users can write reviews\n' +
         '      }\n' +
-        '    }\n' +
-        '    // Add other rules for collections like orders, userdata, etc. below\n' +
+        '    }\n\n' +
+        '    // Ads should be publicly readable\n' +
+        '    match /ads/{adId} {\n' +
+        '      allow read: if true;\n' +
+        '    }\n\n' +
+        '    // Userdata can only be read/written by the authenticated user themselves\n' +
         '    match /userdata/{userId} {\n' +
         '       allow read, write: if request.auth != null && request.auth.uid == userId;\n' +
-        '    }\n' +
+        '    }\n\n' +
+        '    // Orders can be created by any authenticated user, but only read/updated by the user who owns it\n' +
         '    match /orders/{orderId} {\n' +
-        '       allow read, create, update: if request.auth != null;\n' +
-        '    }\n' +
+        '       allow create: if request.auth != null;\n' +
+        '       allow read, update: if request.auth != null && resource.data.userId == request.auth.uid;\n' +
+        '    }\n\n' +
+        '    // Internal counters for things like order numbers\n' +
         '    match /counters/{counterId} {\n' +
-        '       allow read, write: if request.auth != null;\n' +
-        '    }\n' +
-        '    match /ads/{adId} {\n' +
-        '       allow read: if true;\n' +
+        '       allow read, write: if request.auth != null; // Can be restricted further if needed\n' +
         '    }\n' +
         '  }\n' +
         '}\n';
