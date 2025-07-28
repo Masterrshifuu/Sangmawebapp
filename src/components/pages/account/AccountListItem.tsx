@@ -44,7 +44,14 @@ export const AccountListItem = ({
         </div>
       </AccordionTrigger>
       <AccordionContent className="p-4 text-muted-foreground">
-        {content || 'This feature is coming soon!'}
+        {label === 'My Orders' ? (
+             <span>
+                You can view all your past and current orders on the{' '}
+                <Link href="/my-orders" className="text-primary underline">My Orders page</Link>.
+            </span>
+        ) : (
+            content || 'This feature is coming soon!'
+        )}
       </AccordionContent>
     </>
   );

@@ -8,7 +8,6 @@ import {
     RefreshCw,
     User,
   } from 'lucide-react';
-import Link from 'next/link';
 
 export interface NavItem {
     icon: React.ElementType;
@@ -28,12 +27,7 @@ export const getGeneralItems = (): NavItem[] => [
     { 
         icon: Package, 
         label: 'My Orders', 
-        content: (
-            <span>
-                You can view all your past and current orders on the{' '}
-                <Link href="/my-orders" className="text-primary underline">My Orders page</Link>.
-            </span>
-        )
+        content: "View your order history." // Simple string placeholder
     },
     { icon: MapPin, label: 'Address Book', content: 'You can manage your saved addresses during checkout.' },
 ];
