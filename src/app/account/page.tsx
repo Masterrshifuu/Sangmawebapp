@@ -22,7 +22,7 @@ export default function AccountPage() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      router.push('/'); // Redirect to home page after logout
+      router.push('/login'); // Redirect to login page after logout
     } catch (error) {
       console.error('Error signing out: ', error);
     }
@@ -45,7 +45,7 @@ export default function AccountPage() {
                         Welcome to Sangma Megha Mart
                     </h1>
                     <p className="text-sm text-gray-800 mt-1">Log in to manage your orders and account details.</p>
-                     <Button className="mt-4" onClick={() => router.push('/?auth=true')}>
+                     <Button className="mt-4" onClick={() => router.push('/login')}>
                         <LogIn className="mr-2 h-4 w-4" />
                         Login / Sign Up
                     </Button>
