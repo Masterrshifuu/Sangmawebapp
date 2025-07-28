@@ -9,7 +9,7 @@ import {
     serverTimestamp,
     query,
     where,
-    orderBy
+    Timestamp
 } from 'firebase/firestore';
 import type { Review } from './types';
 import { incrementUserStat } from './user';
@@ -18,13 +18,29 @@ import { incrementUserStat } from './user';
 export async function getReviews(productId: string): Promise<Review[]> {
     try {
         const reviewsRef = collection(db, 'reviews');
-        const q = query(reviewsRef, where('productId', '==', productId), orderBy('createdAt', 'desc'));
+        // Query for reviews of a specific product, but don't order them here.
+        const q = query(reviewsRef, where('productId', '==', productId));
         const querySnapshot = await getDocs(q);
-        return querySnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data().createdAt.toDate().toISOString(),
-        } as Review));
+        
+        const reviews = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                ...data,
+                // Ensure createdAt is a Date object for sorting
+                createdAt: (data.createdAt as Timestamp).toDate(),
+            } as unknown as Review & { createdAt: Date };
+        });
+
+        // Sort the reviews by date in descending order in the code.
+        reviews.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+        // Convert Date back to ISO string for serialization
+        return reviews.map(review => ({
+            ...review,
+            createdAt: review.createdAt.toISOString(),
+        }));
+
     } catch (error) {
         console.error("Error fetching reviews:", error);
         return [];
