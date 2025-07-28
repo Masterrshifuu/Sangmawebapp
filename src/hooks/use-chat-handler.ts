@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useTransition } from 'react';
 import { getChatResponse, getChatResponseWithImage } from '@/app/actions';
 import type { AIState } from '@/lib/types';
 
@@ -54,8 +54,6 @@ export function useChatHandler() {
         e?.preventDefault();
         if ((!inputValue.trim() && !imageFile) || isLoading) return;
 
-        setIsLoading(true);
-
         let userMessage: ChatMessage = {
             id: Date.now().toString(),
             role: 'user',
@@ -67,10 +65,10 @@ export function useChatHandler() {
         }
         
         const newMessages: ChatMessage[] = [...messages, userMessage];
-        setMessages(newMessages);
 
+        setMessages(newMessages);
         setInputValue('');
-        clearImage();
+        setIsLoading(true);
 
         try {
             let responseMessage;
@@ -91,6 +89,7 @@ export function useChatHandler() {
             setMessages(currentMessages => [...currentMessages, errorMessage]);
         } finally {
             setIsLoading(false);
+            clearImage();
         }
     };
 

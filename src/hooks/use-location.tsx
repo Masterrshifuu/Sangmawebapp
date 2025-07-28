@@ -51,11 +51,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
         if (user) {
             const userData = await getUserData(user.uid);
             const defaultUserAddress = userData.addresses?.find(a => a.isDefault) || userData.addresses?.[0];
-            if (defaultUserAddress) {
-                setAddressState(defaultUserAddress);
-            } else {
-                setAddressState(defaultAddress); // Fallback if user has no addresses
-            }
+            setAddressState(defaultUserAddress || null);
         } else {
             setAddressState(getLocalAddress());
         }
@@ -84,7 +80,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   return (
     <LocationContext.Provider value={value}>
-      {!loading ? children : null}
+      {children}
     </LocationContext.Provider>
   );
 }
