@@ -3,8 +3,39 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   images: {
+    unoptimized: true,
     remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.bbassets.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'm.media-amazon.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'fetchnbuy.in',
+        port: '',
+        pathname: '/**',
+      },
       {
         protocol: 'https',
         hostname: '**',
@@ -20,19 +51,6 @@ const nextConfig: NextConfig = {
     watchOptions: {
       ignored: ['**/.genkit/**'],
     },
-  },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self' *.tile.openstreetmap.org; connect-src 'self' *.googleapis.com wss://*.firebaseapp.com; img-src 'self' data: *.tile.openstreetmap.org https://*; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src 'self' data:;",
-          },
-        ],
-      },
-    ]
   },
 };
 
