@@ -81,12 +81,3 @@ export default async function ProductPage({ params }: { params: { id: string } }
     </>
   );
 }
-
-// Generate static paths for products to improve build times and performance
-export async function generateStaticParams() {
-    const { products } = await getProducts();
-
-    return products.map(product => ({
-        id: product.id,
-    }));
-}

@@ -15,6 +15,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  experimental: {
+    // This prevents a restart loop with the Genkit watcher.
+    watchOptions: {
+      ignored: ['**/.genkit/**'],
+    },
+  },
   async headers() {
     return [
       {
@@ -22,7 +28,7 @@ const nextConfig: NextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self' *.tile.openstreetmap.org; connect-src 'self' *.googleapis.com wss://*.firebaseapp.com; img-src 'self' data: https:; media-src 'self' data: https:; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; ",
+            value: "default-src 'self' *.tile.openstreetmap.org; connect-src 'self' *.googleapis.com wss://*.firebaseapp.com; img-src 'self' data: *; media-src 'self' data: *; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
           },
         ],
       },
