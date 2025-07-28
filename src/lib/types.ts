@@ -32,8 +32,19 @@ export interface CartItem {
     quantity: number;
 }
 
+export interface Address {
+    id: string;
+    type: 'Home' | 'Work' | 'Other';
+    line1: string;
+    line2?: string;
+    city: string;
+    pincode: string;
+    isDefault?: boolean;
+}
+
 export interface UserData {
     cart: CartItem[];
+    addresses: Address[];
     totalOrders: number;
     totalReviews: number;
     likes: number;

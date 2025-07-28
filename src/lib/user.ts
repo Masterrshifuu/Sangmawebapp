@@ -23,11 +23,17 @@ export async function getUserData(uid: string): Promise<UserData> {
   const userDocSnap = await getDoc(userDocRef);
 
   if (userDocSnap.exists()) {
-    return userDocSnap.data() as UserData;
+    // Ensure addresses field exists and is an array
+    const data = userDocSnap.data() as UserData;
+    if (!Array.isArray(data.addresses)) {
+        data.addresses = [];
+    }
+    return data;
   } else {
     // If the document doesn't exist, create it.
     const newUserData: UserData = {
       cart: [],
+      addresses: [],
       totalOrders: 0,
       totalReviews: 0,
       likes: 0,
@@ -70,7 +76,7 @@ export async function updateUserCart(uid: string, cart: CartItem[]): Promise<voi
  * @param stat The field to increment (e.g., 'totalOrders').
  * @param value The amount to increment by (defaults to 1).
  */
-export async function incrementUserStat(uid: string, stat: keyof Omit<UserData, 'cart' | 'lastLogin' | 'phoneNumber'>, value: number = 1): Promise<void> {
+export async function incrementUserStat(uid: string, stat: keyof Omit<UserData, 'cart' | 'lastLogin' | 'phoneNumber' | 'addresses'>, value: number = 1): Promise<void> {
     const userDocRef = doc(db, 'users', uid);
     try {
         await updateDoc(userDocRef, {

@@ -8,6 +8,9 @@ import {
     RefreshCw,
     User,
   } from 'lucide-react';
+import { AddressBook } from './AddressBook';
+import { ProfileDetailsForm } from './ProfileDetailsForm';
+import { ChangePasswordForm } from './ChangePasswordForm';
 
 export interface NavItem {
     icon: React.ElementType;
@@ -30,10 +33,10 @@ export const myOrdersItem: NavItem = {
 };
 
 export const getGeneralItems = (): NavItem[] => [
-    { icon: MapPin, label: 'Address Book', content: 'You can manage your saved addresses during checkout.' },
+    { icon: MapPin, label: 'Address Book', content: AddressBook },
 ];
   
 export const getSecurityItems = (): NavItem[] => [
-    { icon: User, label: 'Profile Details', content: 'Profile editing is coming soon!' },
-    { icon: Shield, label: 'Change Password', content: 'You can change your password from the login screen using the "Forgot Password" link.' },
+    { icon: User, label: 'Profile Details', content: ProfileDetailsForm },
+    { icon: Shield, label: 'Change Password', content: ChangePasswordForm },
 ];

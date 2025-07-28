@@ -6,7 +6,7 @@ import { auth } from '@/lib/firebase';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogIn, LogOut, Package } from 'lucide-react';
+import { LogIn, LogOut } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Header from '@/components/header';

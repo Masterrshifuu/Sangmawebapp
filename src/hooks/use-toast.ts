@@ -1,4 +1,4 @@
-// Inspired by react-hot-toast library
+
 "use client"
 
 import * as React from "react"
@@ -183,7 +183,7 @@ function useToast() {
 
   return {
     ...state,
-    toast,
+    toast: (props: Toast) => {}, // No-op function to disable toasts
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
 }
