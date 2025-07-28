@@ -3,7 +3,6 @@ import { notFound } from 'next/navigation';
 import { getProducts } from '@/lib/products';
 import Header from '@/components/header';
 import { ProductCard } from '@/components/product-card';
-import type { Metadata } from 'next';
 
 function decodeCategoryName(slug: string): string {
     return decodeURIComponent(slug).replace(/-and-/g, ' & ');
