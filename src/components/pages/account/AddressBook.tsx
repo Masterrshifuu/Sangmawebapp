@@ -11,9 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, CheckCircle, Circle } from 'lucide-react';
 import { updateAddresses } from '@/lib/account-actions';
 import { v4 as uuidv4 } from 'uuid';
+import { useLocation } from '@/hooks/use-location';
+import { cn } from '@/lib/utils';
 
 const addressSchema = z.object({
   area: z.string().min(3, 'Area is required'),
@@ -36,6 +38,7 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
   const onSubmit = (data: z.infer<typeof addressSchema>) => {
     onSave({
         id: address?.id || uuidv4(),
+        isDefault: address?.isDefault || false,
         ...data,
     });
   };
@@ -77,17 +80,28 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
 export function AddressBook({ user, userData }: { user: User; userData: UserData }) {
   const [addresses, setAddresses] = useState(userData.addresses || []);
   const [editingAddress, setEditingAddress] = useState<Address | 'new' | null>(null);
+  const { setAddress: setGlobalAddress } = useLocation();
 
   const handleSave = async (address: Address) => {
     let newAddresses;
     if (addresses.some(a => a.id === address.id)) {
       newAddresses = addresses.map(a => a.id === address.id ? address : a);
     } else {
+      // If adding a new address, make it the default if it's the first one
+      if (addresses.length === 0) {
+        address.isDefault = true;
+      }
       newAddresses = [...addresses, address];
     }
+    
     await updateAddresses(user.uid, newAddresses);
     setAddresses(newAddresses);
     setEditingAddress(null);
+    
+    // If the saved address is the default, update the global state
+    if (address.isDefault) {
+        setGlobalAddress(address);
+    }
   };
   
   const handleDelete = async (addressId: string) => {
@@ -96,16 +110,38 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
     setAddresses(newAddresses);
   };
 
+  const handleSetDefault = async (addressId: string) => {
+    const newAddresses = addresses.map(a => ({
+        ...a,
+        isDefault: a.id === addressId
+    }));
+    await updateAddresses(user.uid, newAddresses);
+    setAddresses(newAddresses);
+    const newDefault = newAddresses.find(a => a.isDefault);
+    if (newDefault) {
+        setGlobalAddress(newDefault);
+    }
+  }
+
   return (
     <div className="space-y-4">
       {addresses.map((address) => (
         <div key={address.id} className="p-3 border rounded-md flex justify-between items-start">
-          <div>
+          <div className="flex-1">
             <p className="font-semibold">{address.area}</p>
             <p className="text-sm text-muted-foreground">{address.landmark ? `${address.landmark}, ` : ''}{address.region}</p>
             <p className="text-sm text-muted-foreground">{address.phone}</p>
           </div>
-          <div className="flex gap-1">
+          <div className="flex items-center gap-1">
+            <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => handleSetDefault(address.id)}
+                title="Set as default"
+            >
+                {address.isDefault ? <CheckCircle className="text-green-600" /> : <Circle className="text-muted-foreground" />}
+            </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setEditingAddress(address)}><Edit /></Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDelete(address.id)}><Trash2 /></Button>
           </div>

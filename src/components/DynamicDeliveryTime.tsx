@@ -6,13 +6,20 @@ import { format } from 'date-fns';
 import { Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getStoreStatus } from '@/lib/datetime';
+import { useLocation } from '@/hooks/use-location';
 
 export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
     const [deliveryInfo, setDeliveryInfo] = useState({ text: '', isEstimate: false });
+    const { address } = useLocation();
 
     useEffect(() => {
         const calculateDeliveryTime = () => {
             const storeStatus = getStoreStatus();
+
+            if (!address) {
+                setDeliveryInfo({ text: 'Select a location', isEstimate: true });
+                return;
+            }
 
             if (storeStatus.isOpen) {
                 const now = new Date();
@@ -45,7 +52,7 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
         const intervalId = setInterval(calculateDeliveryTime, 60000); // Update every minute
 
         return () => clearInterval(intervalId);
-    }, []);
+    }, [address]);
 
     if (!deliveryInfo.text) {
         return null;

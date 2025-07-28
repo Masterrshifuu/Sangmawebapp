@@ -24,14 +24,14 @@ import { useRouter } from 'next/navigation';
 
 export function CartSheet({ children }: { children: React.ReactNode }) {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
-  const { location } = useLocation();
+  const { address } = useLocation();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const router = useRouter();
 
   const deliveryCharge = useMemo(() => {
     if (cart.length === 0) return 0;
-    return calculateDeliveryCharge(totalPrice, location);
-  }, [totalPrice, location, cart.length]);
+    return calculateDeliveryCharge(totalPrice, address);
+  }, [totalPrice, address, cart.length]);
 
   const isServiceable = deliveryCharge !== null;
   const finalTotal = isServiceable ? totalPrice + (deliveryCharge ?? 0) : totalPrice;

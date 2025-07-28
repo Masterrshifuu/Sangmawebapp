@@ -11,7 +11,7 @@ import { db } from '@/lib/firebase';
 import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { verifyPayment, VerifyPaymentInput } from '@/ai/flows/verify-payment-flow';
-import type { Order } from '@/lib/types';
+import type { Order, Address } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
-  const { location } = useLocation();
+  const { address, loading: locationLoading } = useLocation();
   
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi'>('cod');
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
@@ -65,7 +65,7 @@ export default function CheckoutPage() {
     }
   }, [isClient, cart.length, authLoading, router]);
 
-  const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, location), [totalPrice, location]);
+  const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, address), [totalPrice, address]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
 
   const handleScreenshotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +86,7 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async (isVerified: boolean = false) => {
-    if (!user || deliveryCharge === null) {
+    if (!user || deliveryCharge === null || !address) {
         console.error('Login Required or unserviceable location.');
         return;
     };
@@ -97,6 +97,8 @@ export default function CheckoutPage() {
     }
 
     setIsPlacingOrder(true);
+    
+    const deliveryAddressString = `${address.area}${address.landmark ? ', ' + address.landmark : ''}, ${address.region}`;
 
     try {
         await runTransaction(db, async (transaction) => {
@@ -113,14 +115,13 @@ export default function CheckoutPage() {
             const newOrderId = `SMM${String(newOrderCount).padStart(6, '0')}`;
             const isScheduled = !storeStatus.isOpen;
 
-            const orderData: Order = {
-                id: newOrderId,
+            const orderData: Omit<Order, 'id'> = {
                 userId: user.uid,
                 userName: user.displayName || 'Anonymous',
                 userEmail: user.email || '',
-                userPhone: user.phoneNumber || '',
+                userPhone: address.phone || user.phoneNumber || '',
                 createdAt: serverTimestamp(),
-                deliveryAddress: location,
+                deliveryAddress: deliveryAddressString,
                 items: cart.map(item => ({
                     id: item.product.id,
                     name: item.product.name,
@@ -193,7 +194,7 @@ export default function CheckoutPage() {
   };
 
   const renderContent = () => {
-    if (!isClient || authLoading || (cart.length === 0 && !authLoading)) {
+    if (!isClient || authLoading || locationLoading || (cart.length === 0 && !authLoading)) {
       return <CheckoutPageSkeleton />;
     }
     
