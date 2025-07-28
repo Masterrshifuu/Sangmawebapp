@@ -21,19 +21,6 @@ const nextConfig: NextConfig = {
       ignored: ['**/.genkit/**'],
     },
   },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Content-Security-Policy',
-            value: "default-src 'self' *.tile.openstreetmap.org; connect-src 'self' *.googleapis.com wss://*.firebaseapp.com; img-src 'self' data: *; media-src 'self' data: *; script-src 'self' 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline';",
-          },
-        ],
-      },
-    ]
-  },
 };
 
 export default nextConfig;
