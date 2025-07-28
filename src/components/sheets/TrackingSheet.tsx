@@ -19,6 +19,7 @@ import {
   Home,
   Timer,
   XCircle,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -32,7 +33,7 @@ import {
   onSnapshot,
 } from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
-import { format, addMinutes } from 'date-fns';
+import { format, addMinutes, differenceInMinutes } from 'date-fns';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
 import { DynamicDeliveryTime } from '../DynamicDeliveryTime';
@@ -73,17 +74,16 @@ const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
 };
 
 const TrackingTimeline = ({ status }: { status: string }) => {
+  const normalizedStatus = status?.toLowerCase().replace(/ /g, '_') || 'pending';
   const orderStatusHierarchy = [
     'pending',
     'confirmed',
     'packed',
     'out_for_delivery',
     'delivered',
-    'scheduled',
   ];
 
-  const cancelled = status?.toLowerCase() === 'cancelled';
-  if (cancelled) {
+  if (normalizedStatus === 'cancelled') {
     return (
         <div className="p-4 rounded-lg border bg-red-50 text-red-800 text-center">
             <h3 className="font-semibold">Order Cancelled</h3>
@@ -91,10 +91,16 @@ const TrackingTimeline = ({ status }: { status: string }) => {
         </div>
     )
   }
+   if (normalizedStatus === 'scheduled') {
+    return (
+        <div className="p-4 rounded-lg border bg-purple-50 text-purple-800 text-center">
+            <h3 className="font-semibold">Order Scheduled</h3>
+            <p className="text-sm">Your order is scheduled and will begin processing at the next opening time.</p>
+        </div>
+    )
+  }
 
-  const currentStatusIndex = orderStatusHierarchy.findIndex(
-    s => s === status?.toLowerCase().replace(/ /g, '_')
-  );
+  const currentStatusIndex = orderStatusHierarchy.indexOf(normalizedStatus);
 
   const steps = [
     {
@@ -132,7 +138,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   return (
     <div className="space-y-4">
       {steps.map((step, index) => {
-        const stepStatusIndex = orderStatusHierarchy.findIndex(s => s === step.status);
+        const stepStatusIndex = orderStatusHierarchy.indexOf(step.status);
         const isCompleted = stepStatusIndex < currentStatusIndex;
         const isCurrent = stepStatusIndex === currentStatusIndex;
 
@@ -162,7 +168,7 @@ const TrackingTimeline = ({ status }: { status: string }) => {
               <p
                 className={cn(
                   'font-semibold',
-                  isCompleted || isCurrent
+                  (isCompleted || isCurrent)
                     ? 'text-foreground'
                     : 'text-muted-foreground'
                 )}
@@ -193,7 +199,7 @@ const NoActiveOrderCard = () => (
     </div>
 )
 
-const CountdownTimer = ({ order }: { order: Order}) => {
+const OrderStatusCard = ({ order }: { order: Order}) => {
     const [timeLeft, setTimeLeft] = useState('');
     const [eta, setEta] = useState('');
     const [isCancelling, setIsCancelling] = useState(false);
@@ -227,10 +233,13 @@ const CountdownTimer = ({ order }: { order: Order}) => {
     }, [order]);
 
     useEffect(() => {
+        if (order.status.toLowerCase() === 'delivered' || order.status.toLowerCase() === 'cancelled') {
+            return;
+        }
         calculateTimeLeft();
         const intervalId = setInterval(calculateTimeLeft, 1000);
         return () => clearInterval(intervalId);
-    }, [calculateTimeLeft]);
+    }, [calculateTimeLeft, order.status]);
 
     const isCancellable = () => {
         if (!order.createdAt) return false;
@@ -253,6 +262,33 @@ const CountdownTimer = ({ order }: { order: Order}) => {
         }
         setIsCancelling(false);
     };
+
+    if (order.status.toLowerCase() === 'delivered') {
+        const createdAt = (order.createdAt as unknown as Timestamp).toDate();
+        // Assuming a `deliveredAt` field would be set. If not, we can't calculate this.
+        // For now, let's pretend `cancelledAt` is `deliveredAt` for calculation purposes if it exists
+        const deliveredAt = (order.cancelledAt as unknown as Timestamp)?.toDate() || new Date(); 
+        const deliveryDuration = differenceInMinutes(deliveredAt, createdAt);
+
+        return (
+            <div className="p-4 rounded-lg bg-green-100 text-green-800 text-center space-y-1">
+                <p className="text-sm font-semibold flex items-center justify-center gap-2"><CheckCircle2 />Delivered</p>
+                <p className="text-lg font-bold">
+                   Delivered in {deliveryDuration} minutes
+                </p>
+            </div>
+        )
+    }
+
+    if (order.status.toLowerCase() === 'cancelled') {
+        return (
+            <div className="p-4 rounded-lg bg-red-100 text-red-800 text-center space-y-1">
+                <p className="text-sm font-semibold flex items-center justify-center gap-2"><XCircle />Order Cancelled</p>
+                <p className="text-lg font-bold">This order was cancelled.</p>
+            </div>
+        )
+    }
+
 
     return (
         <div className="space-y-4">
@@ -366,7 +402,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                 </div>
             ) : activeOrder ? (
               <>
-                <CountdownTimer order={activeOrder} />
+                <OrderStatusCard order={activeOrder} />
                 <TrackingTimeline status={activeOrder.status} />
                 <OrderSummaryCard items={activeOrder.items} />
               </>
