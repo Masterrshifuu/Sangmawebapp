@@ -10,21 +10,15 @@ import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
 import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
-import { verifyPayment, VerifyPaymentInput } from '@/ai/flows/verify-payment-flow';
 import type { Order, Address } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Input } from '@/components/ui/input';
-import { Loader2, Upload, ChevronLeft, AlertCircle } from 'lucide-react';
-import Image from 'next/image';
+import { Loader2, ChevronLeft } from 'lucide-react';
 import { getStoreStatus } from '@/lib/datetime';
 import { incrementUserStat } from '@/lib/user';
-import { Checkbox } from '@/components/ui/checkbox';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
-import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
 import { StoreClosedWarning } from '@/components/pages/checkout/StoreClosedWarning';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
 import { UnserviceableLocation } from '@/components/pages/checkout/UnserviceableLocation';
@@ -37,10 +31,7 @@ export default function CheckoutPage() {
   const { address, loading: locationLoading } = useLocation();
   
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi'>('cod');
-  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [storeStatus, setStoreStatus] = useState(getStoreStatus());
   const [scheduleForNextDay, setScheduleForNextDay] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -68,24 +59,7 @@ export default function CheckoutPage() {
   const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, address), [totalPrice, address]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
 
-  const handleScreenshotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setScreenshotFile(file);
-      setScreenshotPreview(URL.createObjectURL(file));
-    }
-  };
-
-  const fileToDataUri = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const placeOrder = async (isVerified: boolean = false) => {
+  const placeOrder = async () => {
     if (!user || deliveryCharge === null || !address) {
         console.error('Login Required or unserviceable location.');
         return;
@@ -129,7 +103,7 @@ export default function CheckoutPage() {
                     quantity: item.quantity,
                     imageUrl: item.product.imageUrl
                 })),
-                paymentMethod,
+                paymentMethod: 'cod', // Hardcoded to COD
                 status: isScheduled ? 'Scheduled' : 'Pending',
                 totalAmount: finalTotal,
                 active: !isScheduled,
@@ -154,43 +128,13 @@ export default function CheckoutPage() {
     }
   };
 
-  const handleUpiVerification = async () => {
-    if (!screenshotFile) {
-        console.error('Please upload a screenshot.');
-        return;
-    }
-    setIsVerifying(true);
-    try {
-        const photoDataUri = await fileToDataUri(screenshotFile);
-        const input: VerifyPaymentInput = {
-            photoDataUri,
-            expectedAmount: finalTotal.toString(),
-        };
-        const result = await verifyPayment(input);
-        
-        if (result.isPaymentVerified) {
-            await placeOrder(true);
-        } else {
-            console.error(result.reason || 'The amount in the screenshot does not match the order total.');
-        }
-    } catch (error) {
-        console.error("Verification error:", error);
-    } finally {
-        setIsVerifying(false);
-    }
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) {
         console.error('You must be logged in to place an order.');
         return;
     }
-    if (paymentMethod === 'cod') {
-        await placeOrder();
-    } else {
-        await handleUpiVerification();
-    }
+    await placeOrder();
   };
 
   const renderContent = () => {
@@ -240,15 +184,6 @@ export default function CheckoutPage() {
                                 <p className="text-sm text-muted-foreground">Pay with cash when your order arrives.</p>
                             </div>
                         </Label>
-                        <UpiPayment
-                            paymentMethod={paymentMethod}
-                            canPlaceOrder={canPlaceOrder}
-                            finalTotal={finalTotal}
-                            screenshotPreview={screenshotPreview}
-                            screenshotFile={screenshotFile}
-                            handleScreenshotChange={handleScreenshotChange}
-                            isVerifying={isVerifying || isPlacingOrder}
-                        />
                     </RadioGroup>
                 </CardContent>
             </Card>
@@ -257,12 +192,12 @@ export default function CheckoutPage() {
                 type="submit" 
                 className="w-full" 
                 size="lg"
-                disabled={isPlacingOrder || isVerifying || (paymentMethod === 'upi' && !screenshotFile) || !canPlaceOrder}
+                disabled={isPlacingOrder || !canPlaceOrder}
             >
-                {isPlacingOrder || isVerifying ? (
+                {isPlacingOrder ? (
                     <Loader2 className="animate-spin" />
                 ) : (
-                    paymentMethod === 'cod' ? `Place Order (COD)` : `Verify & Place Order`
+                    `Place Order (COD)`
                 )}
             </Button>
         </form>

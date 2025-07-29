@@ -40,12 +40,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  experimental: {
-    // This prevents a restart loop with the Genkit watcher.
-    watchOptions: {
-      ignored: ['**/.genkit/**'],
-    },
-  },
 };
 
 export default nextConfig;

@@ -8,8 +8,6 @@ import { useCart } from '@/hooks/use-cart';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Sparkles } from 'lucide-react';
-import Link from 'next/link';
 
 import { CartQuantityControl } from '@/components/cart/CartQuantityControl';
 import { DynamicDeliveryTime } from '@/components/DynamicDeliveryTime';
@@ -71,13 +69,6 @@ export function ProductClientPage({
                 <p className="text-muted-foreground text-base leading-relaxed">
                     {currentProduct.description}
                 </p>
-
-                <Button variant="outline" asChild>
-                    <Link href="/ai-chat">
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Ask AI about this product
-                    </Link>
-                </Button>
 
                 <DynamicDeliveryTime />
 

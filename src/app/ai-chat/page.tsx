@@ -1,13 +1,23 @@
 
-import type { Metadata } from 'next';
-import { AiChatClient } from '@/components/chat/AiChatClient';
-
-export const metadata: Metadata = {
-    title: 'Sangma AI Assistant | Your Personal Grocery Expert',
-    description: 'Ask Sangma AI anything about our products, get recommendations, find deals, and receive help with your shopping. Your personal grocery expert at Sangma Megha Mart in Tura.',
-    keywords: ['Sangma Ai', 'AI Shopping Assistant', 'Tura Grocery Help', 'Sangma Megha Mart AI'],
-}
+import { Bot } from 'lucide-react';
+import Header from '@/components/header';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 export default function AiChatPage() {
-  return <AiChatClient />;
+  return (
+    <>
+      <Header />
+      <main className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center p-4">
+        <Bot className="w-16 h-16 mb-4 text-muted-foreground" />
+        <h1 className="text-2xl font-bold">AI Chat Under Construction</h1>
+        <p className="text-muted-foreground mt-2">
+          This feature is temporarily unavailable as we work on some improvements.
+        </p>
+        <Button asChild className="mt-6">
+          <Link href="/">Go Back Home</Link>
+        </Button>
+      </main>
+    </>
+  );
 }
