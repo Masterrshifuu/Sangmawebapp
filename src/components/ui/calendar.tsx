@@ -1,11 +1,14 @@
+
 "use client"
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker } from "react-day-picker"
+import { DayPicker, useDayPicker, useNavigation } from "react-day-picker"
+import { format, addMonths } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./select"
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>
 
@@ -23,7 +26,7 @@ function Calendar({
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
         caption: "flex justify-center pt-1 relative items-center",
-        caption_label: "text-sm font-medium",
+        caption_label: "text-sm font-medium hidden",
         nav: "space-x-1 flex items-center",
         nav_button: cn(
           buttonVariants({ variant: "outline" }),
@@ -54,17 +57,83 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ className, ...props }) => (
-          <ChevronLeft className={cn("h-4 w-4", className)} {...props} />
-        ),
-        IconRight: ({ className, ...props }) => (
-          <ChevronRight className={cn("h-4 w-4", className)} {...props} />
-        ),
+        IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+        IconRight: () => <ChevronRight className="h-4 w-4" />,
+        Caption: CustomCaption
       }}
       {...props}
     />
   )
 }
 Calendar.displayName = "Calendar"
+
+function CustomCaption() {
+  const { goToMonth, nextMonth, previousMonth } = useNavigation();
+  const { currentMonth } = useDayPicker();
+  
+  const handleMonthChange = (value: string) => {
+    const month = new Date(value);
+    goToMonth(month);
+  };
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - 5 + i);
+  const months = Array.from({ length: 12 }, (_, i) => 
+    new Date(currentYear, i, 1)
+  );
+
+  return (
+    <div className="flex justify-between items-center w-full px-1">
+      <button
+        disabled={!previousMonth}
+        onClick={() => previousMonth && goToMonth(previousMonth)}
+        className={cn(buttonVariants({ variant: "outline" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100")}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+
+      <div className="flex gap-2">
+        <Select
+            value={format(currentMonth, "yyyy-MM")}
+            onValueChange={handleMonthChange}
+        >
+            <SelectTrigger className="w-[120px] h-7 text-xs">
+                <SelectValue>{format(currentMonth, "MMMM yyyy")}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+                {months.map((month) => (
+                    <SelectItem key={format(month, "MM")} value={format(new Date(currentMonth.getFullYear(), month.getMonth(), 1), "yyyy-MM")}>
+                        {format(month, "MMMM")}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+        <Select
+            value={currentMonth.getFullYear().toString()}
+            onValueChange={(value) => goToMonth(new Date(Number(value), currentMonth.getMonth(), 1))}
+        >
+            <SelectTrigger className="w-[80px] h-7 text-xs">
+                <SelectValue>{currentMonth.getFullYear()}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+                {years.map((year) => (
+                    <SelectItem key={year} value={year.toString()}>
+                        {year}
+                    </SelectItem>
+                ))}
+            </SelectContent>
+        </Select>
+      </div>
+
+      <button
+        disabled={!nextMonth}
+        onClick={() => nextMonth && goToMonth(nextMonth)}
+        className={cn(buttonVariants({ variant: "outline" }), "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100")}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
 
 export { Calendar }

@@ -6,9 +6,6 @@ import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
 import { BottomNavbar } from '@/components/BottomNavbar';
-import { AdsProvider } from '@/hooks/use-ads';
-import 'leaflet/dist/leaflet.css';
-import { ProductsProvider } from '@/hooks/use-products';
 
 const notoSans = Noto_Sans({
   subsets: ['latin'],
@@ -60,17 +57,13 @@ export default function RootLayout({
       <head />
       <body className="antialiased">
         <AuthWrapper>
-          <ProductsProvider>
-            <AdsProvider>
-              <div className="flex flex-col min-h-screen">
+            <div className="flex flex-col min-h-screen">
                 <div className="flex-grow">
-                  {children}
+                    {children}
                 </div>
                 <Toaster />
                 <BottomNavbar />
-              </div>
-            </AdsProvider>
-          </ProductsProvider>
+            </div>
         </AuthWrapper>
       </body>
     </html>
