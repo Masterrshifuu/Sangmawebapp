@@ -7,6 +7,8 @@ import {
   signInWithEmailAndPassword,
   updateProfile,
   updateCurrentUser,
+  GoogleAuthProvider,
+  signInWithPopup,
   type Auth,
 } from "firebase/auth";
 
@@ -31,6 +33,8 @@ export {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     updateProfile,
-    updateCurrentUser
+    updateCurrentUser,
+    GoogleAuthProvider,
+    signInWithPopup
 };
 export type { Auth };
