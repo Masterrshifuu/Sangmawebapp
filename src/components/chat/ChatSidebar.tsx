@@ -9,7 +9,7 @@ import { Bot, Plus } from 'lucide-react';
 
 export const ChatSidebar = () => {
     const { user } = useAuth();
-    const { location } = useLocation();
+    const { address } = useLocation();
 
     return (
         <div className="flex flex-col h-full bg-secondary/30">
@@ -23,7 +23,7 @@ export const ChatSidebar = () => {
                     {/* Placeholder for previous chats */}
                     <p className="px-2 py-1 text-xs text-muted-foreground font-semibold">Today</p>
                     <button className="w-full text-left text-sm p-2 rounded-md hover:bg-secondary truncate">
-                        Recommendations for {location}
+                        Recommendations for {address?.area || 'your area'}
                     </button>
                     <button className="w-full text-left text-sm p-2 rounded-md hover:bg-secondary truncate">
                         Healthy breakfast ideas
