@@ -14,6 +14,7 @@ import { cancelOrder } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
 import { getStoreStatus } from '@/lib/datetime';
+import { Separator } from '@/components/ui/separator';
 
 const statusStyles: { [key: string]: string } = {
     placed: 'bg-blue-100 text-blue-800',
@@ -44,6 +45,18 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
   const createdAt = getSafeDate(order.createdAt);
   const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
   const status = order.status || 'Pending';
+  
+  const subtotal = useMemo(() => {
+    if (order.subtotal !== undefined) return order.subtotal;
+    // Fallback calculation if subtotal is not stored in the order
+    return order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  }, [order.items, order.subtotal]);
+
+  const deliveryCharge = useMemo(() => {
+    if (order.deliveryCharge !== undefined) return order.deliveryCharge;
+    // Fallback calculation
+    return totalAmount - subtotal;
+  }, [order.deliveryCharge, totalAmount, subtotal]);
 
   const isCancellable = () => {
     if (!user) return false;
@@ -104,24 +117,37 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
           </div>
         ))}
       </div>
-      <div className="p-4 bg-muted/30 rounded-b-lg flex justify-between items-center">
-        <p className="text-sm font-semibold">Total: ₹{totalAmount.toFixed(2)}</p>
-        <div>
-            {isCancellable() ? (
-                <Button 
-                    size="sm" 
-                    variant="destructive"
-                    onClick={handleCancelOrder}
-                    disabled={isCancelling}
-                >
-                    <XCircle className="mr-2 h-4 w-4" />
-                    {isCancelling ? 'Cancelling...' : 'Cancel Order'}
-                </Button>
-            ) : (
-                <Button size="sm" variant="outline" asChild>
-                    <Link href={`/my-orders/${order.id}`}>View Details</Link>
-                </Button>
-            )}
+      <div className="p-4 bg-muted/30 rounded-b-lg space-y-4">
+        <div className="space-y-2 text-sm">
+            <div className="flex justify-between">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span>₹{subtotal.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between">
+                <span className="text-muted-foreground">Delivery Fee</span>
+                <span>{deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}</span>
+            </div>
+        </div>
+        <Separator />
+        <div className="flex justify-between items-center">
+            <p className="text-base font-semibold">Total: ₹{totalAmount.toFixed(2)}</p>
+            <div>
+                {isCancellable() ? (
+                    <Button 
+                        size="sm" 
+                        variant="destructive"
+                        onClick={handleCancelOrder}
+                        disabled={isCancelling}
+                    >
+                        <XCircle className="mr-2 h-4 w-4" />
+                        {isCancelling ? 'Cancelling...' : 'Cancel Order'}
+                    </Button>
+                ) : (
+                    <Button size="sm" variant="outline" asChild>
+                        <Link href={`/my-orders/${order.id}`}>View Details</Link>
+                    </Button>
+                )}
+            </div>
         </div>
       </div>
     </div>

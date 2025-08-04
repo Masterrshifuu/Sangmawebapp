@@ -126,15 +126,26 @@ export default function CheckoutPage() {
           })),
           paymentMethod: paymentDetails.method,
           status: orderStatus,
+          subtotal: totalPrice,
+          deliveryCharge: deliveryCharge,
           totalAmount: finalTotal,
           active: true,
           extraTimeInMinutes: 0,
           extraReasons: []
         };
         
-        const orderData: Omit<Order, 'id'> = paymentDetails.method === 'upi' 
-            ? { ...baseOrderData, paymentTransactionId: paymentDetails.transactionId }
-            : baseOrderData;
+        let orderData: Omit<Order, 'id'>;
+
+        if (paymentDetails.method === 'upi') {
+          orderData = { 
+            ...baseOrderData, 
+            paymentTransactionId: paymentDetails.transactionId 
+          };
+        } else {
+          // Destructure to remove paymentTransactionId for COD
+          const { paymentTransactionId, ...codOrderData } = { ...baseOrderData, paymentTransactionId: undefined };
+          orderData = codOrderData;
+        }
 
         const ordersCollection = collection(db, 'orders');
         await addDoc(ordersCollection, orderData);

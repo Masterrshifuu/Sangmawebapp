@@ -115,6 +115,8 @@ export interface Order {
     // Core Order Details
     items: OrderItem[];
     totalAmount: number;
+    subtotal?: number;
+    deliveryCharge?: number;
     deliveryAddress: string;
     paymentMethod: 'cod' | 'upi';
     paymentTransactionId?: string;
@@ -143,3 +145,4 @@ export interface Review {
     comment: string;
     createdAt: string; // Stored as ISO string
 }
+
