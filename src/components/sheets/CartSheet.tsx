@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -8,15 +9,13 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-  DrawerClose,
-  DrawerFooter,
 } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
 
-import { ShoppingCart, ArrowUp, ArrowDown } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useMemo, useState } from 'react';
 import { CartItemCard } from '@/components/cart/CartItemCard';
 import { useLocation } from '@/hooks/use-location';
 import { calculateDeliveryCharge } from '@/lib/delivery';
@@ -76,7 +75,7 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
                 {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
               </span>
             ) : (
-              <span className="text-destructive font-medium">Unserviceable</span>
+              <span className="text-destructive font-medium">Select Address</span>
             )}
           </div>
           
@@ -89,15 +88,13 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
 
           {!isServiceable && (
             <p className="text-xs text-destructive text-center p-2 bg-destructive/10 rounded-md">
-              Sorry, we do not deliver to your selected location. Please change your address to proceed.
+              Please provide a delivery address at checkout.
             </p>
           )}
 
           <Button 
               className="w-full" 
               size="lg"
-              disabled={!isServiceable}
-              aria-disabled={!isServiceable}
               onClick={onCheckout}
           >
               Proceed to Checkout
@@ -127,7 +124,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
     return (
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         <SheetTrigger asChild>{children}</SheetTrigger>
-        <SheetContent side="right" size="sm" className="p-0">
+        <SheetContent side="right" size="sm" className="p-0 flex flex-col">
           <SheetHeader className="p-4 border-b">
             <SheetTitle>Your Cart ({totalItems})</SheetTitle>
           </SheetHeader>

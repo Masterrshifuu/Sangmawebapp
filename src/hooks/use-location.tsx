@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
@@ -8,43 +9,19 @@ import { getUserData } from '@/lib/user';
 
 type LocationContextType = {
   address: Address | null;
-  setAddress: (address: Address) => void;
+  setAddress: (address: Address | null) => void;
   loading: boolean;
 };
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
-
-const defaultAddress: Address = {
-    id: 'guest-default',
-    area: 'Chandmari',
-    region: 'South Tura',
-    phone: '',
-    isDefault: true
-};
 
 export function LocationProvider({ children }: { children: ReactNode }) {
   const [address, setAddressState] = useState<Address | null>(null);
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  const getLocalAddress = (): Address => {
-    try {
-        const savedAddress = localStorage.getItem('userAddress');
-        return savedAddress ? JSON.parse(savedAddress) : defaultAddress;
-    } catch (error) {
-        console.error('Failed to parse address from localStorage', error);
-        return defaultAddress;
-    }
-  };
-
-  const saveLocalAddress = (addressToSave: Address) => {
-      try {
-        localStorage.setItem('userAddress', JSON.stringify(addressToSave));
-      } catch (error) {
-        console.error('Failed to save address to localStorage', error);
-      }
-  };
-
+  // This hook now primarily loads the default address for logged-in users.
+  // Guest address is handled locally on the checkout page.
   useEffect(() => {
     const loadAddress = async () => {
         setLoading(true);
@@ -53,7 +30,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
             const defaultUserAddress = userData.addresses?.find(a => a.isDefault) || userData.addresses?.[0];
             setAddressState(defaultUserAddress || null);
         } else {
-            setAddressState(getLocalAddress());
+            // For guests, we start with no address. It will be collected at checkout.
+            setAddressState(null);
         }
         setLoading(false);
     };
@@ -64,13 +42,11 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   }, [user, authLoading]);
 
 
-  const setAddress = useCallback((newAddress: Address) => {
+  const setAddress = useCallback((newAddress: Address | null) => {
     setAddressState(newAddress);
-    if (!user) {
-        saveLocalAddress(newAddress);
-    }
-    // For logged-in users, saving is handled by the component that calls this (e.g., AddressBook)
-  }, [user]);
+    // Saving logic is handled by the component that calls this.
+    // e.g., Checkout page for guests, AddressBook for logged-in users.
+  }, []);
 
   const value = {
       address,

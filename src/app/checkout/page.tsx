@@ -6,10 +6,9 @@ import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
-import { useLocation } from '@/hooks/use-location';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, doc, runTransaction, serverTimestamp, addDoc } from 'firebase/firestore';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import type { Order, Address } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -22,7 +21,6 @@ import { incrementUserStat } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { StoreClosedWarning } from '@/components/pages/checkout/StoreClosedWarning';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
-import { UnserviceableLocation } from '@/components/pages/checkout/UnserviceableLocation';
 import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
 import { verifyPayment } from '@/app/actions';
 import {
@@ -35,14 +33,15 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { DeliveryAddressForm } from '@/components/pages/checkout/DeliveryAddressForm';
 
 
 export default function CheckoutPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
-  const { address, loading: locationLoading } = useLocation();
   
+  const [address, setAddress] = useState<Address | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi'>('cod');
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -92,8 +91,8 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async (paymentDetails: { method: 'cod' | 'upi', transactionId?: string }) => {
-    if (deliveryCharge === null || !address) {
-      setPaymentError('Unserviceable location.');
+    if (deliveryCharge === null || !address || !address.phone) {
+      setPaymentError('Please provide a valid delivery address and phone number.');
       return;
     }
 
@@ -112,7 +111,7 @@ export default function CheckoutPage() {
           userId: user?.uid || 'guest',
           userName: user?.displayName || 'Guest User',
           userEmail: user?.email || '',
-          userPhone: address.phone || user?.phoneNumber || '',
+          userPhone: address.phone,
           createdAt: serverTimestamp(),
           deliveryAddress: deliveryAddressString,
           items: cart.map(item => ({
@@ -191,15 +190,11 @@ export default function CheckoutPage() {
   };
 
   const renderContent = () => {
-    if (!isClient || authLoading || locationLoading || (cart.length === 0 && !authLoading)) {
+    if (!isClient || authLoading || (cart.length === 0 && !authLoading)) {
       return <CheckoutPageSkeleton />;
     }
     
-    if (deliveryCharge === null) {
-        return <UnserviceableLocation />;
-    }
-
-    const canPlaceOrder = storeStatus.isOpen || scheduleForNextDay;
+    const canPlaceOrder = (storeStatus.isOpen || scheduleForNextDay) && deliveryCharge !== null;
     const isLoading = isPlacingOrder || isVerifying;
 
     return (
@@ -218,6 +213,8 @@ export default function CheckoutPage() {
           deliveryCharge={deliveryCharge}
           finalTotal={finalTotal}
         />
+        
+        <DeliveryAddressForm onAddressChange={setAddress} />
 
         <Card>
           <CardHeader>
@@ -234,8 +231,8 @@ export default function CheckoutPage() {
               className="space-y-4"
               disabled={isLoading}
             >
-              <Label htmlFor="cod" className={`flex items-center gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${canPlaceOrder && !isLoading ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
-                <RadioGroupItem value="cod" id="cod" disabled={!canPlaceOrder || isLoading} />
+              <Label htmlFor="cod" className={`flex items-center gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${!isLoading ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+                <RadioGroupItem value="cod" id="cod" disabled={isLoading} />
                 <div>
                   <p className="font-semibold">Cash on Delivery</p>
                   <p className="text-sm text-muted-foreground">Pay with cash when your order arrives.</p>
@@ -243,7 +240,7 @@ export default function CheckoutPage() {
               </Label>
               <UpiPayment 
                 paymentMethod={paymentMethod}
-                canPlaceOrder={canPlaceOrder}
+                canPlaceOrder={true}
                 finalTotal={finalTotal}
                 screenshotPreview={screenshotPreview}
                 screenshotFile={screenshotFile}

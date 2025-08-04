@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import * as React from 'react';
@@ -6,10 +7,8 @@ import { Search } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { cn } from '@/lib/utils';
-import { LocationPicker } from './location-picker';
 import { SearchDialog } from './SearchDialog';
 import { DesktopNav } from './DesktopNav';
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { Input } from './ui/input';
 import { useOnClickOutside } from '@/hooks/use-on-click-outside';
 import { useProducts } from '@/hooks/use-products';
@@ -19,6 +18,7 @@ import Fuse from 'fuse.js';
 import { ScrollArea } from './ui/scroll-area';
 import { ProductCard } from './product-card';
 import Link from 'next/link';
+import { DynamicDeliveryTime } from './DynamicDeliveryTime';
 
 const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProductClick: () => void }) => {
     const { products: allProducts, loading: isLoading } = useProducts();
@@ -119,7 +119,7 @@ export default function Header() {
                       <span className="font-headline text-base font-bold leading-none">
                           Sangma Megha Mart
                       </span>
-                      <LocationPicker />
+                      <DynamicDeliveryTime />
                     </div>
                 </Link>
             </div>
