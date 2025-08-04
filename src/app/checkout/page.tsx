@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -14,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Loader2, ChevronLeft, UserCheck, ShieldAlert } from 'lucide-react';
+import { Loader2, ChevronLeft, UserCheck, ShieldAlert, X } from 'lucide-react';
 import { incrementUserStat } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
@@ -30,6 +31,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { DialogClose } from '@radix-ui/react-dialog';
 import { DeliveryAddressForm } from '@/components/pages/checkout/DeliveryAddressForm';
 
 
@@ -61,7 +63,14 @@ export default function CheckoutPage() {
     }
   }, [isClient, cart.length, totalPrice, authLoading, router]);
 
-  const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, address), [totalPrice, address]);
+  const deliveryCharge = useMemo(() => {
+      // Ensure we have an address to calculate charge, otherwise it's a default fee.
+      // This is mainly for UI display before an address is entered.
+      if (!address || !address.region) {
+          return 50; 
+      }
+      return calculateDeliveryCharge(totalPrice, address);
+  }, [totalPrice, address]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
 
   const handleScreenshotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -252,6 +261,12 @@ export default function CheckoutPage() {
     <>
       <AlertDialog open={showGuestAlert} onOpenChange={setShowGuestAlert}>
         <AlertDialogContent>
+            <DialogClose asChild>
+                <button className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                </button>
+            </DialogClose>
             <AlertDialogHeader>
                 <AlertDialogTitle className="flex items-center gap-2">
                     <UserCheck /> Proceed as Guest?
