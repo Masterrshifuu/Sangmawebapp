@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -35,19 +34,20 @@ import Link from 'next/link';
 import { db, auth } from '@/lib/firebase';
 import {
   collection,
-  getDocs,
   Timestamp,
   query,
   where,
   onSnapshot,
 } from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
-import { format, addMinutes, differenceInMinutes } from 'date-fns';
+import { format, addMinutes, differenceInMinutes, formatRelative } from 'date-fns';
 import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
 import { DynamicDeliveryTime } from '../DynamicDeliveryTime';
 import { cancelOrder } from '@/app/actions';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { getStoreStatus } from '@/lib/datetime';
+import { Separator } from '../ui/separator';
 
 const OrderSummaryCard = ({ items, orderId }: { items: OrderItem[], orderId: string }) => {
   const firstItem = items[0];
@@ -220,11 +220,9 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
 
     const getSafeDate = (dateValue: any): Date => {
       if (!dateValue) return new Date();
-      // Check if it's a Firestore Timestamp
       if (typeof dateValue.toDate === 'function') {
         return dateValue.toDate();
       }
-      // Assume it's an ISO string or already a Date object
       return new Date(dateValue);
     };
 
@@ -309,10 +307,17 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     }
 
      if (order.status === 'Scheduled') {
+        const storeStatus = getStoreStatus();
+        const nextOpenTimeFormatted = storeStatus.nextOpenTime 
+            ? formatRelative(storeStatus.nextOpenTime, new Date())
+                .replace(/^./, (c) => c.toUpperCase()) + ` at ${format(storeStatus.nextOpenTime, 'p')}`
+            : 'next opening';
+
         return (
             <div className="p-4 rounded-lg bg-purple-100 text-purple-800 text-center space-y-1">
                 <p className="text-sm font-semibold flex items-center justify-center gap-2"><Clock />Order Scheduled</p>
                 <p className="text-lg font-bold">Will be delivered on next opening.</p>
+                <p className="text-xs pt-1">Shop opens: {nextOpenTimeFormatted}</p>
             </div>
         )
     }
@@ -344,17 +349,16 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
 
 const TrackingContent = () => {
     const [user, setUser] = useState<User | null>(null);
-    const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+    const [activeOrders, setActiveOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
-    const [open, setOpen] = useState(false);
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
         setUser(currentUser);
         if (!currentUser) {
             setLoading(false);
-            setActiveOrder(null);
+            setActiveOrders([]);
         }
         });
         return () => unsubscribe();
@@ -377,15 +381,15 @@ const TrackingContent = () => {
         
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             if (querySnapshot.empty) {
-                setActiveOrder(null);
+                setActiveOrders([]);
             } else {
-                const activeOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-                activeOrders.sort((a, b) => {
-                    const dateA = (a.createdAt as unknown as Timestamp).toDate();
-                    const dateB = (b.createdAt as unknown as Timestamp).toDate();
+                const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+                fetchedOrders.sort((a, b) => {
+                    const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date();
+                    const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date();
                     return dateB.getTime() - dateA.getTime();
                 });
-                setActiveOrder(activeOrders[0]);
+                setActiveOrders(fetchedOrders);
             }
             setLoading(false);
         }, (err) => {
@@ -410,12 +414,15 @@ const TrackingContent = () => {
                     <p className="font-bold">Error</p>
                     <p>{error}</p>
                 </div>
-            ) : activeOrder ? (
-              <>
-                <OrderStatusCard order={activeOrder} />
-                <TrackingTimeline status={activeOrder.status} />
-                <OrderSummaryCard items={activeOrder.items} orderId={activeOrder.id} />
-              </>
+            ) : activeOrders.length > 0 ? (
+                activeOrders.map((order, index) => (
+                    <div key={order.id} className="space-y-4">
+                        {index > 0 && <Separator className="my-6" />}
+                        <OrderStatusCard order={order} />
+                        <TrackingTimeline status={order.status} />
+                        <OrderSummaryCard items={order.items} orderId={order.id} />
+                    </div>
+                ))
             ) : (
               <NoActiveOrderCard />
             )}
