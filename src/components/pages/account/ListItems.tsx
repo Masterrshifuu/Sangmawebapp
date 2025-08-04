@@ -1,18 +1,17 @@
 
 'use client';
 
-import React from 'react';
+import React, { ComponentType } from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import { AccordionContent, AccordionTrigger } from '@/components/ui/accordion';
-import { useAuth } from '@/hooks/use-auth';
 import type { User } from 'firebase/auth';
 import type { UserData } from '@/lib/types';
 
 interface ListItemProps {
     icon: React.ElementType;
     label: string;
-    content?: React.ReactNode | React.ComponentType<{ user: User, userData: UserData }>;
+    content?: React.ReactNode | ComponentType<{ user: User, userData: UserData }>;
 }
 
 // For items that are part of an Accordion

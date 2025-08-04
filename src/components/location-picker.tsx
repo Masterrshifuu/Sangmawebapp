@@ -31,7 +31,10 @@ export function LocationPicker() {
             
             // Make all other addresses not default
             const updatedAddresses = existingAddresses.map(a => ({ ...a, isDefault: false }));
-            updatedAddresses.push(newAddress);
+            updatedAddresses.push({
+              ...newAddress,
+              isDefault: newAddress.isDefault ?? false
+            });
             
             await updateAddresses(user.uid, updatedAddresses);
             setAddress(newAddress); // Update context

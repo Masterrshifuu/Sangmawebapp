@@ -13,14 +13,21 @@ import { ProfileDetailsForm } from './ProfileDetailsForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
 import type { User as FirebaseUser } from 'firebase/auth';
 import type { UserData } from '@/lib/types';
-import type { ReactNode } from 'react';
+import type { ReactNode, ComponentType } from 'react';
 
 export interface NavItem {
     icon: React.ElementType;
     label: string;
     href?: string;
     onClick?: () => void;
-    content?: ReactNode | React.ComponentType<{ user: FirebaseUser, userData: UserData }>;
+    content?: ReactNode | ComponentType<{ user: FirebaseUser, userData: UserData }>;
+}
+
+export interface LinkNavItem {
+    icon: React.ElementType;
+    label: string;
+    href?: string;
+    content?: ReactNode;
 }
   
 export const getLegalItems = (): NavItem[] => [
@@ -29,7 +36,7 @@ export const getLegalItems = (): NavItem[] => [
     { icon: Headphones, label: 'Help Center', content: 'For help, please contact us at support@sangma.com' },
 ];
   
-export const myOrdersItem: NavItem = { 
+export const myOrdersItem: LinkNavItem = { 
     icon: Package, 
     label: 'My Orders', 
     href: '/my-orders'
