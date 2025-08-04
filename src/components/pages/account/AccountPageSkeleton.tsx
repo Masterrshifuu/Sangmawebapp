@@ -1,10 +1,10 @@
 
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const AccountPageSkeleton = () => (
     <>
-        <Header />
+        <SearchHeader />
         <main className="flex-1 pb-16 md:pb-0">
              <div className="p-6 bg-accent/20">
                 <div className="flex items-center gap-4">

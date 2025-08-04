@@ -1,10 +1,11 @@
-import Header from '@/components/header';
+
+import SearchHeader from '@/components/SearchHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function Loading() {
   return (
     <>
-      <Header />
+      <SearchHeader />
       <main className="container mx-auto px-4 py-8">
         <Skeleton className="h-10 w-1/3 mb-6" />
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

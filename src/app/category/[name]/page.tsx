@@ -1,6 +1,7 @@
+
 import { notFound } from 'next/navigation';
 import { getProducts } from '@/lib/products';
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import { ProductCard } from '@/components/product-card';
 
 function decodeCategoryName(slug: string): string {
@@ -43,7 +44,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <>
-      <Header />
+      <SearchHeader />
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold font-headline mb-6">{displayCategoryName}</h1>
         {categoryProducts.length > 0 ? (

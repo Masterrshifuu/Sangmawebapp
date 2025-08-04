@@ -2,7 +2,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { getProducts } from '@/lib/products';
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import { Suspense } from 'react';
 import Loading from './loading';
 
@@ -49,7 +49,7 @@ async function CategoriesList() {
 export default function CategoriesPage() {
   return (
     <>
-        <Header />
+        <SearchHeader />
         <main className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold font-headline mb-6">All Categories</h1>
             <Suspense fallback={<Loading />}>

@@ -3,9 +3,7 @@
 
 import * as React from 'react';
 import { Search } from 'lucide-react';
-import Image from 'next/image';
-import { useState, useEffect, useRef, Suspense } from 'react';
-import { cn } from '@/lib/utils';
+import { useState, useRef, Suspense } from 'react';
 import { SearchDialog } from './SearchDialog';
 import { DesktopNav } from './DesktopNav';
 import { Input } from './ui/input';
@@ -16,8 +14,6 @@ import type { Product } from '@/lib/types';
 import Fuse from 'fuse.js';
 import { ScrollArea } from './ui/scroll-area';
 import { ProductCard } from './product-card';
-import Link from 'next/link';
-import { DynamicDeliveryTime } from './DynamicDeliveryTime';
 
 const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProductClick: () => void }) => {
     const { products: allProducts, loading: isLoading } = useProducts();
@@ -30,7 +26,7 @@ const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProd
         minMatchCharLength: 2,
     }), [allProducts]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (debouncedQuery.trim() === '') {
             setSearchResults([]);
             return;
@@ -69,47 +65,18 @@ const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProd
 };
 
 
-export default function Header() {
+export default function SearchHeader() {
   const [query, setQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useOnClickOutside(searchRef, () => setIsSearchFocused(false));
 
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   return (
     <header className="sticky top-0 z-50 bg-[#faf368]">
-        <div className={cn(
-            "container mx-auto px-4 pt-3 transition-all duration-300 overflow-hidden",
-            isScrolled ? 'h-0 py-0' : 'h-[68px]'
-        )}>
-            <Link href="/" className="flex items-center gap-3">
-                <Image
-                    src="/logo.png"
-                    alt="Sangma Megha Mart Logo"
-                    width={60}
-                    height={60}
-                    priority
-                />
-                <div className="flex flex-col justify-center gap-1 flex-grow pt-1">
-                    <span className="font-headline text-lg font-bold leading-none">
-                        Sangma Megha Mart
-                    </span>
-                    <DynamicDeliveryTime className="text-muted-foreground" />
-                </div>
-            </Link>
-        </div>
-      <div className="bg-[#faf368] relative">
+      <div className="relative">
         <div className="container mx-auto px-4 py-3">
           {/* Search section */}
           <div ref={searchRef}>
@@ -150,12 +117,6 @@ export default function Header() {
           </div>
         )}
       </div>
-        {/* Desktop Navigation */}
-        <div className={cn("hidden md:block bg-background/20 backdrop-blur-sm", isScrolled && "border-b")}>
-            <div className="container mx-auto px-4">
-                <DesktopNav />
-            </div>
-        </div>
     </header>
   );
 }

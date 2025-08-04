@@ -3,7 +3,7 @@
 import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order } from '@/lib/types';
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import { notFound } from 'next/navigation';
 import { OrderCard } from '@/components/pages/my-orders/OrderCard';
 
@@ -43,7 +43,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
 
     return (
         <>
-            <Header />
+            <SearchHeader />
             <main className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold font-headline mb-6">Order Details</h1>
                 <div className="max-w-2xl mx-auto">

@@ -1,13 +1,13 @@
 
 import { Bot } from 'lucide-react';
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 
 export default function AiChatPage() {
   return (
     <>
-      <Header />
+      <SearchHeader />
       <main className="flex flex-col items-center justify-center min-h-[calc(100vh-200px)] text-center p-4">
         <Bot className="w-16 h-16 mb-4 text-muted-foreground" />
         <h1 className="text-2xl font-bold">AI Chat Under Construction</h1>

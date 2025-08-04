@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import type { Order } from '@/lib/types';
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PackageOpen } from 'lucide-react';
@@ -74,7 +74,7 @@ export default function MyOrdersPage() {
   if (!user) {
     return (
         <>
-            <Header />
+            <SearchHeader />
             <main className="container mx-auto px-4 py-8">
                 <div className="text-center text-muted-foreground py-16">
                     <PackageOpen className="mx-auto h-16 w-16 mb-4" />
@@ -91,7 +91,7 @@ export default function MyOrdersPage() {
 
   return (
     <>
-      <Header />
+      <SearchHeader />
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold font-headline mb-6">My Orders</h1>
         

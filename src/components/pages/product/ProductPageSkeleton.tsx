@@ -1,10 +1,10 @@
 
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const ProductPageSkeleton = () => (
     <>
-        <Header />
+        <SearchHeader />
         <main className="container mx-auto px-4 py-8">
             <div className="grid md:grid-cols-2 gap-12">
                 <div>
