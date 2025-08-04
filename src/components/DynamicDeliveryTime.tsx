@@ -53,7 +53,7 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
     }
 
     return (
-        <div className={cn("flex items-center gap-2 text-sm", deliveryInfo.isEstimate ? "text-muted-foreground" : "text-[#5D4037] font-medium", className)}>
+        <div className={cn("flex items-center gap-2 text-sm", deliveryInfo.isEstimate ? "text-muted-foreground" : "text-red-600 font-medium", className)}>
             <Clock className="w-4 h-4" />
             <span>{deliveryInfo.text}</span>
         </div>
