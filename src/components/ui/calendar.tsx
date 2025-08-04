@@ -68,8 +68,7 @@ function Calendar({
 Calendar.displayName = "Calendar"
 
 function CustomCaption() {
-  const { goToMonth, nextMonth, previousMonth } = useNavigation();
-  const { currentMonth } = useDayPicker();
+  const { goToMonth, nextMonth, previousMonth, currentMonth } = useNavigation();
   
   const handleMonthChange = (value: string) => {
     const month = new Date(value);

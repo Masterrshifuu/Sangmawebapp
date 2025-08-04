@@ -49,8 +49,13 @@ export const AccountSection = ({ title, items }: AccountSectionProps) => {
     );
 }
 
+interface LegalSectionProps {
+    title: string;
+    items: LinkNavItem[];
+}
+
 // Section that renders simple links, no accordion
-export const LegalSection = ({ title, items }: AccountSectionProps) => (
+export const LegalSection = ({ title, items }: LegalSectionProps) => (
      <section>
         <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">{title}</h2>
         <div className="space-y-2">
