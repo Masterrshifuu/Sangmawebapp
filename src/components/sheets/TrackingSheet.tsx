@@ -310,7 +310,7 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
         const storeStatus = getStoreStatus();
         const nextOpenTimeFormatted = storeStatus.nextOpenTime 
             ? formatRelative(storeStatus.nextOpenTime, new Date())
-                .replace(/^./, (c) => c.toUpperCase()) + ` at ${format(storeStatus.nextOpenTime, 'p')}`
+                .replace(/^./, (c) => c.toUpperCase())
             : 'next opening';
 
         return (
