@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -16,10 +15,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Loader2, ChevronLeft, UserCheck, ShieldAlert } from 'lucide-react';
-import { getStoreStatus } from '@/lib/datetime';
 import { incrementUserStat } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
-import { StoreClosedWarning } from '@/components/pages/checkout/StoreClosedWarning';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
 import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
 import { verifyPayment } from '@/app/actions';
@@ -45,8 +42,6 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi'>('cod');
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
-  const [storeStatus, setStoreStatus] = useState(getStoreStatus());
-  const [scheduleForNextDay, setScheduleForNextDay] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
@@ -55,16 +50,6 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     setIsClient(true);
-    const currentStatus = getStoreStatus();
-    setStoreStatus(currentStatus);
-    if (!currentStatus.isOpen) {
-        setScheduleForNextDay(true);
-    }
-
-    const statusInterval = setInterval(() => {
-        setStoreStatus(getStoreStatus());
-    }, 1000 * 30);
-    return () => clearInterval(statusInterval);
   }, []);
   
   const MINIMUM_ORDER_VALUE = 150;
@@ -97,11 +82,6 @@ export default function CheckoutPage() {
       setPaymentError('Please provide a valid delivery address and phone number.');
       return;
     }
-
-    if (!storeStatus.isOpen && !scheduleForNextDay) {
-      setPaymentError('Store is currently closed and order not scheduled.');
-      return;
-    }
     
     if (totalPrice < MINIMUM_ORDER_VALUE) {
         setPaymentError(`Minimum order value is ₹${MINIMUM_ORDER_VALUE}.`);
@@ -112,8 +92,6 @@ export default function CheckoutPage() {
     const deliveryAddressString = `${address.area}${address.landmark ? ', ' + address.landmark : ''}, ${address.region}`;
 
     try {
-        const isScheduled = !storeStatus.isOpen;
-
         const orderData: Omit<Order, 'id'> = {
           userId: user?.uid || 'guest',
           userName: user?.displayName || 'Guest User',
@@ -130,9 +108,9 @@ export default function CheckoutPage() {
           })),
           paymentMethod: paymentDetails.method,
           paymentTransactionId: paymentDetails.transactionId,
-          status: isScheduled ? 'Scheduled' : 'Pending',
+          status: 'Pending',
           totalAmount: finalTotal,
-          active: !isScheduled,
+          active: true,
           extraTimeInMinutes: 0,
           extraReasons: []
         };
@@ -201,19 +179,11 @@ export default function CheckoutPage() {
       return <CheckoutPageSkeleton />;
     }
     
-    const canPlaceOrder = (storeStatus.isOpen || scheduleForNextDay) && deliveryCharge !== null;
+    const canPlaceOrder = deliveryCharge !== null;
     const isLoading = isPlacingOrder || isVerifying;
 
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
-        {!storeStatus.isOpen && (
-          <StoreClosedWarning
-            message={storeStatus.message}
-            scheduleForNextDay={scheduleForNextDay}
-            setScheduleForNextDay={setScheduleForNextDay}
-          />
-        )}
-        
         <OrderSummary
           cart={cart}
           totalPrice={totalPrice}
