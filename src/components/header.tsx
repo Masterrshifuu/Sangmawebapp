@@ -111,7 +111,7 @@ export default function Header() {
                 </Link>
             </div>
         </div>
-      <div className="bg-[#faf368] relative border-b border-t">
+      <div className="bg-[#faf368] relative">
         <div className="container mx-auto px-4 py-3">
           {/* Search section */}
           <div ref={searchRef}>
