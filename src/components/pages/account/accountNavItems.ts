@@ -30,7 +30,7 @@ export interface LinkNavItem {
     content?: ReactNode;
 }
   
-export const getLegalItems = (): NavItem[] => [
+export const getLegalItems = (): LinkNavItem[] => [
     { icon: FileText, label: 'Terms & Conditions', href: '/terms' },
     { icon: RefreshCw, label: 'Refund & Cancellation Policy', href: '/refund-policy' },
     { icon: Headphones, label: 'Help Center', content: 'For help, please contact us at support@sangma.com' },

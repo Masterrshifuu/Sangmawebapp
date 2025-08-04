@@ -7,6 +7,7 @@ import { ChevronRight } from 'lucide-react';
 import { AccordionContent, AccordionTrigger } from '@/components/ui/accordion';
 import type { User } from 'firebase/auth';
 import type { UserData } from '@/lib/types';
+import { NavItem } from './accountNavItems';
 
 interface ListItemProps {
     icon: React.ElementType;
