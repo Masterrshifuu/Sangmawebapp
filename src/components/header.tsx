@@ -92,37 +92,22 @@ const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProd
 
 
 export default function Header() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  
-  // State for search functionality
   const [query, setQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Close search when clicking outside
   useOnClickOutside(searchRef, () => setIsSearchFocused(false));
-
-  useEffect(() => {
-    const handleScroll = () => {
-        const currentScrollY = window.scrollY;
-        setIsScrolled(currentScrollY > 10);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-transparent">
-      <div className="bg-[#faf368] backdrop-blur-sm relative">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 py-2">
-            <Link href="/" className="flex items-center gap-3">
+    <header className="sticky top-0 z-50">
+      <div className="bg-[#faf368] backdrop-blur-sm relative border-b">
+        <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
+          
+          {/* Top section: Logo, Title, Location, Time */}
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex-shrink-0">
               <Image
                 src="/logo.png"
                 alt="Sangma Megha Mart Logo"
@@ -131,8 +116,8 @@ export default function Header() {
                 priority
               />
             </Link>
-            <div className="flex flex-col justify-center gap-1">
-              <span className="font-headline text-base font-bold leading-none">
+            <div className="flex flex-col justify-center gap-1 flex-grow">
+              <span className="font-headline text-lg font-bold leading-none">
                 Sangma Megha Mart
               </span>
               <LocationDisplay />
@@ -140,7 +125,8 @@ export default function Header() {
             </div>
           </div>
           
-          <div className="py-2" ref={searchRef}>
+          {/* Search section */}
+          <div ref={searchRef}>
               <SearchDialog>
                   {/* This child is the trigger for the mobile drawer */}
                   <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
@@ -178,19 +164,12 @@ export default function Header() {
           </div>
         )}
 
-      </div>
-      
-      <div 
-        className={cn(
-          "grid transition-all duration-300 ease-in-out",
-          isScrolled ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-        )}
-      >
-          <div className="overflow-hidden bg-background/20 backdrop-blur-sm">
+        {/* Desktop Navigation */}
+        <div className="hidden md:block bg-background/20 backdrop-blur-sm border-t">
             <div className="container mx-auto px-4">
-              <DesktopNav />
+                <DesktopNav />
             </div>
-          </div>
+        </div>
       </div>
     </header>
   );
