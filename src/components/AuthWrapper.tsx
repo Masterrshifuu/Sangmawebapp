@@ -1,7 +1,7 @@
 
 'use client';
 
-import { AuthProvider } from '@/hooks/use-auth';
+import { AuthContextProvider } from '@/hooks/use-auth';
 import { CartProvider } from '@/hooks/use-cart';
 import { LocationProvider } from '@/hooks/use-location';
 import { ProductsProvider } from '@/hooks/use-products';
@@ -9,14 +9,14 @@ import { ReactNode } from 'react';
 
 export function AuthWrapper({ children }: { children: ReactNode }) {
   return (
-    <AuthProvider>
+    <AuthContextProvider>
       <ProductsProvider>
         <LocationProvider>
             <CartProvider>
                 {children}
-            </Cart.Provider>
+            </CartProvider>
         </LocationProvider>
       </ProductsProvider>
-    </AuthProvider>
+    </AuthContextProvider>
   );
 }
