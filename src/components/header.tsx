@@ -160,7 +160,12 @@ export default function Header() {
         )}
       </div>
       {/* Desktop Navigation */}
-      <div className="hidden md:block bg-[#faf368]">
+      <div
+        className={cn(
+          'hidden md:block bg-background/80 backdrop-blur-sm border-b transition-all duration-300',
+          isScrolled ? 'h-auto' : 'h-0 overflow-hidden'
+        )}
+      >
         <div className="container mx-auto px-4">
             <DesktopNav />
         </div>
