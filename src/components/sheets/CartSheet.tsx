@@ -23,7 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
-const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
+const CartContent = ({ onCheckout, isPopover = false }: { onCheckout: () => void, isPopover?: boolean }) => {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { address } = useLocation();
   const router = useRouter();
@@ -35,6 +35,14 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
 
   const isServiceable = deliveryCharge !== null;
   const finalTotal = isServiceable ? totalPrice + (deliveryCharge ?? 0) : totalPrice;
+
+  const cartItemsList = (
+    <div className="p-4 space-y-4">
+      {cart.map((item) => (
+        <CartItemCard key={item.product.id} item={item} />
+      ))}
+    </div>
+  );
 
   if (cart.length === 0) {
     return (
@@ -52,13 +60,16 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
 
   return (
     <>
-      <ScrollArea className="flex-1">
-        <div className="p-4 space-y-4">
-          {cart.map((item) => (
-            <CartItemCard key={item.product.id} item={item} />
-          ))}
-        </div>
-      </ScrollArea>
+      {isPopover ? (
+          <ScrollArea className="flex-1 max-h-[40vh]">
+            {cartItemsList}
+          </ScrollArea>
+      ) : (
+        <ScrollArea className="flex-1">
+          {cartItemsList}
+        </ScrollArea>
+      )}
+
       <div className="p-4 border-t bg-background mt-auto">
         <div className="w-full space-y-2">
           <div className="flex justify-between text-muted-foreground">
@@ -122,11 +133,11 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
     return (
       <Popover open={isOpen} onOpenChange={setIsOpen}>
         <PopoverTrigger asChild>{children}</PopoverTrigger>
-        <PopoverContent className="w-96 p-0 flex flex-col max-h-[70vh]">
+        <PopoverContent className="w-96 p-0 flex flex-col max-h-[80vh] bg-card">
           <div className="p-4 border-b">
             <h3 className="font-semibold text-lg">Your Cart ({totalItems})</h3>
           </div>
-          <CartContent onCheckout={handleProceedToCheckout} />
+          <CartContent onCheckout={handleProceedToCheckout} isPopover={true} />
         </PopoverContent>
       </Popover>
     )
