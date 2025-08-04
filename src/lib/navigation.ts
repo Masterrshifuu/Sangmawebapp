@@ -9,7 +9,7 @@ import { CategorySheet } from '@/components/sheets/CategorySheet';
 
 export const navItems = [
   { href: '/', label: 'Home', icon: Home, isLink: true },
-  { label: 'Categories', icon: LayoutGrid, component: CategorySheet },
+  { href: '/categories', label: 'Categories', icon: LayoutGrid, isLink: true, component: CategorySheet },
   { label: 'Tracking', icon: Truck, component: TrackingSheet },
   { href: '/ai-chat', label: 'AI Chat', icon: Sparkles, isLink: true },
   { label: 'Cart', icon: ShoppingCart, component: CartSheet },

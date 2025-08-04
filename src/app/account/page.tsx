@@ -13,6 +13,7 @@ import { AccountSection, LegalSection } from '@/components/pages/account/Account
 import { LinkListItem } from '@/components/pages/account/ListItems';
 import { getLegalItems, getGeneralItems, getSecurityItems, myOrdersItem } from '@/components/pages/account/accountNavItems';
 import Link from 'next/link';
+import SearchHeader from '@/components/SearchHeader';
 
 
 export default function AccountPage() {
@@ -35,9 +36,8 @@ export default function AccountPage() {
   
   const legalItems = getLegalItems();
   
-  // A simple header for the account page
   const AccountHeader = ({ title }: { title: string }) => (
-    <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
+    <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px] md:hidden">
         <Button variant="ghost" size="icon" asChild>
             <Link href="/" aria-label="Go back home">
                 <ChevronLeft />
@@ -52,6 +52,7 @@ export default function AccountPage() {
     // Logged-out view
     return (
         <>
+            <SearchHeader />
             <AccountHeader title="My Account" />
             <main className="flex-1 pb-24 md:pb-0 bg-background">
                 <div className="p-6 text-center" style={{ backgroundColor: '#faf368' }}>
@@ -79,6 +80,7 @@ export default function AccountPage() {
 
   return (
     <>
+      <SearchHeader />
       <AccountHeader title="My Account" />
       <main className="flex-1 pb-24 md:pb-0 bg-background">
         <div className="p-6" style={{ backgroundColor: '#faf368' }}>

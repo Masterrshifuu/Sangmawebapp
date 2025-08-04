@@ -10,6 +10,13 @@ import {
   DrawerTrigger,
   DrawerClose,
 } from '@/components/ui/drawer';
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import {
   ChevronLeft,
@@ -38,6 +45,7 @@ import { onAuthStateChanged, type User } from 'firebase/auth';
 import Logo from '../logo';
 import { DynamicDeliveryTime } from '../DynamicDeliveryTime';
 import { cancelOrder } from '@/app/actions';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
 const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
   const firstItem = items[0];
@@ -309,82 +317,64 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     )
 };
 
+const TrackingContent = () => {
+    const [user, setUser] = useState<User | null>(null);
+    const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [open, setOpen] = useState(false);
 
-export function TrackingSheet({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [activeOrder, setActiveOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      if (!currentUser) {
-        setLoading(false);
-        setActiveOrder(null);
-      }
-    });
-    return () => unsubscribe();
-  }, []);
-  
-  useEffect(() => {
-    if (!open || !user) {
-        if (!user) setLoading(false);
-        return;
-    }
-    
-    setLoading(true);
-
-    const ordersRef = collection(db, 'orders');
-    const q = query(
-        ordersRef, 
-        where('userId', '==', user.uid), 
-        where('active', '==', true)
-    );
-      
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        if (querySnapshot.empty) {
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        if (!currentUser) {
+            setLoading(false);
             setActiveOrder(null);
-        } else {
-            const activeOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-            activeOrders.sort((a, b) => {
-                const dateA = (a.createdAt as unknown as Timestamp).toDate();
-                const dateB = (b.createdAt as unknown as Timestamp).toDate();
-                return dateB.getTime() - dateA.getTime();
-            });
-            setActiveOrder(activeOrders[0]);
         }
-        setLoading(false);
-    }, (err) => {
-        console.error('Error with real-time order listener:', err);
-        setError('An error occurred while tracking your order.');
-        setLoading(false);
-    });
+        });
+        return () => unsubscribe();
+    }, []);
+    
+    useEffect(() => {
+        if (!user) {
+            if (!user) setLoading(false);
+            return;
+        }
+        
+        setLoading(true);
 
-    return () => unsubscribe();
+        const ordersRef = collection(db, 'orders');
+        const q = query(
+            ordersRef, 
+            where('userId', '==', user.uid), 
+            where('active', '==', true)
+        );
+        
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+            if (querySnapshot.empty) {
+                setActiveOrder(null);
+            } else {
+                const activeOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+                activeOrders.sort((a, b) => {
+                    const dateA = (a.createdAt as unknown as Timestamp).toDate();
+                    const dateB = (b.createdAt as unknown as Timestamp).toDate();
+                    return dateB.getTime() - dateA.getTime();
+                });
+                setActiveOrder(activeOrders[0]);
+            }
+            setLoading(false);
+        }, (err) => {
+            console.error('Error with real-time order listener:', err);
+            setError('An error occurred while tracking your order.');
+            setLoading(false);
+        });
 
-  }, [open, user]);
+        return () => unsubscribe();
 
+    }, [user]);
 
-  return (
-    <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent className="h-[85vh] flex flex-col p-0">
-        <DrawerHeader className="p-4 pt-4 text-center flex items-center justify-between border-b">
-          <DrawerClose asChild>
-            <Button variant="ghost" size="icon" className="md:flex hidden">
-              <ChevronLeft />
-              <span className="sr-only">Back</span>
-            </Button>
-          </DrawerClose>
-          <DrawerTitle className="flex-1 text-center">
-            Track Your Order
-          </DrawerTitle>
-          <div className="w-10 md:block hidden" />
-        </DrawerHeader>
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 space-y-6">
+    return (
+        <div className="p-4 space-y-6">
             {loading ? (
                 <div className="flex flex-col justify-center items-center p-8 space-y-4">
                     <Logo className="animate-pulse" />
@@ -404,9 +394,51 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
             ) : (
               <NoActiveOrderCard />
             )}
-          </div>
-        </main>
-      </DrawerContent>
-    </Drawer>
-  );
+        </div>
+    )
+}
+
+
+export function TrackingSheet({ children }: { children: React.ReactNode }) {
+    const [open, setOpen] = useState(false);
+    const isDesktop = useMediaQuery("(min-width: 768px)");
+
+    if (isDesktop) {
+        return (
+            <Sheet open={open} onOpenChange={setOpen}>
+                <SheetTrigger asChild>{children}</SheetTrigger>
+                <SheetContent size="sm" className="p-0 flex flex-col">
+                    <SheetHeader className="p-4 border-b">
+                        <SheetTitle>Track Your Order</SheetTitle>
+                    </SheetHeader>
+                    <main className="flex-1 overflow-y-auto">
+                        <TrackingContent />
+                    </main>
+                </SheetContent>
+            </Sheet>
+        );
+    }
+    
+    return (
+        <Drawer open={open} onOpenChange={setOpen}>
+            <DrawerTrigger asChild>{children}</DrawerTrigger>
+            <DrawerContent className="h-[85vh] flex flex-col p-0">
+                <DrawerHeader className="p-4 pt-4 text-center flex items-center justify-between border-b">
+                    <DrawerClose asChild>
+                        <Button variant="ghost" size="icon" className="md:flex hidden">
+                        <ChevronLeft />
+                        <span className="sr-only">Back</span>
+                        </Button>
+                    </DrawerClose>
+                    <DrawerTitle className="flex-1 text-center">
+                        Track Your Order
+                    </DrawerTitle>
+                    <div className="w-10 md:block hidden" />
+                </DrawerHeader>
+                <main className="flex-1 overflow-y-auto">
+                    <TrackingContent />
+                </main>
+            </DrawerContent>
+        </Drawer>
+    );
 }
