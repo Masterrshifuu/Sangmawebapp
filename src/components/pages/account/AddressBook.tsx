@@ -21,7 +21,7 @@ const addressSchema = z.object({
   area: z.string().min(3, 'Area is required'),
   landmark: z.string().optional(),
   region: z.enum(['North Tura', 'South Tura', 'Tura NEHU']),
-  phone: z.string().regex(/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number.'),
+  phone: z.string().regex(/^\+?[1-9]\d{9,14}$/, 'Please enter a valid phone number.'),
 });
 
 const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave: (data: Address) => void; onCancel: () => void; }) => {
@@ -47,7 +47,7 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg bg-secondary/30 mt-4">
         <FormField control={form.control} name="area" render={({ field }) => (
-            <FormItem><FormLabel>Area</FormLabel><FormControl><Input placeholder="e.g., Chandmari" {...field} /></FormControl><FormMessage /></FormItem>
+            <FormItem><FormLabel>Area/Locality</FormLabel><FormControl><Input placeholder="e.g., Chandmari" {...field} /></FormControl><FormMessage /></FormItem>
         )} />
         <FormField control={form.control} name="landmark" render={({ field }) => (
             <FormItem><FormLabel>Landmark (Optional)</FormLabel><FormControl><Input placeholder="e.g., Near Traffic Point" {...field} /></FormControl><FormMessage /></FormItem>
@@ -56,7 +56,7 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
             <FormItem>
                 <FormLabel>Region</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                    <FormControl><SelectTrigger><SelectValue placeholder="Select a region" /></SelectTrigger></FormControl>
                     <SelectContent>
                         <SelectItem value="North Tura">North Tura</SelectItem>
                         <SelectItem value="South Tura">South Tura</SelectItem>

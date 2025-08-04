@@ -33,30 +33,43 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
   const { user } = useAuth();
   const { address: defaultAddress } = useLocation();
 
-  const { register, control, formState: { errors } } = useForm<AddressFormValues>({
+  const { register, control, formState: { errors }, setValue } = useForm<AddressFormValues>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
-        area: defaultAddress?.area || '',
-        landmark: defaultAddress?.landmark || '',
-        region: defaultAddress?.region,
-        phone: defaultAddress?.phone || user?.phoneNumber || '',
+        area: '',
+        landmark: '',
+        region: undefined,
+        phone: '',
     },
   });
 
   const watchedValues = useWatch({ control });
 
+  // Pre-fill form when default address loads
   useEffect(() => {
-    const { success } = addressSchema.safeParse(watchedValues);
+    if (defaultAddress) {
+        setValue('area', defaultAddress.area);
+        setValue('landmark', defaultAddress.landmark || '');
+        setValue('region', defaultAddress.region);
+        setValue('phone', defaultAddress.phone);
+    } else if (user?.phoneNumber) {
+        setValue('phone', user.phoneNumber);
+    }
+  }, [defaultAddress, user, setValue]);
+
+
+  useEffect(() => {
+    const { success, data } = addressSchema.safeParse(watchedValues);
     if (success) {
       onAddressChange({
-        id: 'checkout-address',
-        isDefault: false,
-        ...watchedValues as AddressFormValues,
+        id: defaultAddress?.id || 'checkout-address',
+        isDefault: defaultAddress?.isDefault || false,
+        ...data,
       });
     } else {
       onAddressChange(null);
     }
-  }, [watchedValues, onAddressChange]);
+  }, [watchedValues, onAddressChange, defaultAddress]);
 
   return (
     <Card>
@@ -76,7 +89,10 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
         </div>
         <div className="space-y-1">
           <Label>Region</Label>
-          <Select onValueChange={(value) => register('region').onChange({ target: { name: 'region', value }})} defaultValue={defaultAddress?.region}>
+          <Select 
+            value={watchedValues.region}
+            onValueChange={(value) => setValue('region', value as any, { shouldValidate: true })}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Select a region" />
             </SelectTrigger>

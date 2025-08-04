@@ -19,6 +19,8 @@ export async function updateName(newName: string) {
     }
     try {
         await updateProfile(user, { displayName: newName });
+        const userDocRef = doc(db, 'users', user.uid);
+        await updateDoc(userDocRef, { displayName: newName });
         return { success: true };
     } catch (error: any) {
         return { success: false, error: error.message };
