@@ -105,8 +105,11 @@ const TrackingTimeline = ({ status }: { status: string }) => {
    if (normalizedStatus === 'Scheduled') {
     return (
         <div className="p-4 rounded-lg border bg-purple-50 text-purple-800 text-center">
-            <h3 className="font-semibold">Order Scheduled</h3>
-            <p className="text-sm">Your order is scheduled and will begin processing at the next opening time.</p>
+            <div className="flex items-center justify-center gap-2">
+                <Clock className="w-5 h-5" />
+                <h3 className="font-semibold">Order Scheduled</h3>
+            </div>
+            <p className="text-sm mt-1">Your order will be processed when the store opens.</p>
         </div>
     )
   }
@@ -217,9 +220,11 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
 
     const getSafeDate = (dateValue: any): Date => {
       if (!dateValue) return new Date();
+      // Check if it's a Firestore Timestamp
       if (typeof dateValue.toDate === 'function') {
         return dateValue.toDate();
       }
+      // Assume it's an ISO string or already a Date object
       return new Date(dateValue);
     };
 
@@ -250,7 +255,7 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     }, [order]);
 
     useEffect(() => {
-        if (order.status === 'Delivered' || order.status === 'Cancelled') {
+        if (order.status === 'Delivered' || order.status === 'Cancelled' || order.status === 'Scheduled') {
             return;
         }
         calculateTimeLeft();
@@ -299,6 +304,15 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
             <div className="p-4 rounded-lg bg-red-100 text-red-800 text-center space-y-1">
                 <p className="text-sm font-semibold flex items-center justify-center gap-2"><XCircle />Order Cancelled</p>
                 <p className="text-lg font-bold">This order was cancelled.</p>
+            </div>
+        )
+    }
+
+     if (order.status === 'Scheduled') {
+        return (
+            <div className="p-4 rounded-lg bg-purple-100 text-purple-800 text-center space-y-1">
+                <p className="text-sm font-semibold flex items-center justify-center gap-2"><Clock />Order Scheduled</p>
+                <p className="text-lg font-bold">Will be delivered on next opening.</p>
             </div>
         )
     }
