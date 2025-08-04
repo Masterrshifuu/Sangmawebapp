@@ -1,6 +1,7 @@
 
 'use client';
 
+import * as React from 'react';
 import { Search } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useRef, Suspense } from 'react';

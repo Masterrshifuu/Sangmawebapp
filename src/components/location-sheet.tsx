@@ -34,7 +34,7 @@ export default function LocationSheet({ open, onOpenChange, address, onSave }: L
   const { user } = useAuth();
   const [area, setArea] = useState('');
   const [landmark, setLandmark] = useState('');
-  const [region, setRegion] = useState('South Tura');
+  const [region, setRegion] = useState<Address['region']>('South Tura');
   const [phone, setPhone] = useState('');
 
   useEffect(() => {

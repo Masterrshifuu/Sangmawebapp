@@ -11,13 +11,16 @@ import {
 import { AddressBook } from './AddressBook';
 import { ProfileDetailsForm } from './ProfileDetailsForm';
 import { ChangePasswordForm } from './ChangePasswordForm';
+import type { User as FirebaseUser } from 'firebase/auth';
+import type { UserData } from '@/lib/types';
+import type { ReactNode } from 'react';
 
 export interface NavItem {
     icon: React.ElementType;
     label: string;
     href?: string;
     onClick?: () => void;
-    content?: React.ReactNode;
+    content?: ReactNode | React.ComponentType<{ user: FirebaseUser, userData: UserData }>;
 }
   
 export const getLegalItems = (): NavItem[] => [

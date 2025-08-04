@@ -21,7 +21,7 @@ export const OrderSummary = ({ cart, totalPrice, deliveryCharge, finalTotal }: O
                     {cart.map(item => (
                         <div key={item.product.id} className="flex justify-between">
                             <span className="text-muted-foreground flex-1 truncate pr-2">{item.product.name} x {item.quantity}</span>
-                            <span>₹{(item.product.mrp * item.quantity).toFixed(2)}</span>
+                            <span>₹{((item.product.mrp || 0) * item.quantity).toFixed(2)}</span>
                         </div>
                     ))}
                 </div>

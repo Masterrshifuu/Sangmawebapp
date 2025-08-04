@@ -9,6 +9,7 @@ import {
   updateDoc,
   increment,
   serverTimestamp,
+  FieldValue,
 } from 'firebase/firestore';
 import type { UserData, CartItem } from './types';
 
@@ -43,7 +44,7 @@ export async function getUserData(uid: string): Promise<UserData> {
       phoneNumber: null,
     };
     await setDoc(userDocRef, newUserData);
-    return { ...newUserData, lastLogin: new Date() }; // Return with JS Date for immediate use
+    return { ...newUserData, lastLogin: newUserData.lastLogin }; // Return with FieldValue for immediate use
   }
 }
 
