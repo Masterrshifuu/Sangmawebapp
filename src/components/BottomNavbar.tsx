@@ -7,13 +7,18 @@ import { cn } from '@/lib/utils';
 import { useCart } from '@/hooks/use-cart';
 import { navItems } from '@/lib/navigation';
 import { useState, useEffect } from 'react';
+import { useAuth } from '@/hooks/use-auth';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 
 export function BottomNavbar() {
   const pathname = usePathname();
+  const { user } = useAuth();
   const { totalItems } = useCart();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [activeOrderCount, setActiveOrderCount] = useState(0);
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -35,6 +40,26 @@ export function BottomNavbar() {
       };
     }
   }, [lastScrollY]);
+  
+  useEffect(() => {
+    if (!user) {
+      setActiveOrderCount(0);
+      return;
+    }
+
+    const ordersRef = collection(db, 'orders');
+    const q = query(
+        ordersRef, 
+        where('userId', '==', user.uid), 
+        where('active', '==', true)
+    );
+    
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        setActiveOrderCount(querySnapshot.size);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
 
   const hiddenPaths = ['/ai-chat', '/checkout', '/login', '/signup/phone'];
@@ -51,6 +76,9 @@ export function BottomNavbar() {
         {navItems.map((item) => {
           const isActive = (item.isLink && item.href === '/') ? pathname === '/' : (item.isLink && pathname.startsWith(item.href || '---'));
           const Icon = item.icon;
+          const showCartBadge = item.label === 'Cart' && totalItems > 0;
+          const showTrackingBadge = item.label === 'Tracking' && activeOrderCount > 0;
+          const badgeCount = item.label === 'Cart' ? totalItems : activeOrderCount;
 
           if (item.component) {
             const SheetComponent = item.component;
@@ -59,9 +87,9 @@ export function BottomNavbar() {
                 <button className="relative flex flex-col items-center justify-center h-full text-sm font-medium text-muted-foreground hover:text-primary transition-all active:scale-95">
                   <Icon className="w-6 h-6" />
                   <span className="text-xs mt-1">{item.label}</span>
-                  {item.label === 'Cart' && totalItems > 0 && (
+                  {(showCartBadge || showTrackingBadge) && (
                      <span className="absolute top-1 right-4 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center">
-                        {totalItems}
+                        {badgeCount}
                     </span>
                   )}
                 </button>
