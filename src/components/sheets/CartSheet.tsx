@@ -46,7 +46,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
       <Drawer open={isCartOpen} onOpenChange={setIsCartOpen}>
         <DrawerTrigger asChild>{children}</DrawerTrigger>
         <DrawerContent
-          className="h-full md:h-[80vh] flex flex-col p-0"
+          className="h-[85vh] flex flex-col p-0"
         >
           <DrawerHeader className="p-4 pt-4 border-b flex items-center justify-between">
             <DrawerClose asChild>
