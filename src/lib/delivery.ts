@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import type { Address } from './types';
@@ -9,11 +10,16 @@ import type { Address } from './types';
  * 
  * @param subtotal - The total price of items in the cart.
  * @param address - The user's selected delivery address object.
- * @returns The calculated delivery charge, or null if the location is unserviceable.
+ * @returns The calculated delivery charge. Returns a default if address is not provided.
  */
-export function calculateDeliveryCharge(subtotal: number, address: Address | null): number | null {
+export function calculateDeliveryCharge(subtotal: number, address: Address | null): number {
   if (!address) {
-    return null; // No address selected, so unserviceable
+    // If no address, assume a standard location for default fee calculation
+    // Free delivery over ₹1000
+    if (subtotal > 1000) {
+      return 0;
+    }
+    return 50; // Default standard ₹50 fee
   }
   
   const region = address.region.toLowerCase();
@@ -32,6 +38,7 @@ export function calculateDeliveryCharge(subtotal: number, address: Address | nul
     return 50; // Standard ₹50 fee
   }
 
-  // Location is not serviceable
-  return null;
+  // Location is not serviceable - this case should ideally be handled by UI
+  // but we return a default fee to prevent crashes.
+  return 50;
 }

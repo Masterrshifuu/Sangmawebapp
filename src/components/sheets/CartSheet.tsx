@@ -10,33 +10,51 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from '@/components/ui/drawer';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
 
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Sparkles } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useRef, RefObject } from 'react';
 import { CartItemCard } from '@/components/cart/CartItemCard';
 import { useLocation } from '@/hooks/use-location';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
-const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
+const FreeDeliveryProgress = ({ totalPrice, region }: { totalPrice: number, region: 'North Tura' | 'South Tura' | 'Tura NEHU' | null }) => {
+    const freeDeliveryThreshold = region === 'Tura NEHU' ? 3000 : 1000;
+    const amountNeeded = freeDeliveryThreshold - totalPrice;
+
+    if (amountNeeded > 0 && amountNeeded < 500) { // Only show if they are close
+        return (
+            <div className="p-2 my-2 text-center text-xs bg-green-50 border-l-4 border-green-500 text-green-800 rounded-r-lg">
+                <p>
+                    <Sparkles className="inline-block w-3 h-3 mr-1" />
+                    Add ₹{amountNeeded.toFixed(2)} more for FREE delivery!
+                </p>
+            </div>
+        )
+    }
+    return null;
+}
+
+
+const CartContent = ({ onCheckout, scrollContainerRef }: { onCheckout: () => void; scrollContainerRef?: RefObject<HTMLDivElement> }) => {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { address } = useLocation();
 
   const deliveryCharge = useMemo(() => {
-    if (cart.length === 0) return 0;
     return calculateDeliveryCharge(totalPrice, address);
-  }, [totalPrice, address, cart.length]);
+  }, [totalPrice, address]);
 
-  const isServiceable = deliveryCharge !== null;
-  const finalTotal = isServiceable ? totalPrice + (deliveryCharge ?? 0) : totalPrice;
+  const finalTotal = totalPrice + deliveryCharge;
   
   const cartItemsList = (
-    <div className="p-4 space-y-4">
+    <div ref={scrollContainerRef} className="p-4 space-y-4">
       {cart.map((item) => (
         <CartItemCard key={item.product.id} item={item} />
       ))}
@@ -58,25 +76,22 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full bg-background">
       <ScrollArea className="flex-1">
           {cartItemsList}
       </ScrollArea>
       <SheetFooter className="p-4 border-t bg-background mt-auto">
         <div className="w-full space-y-2">
+            <FreeDeliveryProgress totalPrice={totalPrice} region={address?.region || null} />
           <div className="flex justify-between text-muted-foreground">
             <span>Subtotal</span>
             <span>₹{totalPrice.toFixed(2)}</span>
           </div>
           <div className="flex justify-between text-muted-foreground">
             <span>Delivery Fee</span>
-            {isServiceable ? (
-              <span>
+            <span>
                 {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
-              </span>
-            ) : (
-              <span className="text-destructive font-medium">Select Address</span>
-            )}
+            </span>
           </div>
           
           <Separator className="my-2" />
@@ -85,12 +100,6 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
             <span>Total Amount</span>
             <span>₹{finalTotal.toFixed(2)}</span>
           </div>
-
-          {!isServiceable && (
-            <p className="text-xs text-destructive text-center p-2 bg-destructive/10 rounded-md">
-              Please provide a delivery address at checkout.
-            </p>
-          )}
 
           <Button 
               className="w-full" 
@@ -115,6 +124,16 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { totalItems } = useCart();
 
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  const handleScroll = (direction: 'up' | 'down') => {
+    const { current } = scrollContainerRef;
+    if (current) {
+      const scrollAmount = direction === 'up' ? -150 : 150;
+      current.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   const handleProceedToCheckout = () => {
     setIsOpen(false);
     router.push('/checkout');
@@ -122,16 +141,28 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
 
   if (isDesktop) {
     return (
-      <Sheet open={isOpen} onOpenChange={setIsOpen}>
-        <SheetTrigger asChild>{children}</SheetTrigger>
-        <SheetContent side="right" size="sm" className="p-0 flex flex-col">
-          <SheetHeader className="p-4 border-b">
-            <SheetTitle>Your Cart ({totalItems})</SheetTitle>
-          </SheetHeader>
-          <CartContent onCheckout={handleProceedToCheckout} />
-        </SheetContent>
-      </Sheet>
-    )
+        <Popover open={isOpen} onOpenChange={setIsOpen}>
+          <PopoverTrigger asChild>{children}</PopoverTrigger>
+          <PopoverContent className="w-80 p-0" align="end">
+            <div className="p-4 border-b">
+                <h3 className="text-lg font-semibold">Your Cart ({totalItems})</h3>
+            </div>
+            <ScrollArea className="max-h-[400px]">
+                <CartContent onCheckout={handleProceedToCheckout} scrollContainerRef={scrollContainerRef} />
+            </ScrollArea>
+             {totalItems > 3 && (
+                <div className="p-2 border-t flex justify-end gap-2">
+                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScroll('up')}>
+                        <ChevronUp className="h-4 w-4" />
+                    </Button>
+                     <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScroll('down')}>
+                        <ChevronDown className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
+          </PopoverContent>
+        </Popover>
+      );
   }
 
   return (
