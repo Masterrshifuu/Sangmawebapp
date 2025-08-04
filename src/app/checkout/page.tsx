@@ -33,10 +33,12 @@ import {
 import { DeliveryAddressForm } from '@/components/pages/checkout/DeliveryAddressForm';
 import { getStoreStatus } from '@/lib/datetime';
 import { StoreClosedWarning } from '@/components/pages/checkout/StoreClosedWarning';
+import { useToast } from '@/hooks/use-toast';
 
 
 export default function CheckoutPage() {
   const router = useRouter();
+  const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
   
@@ -148,7 +150,7 @@ export default function CheckoutPage() {
         }
 
         const ordersCollection = collection(db, 'orders');
-        await addDoc(ordersCollection, orderData);
+        const newOrderRef = await addDoc(ordersCollection, orderData);
 
         if (user) {
             await incrementUserStat(user.uid, 'totalOrders');
@@ -157,7 +159,11 @@ export default function CheckoutPage() {
         }
 
         clearCart();
-        router.push('/my-orders');
+        toast({
+            title: "Order Placed Successfully!",
+            description: "You can track your order in the 'My Orders' section.",
+        });
+        router.push(`/my-orders/${newOrderRef.id}`);
 
     } catch (error: any) {
       console.error("Error placing order: ", error);
