@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import * as React from 'react';
@@ -122,31 +121,22 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-transparent">
       <div className="bg-[#faf368] backdrop-blur-sm relative">
         <div className="container mx-auto px-4">
-          <div
-            className={cn(
-              "grid transition-all duration-300 ease-in-out",
-              isScrolled ? "grid-rows-[0fr]" : "grid-rows-[1fr]"
-            )}
-          >
-            <div className="overflow-hidden">
-                <div className="flex items-center gap-4 py-2">
-                    <Link href="/" className="flex items-center gap-3">
-                       <Image
-                          src="/logo.png"
-                          alt="Sangma Megha Mart Logo"
-                          width={60}
-                          height={60}
-                          priority
-                        />
-                    </Link>
-                    <div className="flex flex-col justify-center gap-1">
-                      <span className="font-headline text-base font-bold leading-none">
-                          Sangma Megha Mart
-                      </span>
-                      <LocationDisplay />
-                      <DynamicDeliveryTime />
-                    </div>
-                </div>
+          <div className="flex items-center gap-3 py-2">
+            <Link href="/" className="flex items-center gap-3">
+              <Image
+                src="/logo.png"
+                alt="Sangma Megha Mart Logo"
+                width={60}
+                height={60}
+                priority
+              />
+            </Link>
+            <div className="flex flex-col justify-center gap-1">
+              <span className="font-headline text-base font-bold leading-none">
+                Sangma Megha Mart
+              </span>
+              <LocationDisplay />
+              <DynamicDeliveryTime />
             </div>
           </div>
           
