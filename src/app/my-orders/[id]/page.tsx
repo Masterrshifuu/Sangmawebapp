@@ -1,11 +1,27 @@
 
-
 import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order } from '@/lib/types';
 import SearchHeader from '@/components/SearchHeader';
 import { notFound } from 'next/navigation';
 import { OrderCard } from '@/components/pages/my-orders/OrderCard';
+
+function processTimestamps(data: any): any {
+    if (data instanceof Timestamp) {
+        return data.toDate().toISOString();
+    }
+    if (Array.isArray(data)) {
+        return data.map(item => processTimestamps(item));
+    }
+    if (typeof data === 'object' && data !== null && !(data instanceof Timestamp)) {
+        const newData: { [key: string]: any } = {};
+        for (const key in data) {
+            newData[key] = processTimestamps(data[key]);
+        }
+        return newData;
+    }
+    return data;
+}
 
 async function getOrderById(id: string): Promise<Order | null> {
     try {
@@ -17,15 +33,9 @@ async function getOrderById(id: string): Promise<Order | null> {
         }
 
         const data = orderSnap.data();
-        // Convert any Firestore Timestamps to serializable ISO strings
-        for (const key in data) {
-            const value = data[key];
-            if (value && typeof value.toDate === 'function') {
-                data[key] = value.toDate().toISOString();
-            }
-        }
+        const processedData = processTimestamps(data);
 
-        return { id: orderSnap.id, ...data } as Order;
+        return { id: orderSnap.id, ...processedData } as Order;
 
     } catch (error) {
         console.error("Error fetching order:", error);

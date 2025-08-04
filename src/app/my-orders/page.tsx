@@ -37,8 +37,12 @@ export default function MyOrdersPage() {
         const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
         
         const sortedOrders = fetchedOrders.sort((a, b) => {
-            const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date(0);
-            const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date(0);
+            const dateAValue = a.createdAt as unknown;
+            const dateBValue = b.createdAt as unknown;
+
+            const dateA = dateAValue instanceof Timestamp ? dateAValue.toDate() : new Date(0);
+            const dateB = dateBValue instanceof Timestamp ? dateBValue.toDate() : new Date(0);
+            
             return dateB.getTime() - dateA.getTime();
         });
 
