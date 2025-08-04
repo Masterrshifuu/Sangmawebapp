@@ -5,6 +5,7 @@ import type { Order } from '@/lib/types';
 import SearchHeader from '@/components/SearchHeader';
 import { notFound } from 'next/navigation';
 import { OrderCard } from '@/components/pages/my-orders/OrderCard';
+import { AlertTriangle } from 'lucide-react';
 
 function processTimestamps(data: any): any {
     if (data instanceof Timestamp) {
@@ -23,30 +24,48 @@ function processTimestamps(data: any): any {
     return data;
 }
 
-async function getOrderById(id: string): Promise<Order | null> {
+async function getOrderById(id: string): Promise<{ order: Order | null; error: string | null }> {
     try {
         const orderDocRef = doc(db, 'orders', id);
         const orderSnap = await getDoc(orderDocRef);
 
         if (!orderSnap.exists()) {
-            return null;
+            return { order: null, error: `Order with ID "${id}" could not be found.` };
         }
 
         const data = orderSnap.data();
         const processedData = processTimestamps(data);
 
-        return { id: orderSnap.id, ...processedData } as Order;
+        return { order: { id: orderSnap.id, ...processedData } as Order, error: null };
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error fetching order:", error);
-        return null;
+        return { order: null, error: `Failed to fetch order: ${error.message}` };
     }
 }
 
-
 export default async function OrderDetailsPage({ params }: { params: { id: string }}) {
-    const order = await getOrderById(params.id);
+    const { order, error } = await getOrderById(params.id);
 
+    if (error) {
+        return (
+            <>
+                <SearchHeader />
+                <main className="container mx-auto px-4 py-8">
+                    <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
+                        <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
+                        <h1 className="text-2xl font-bold mb-2">Error Loading Order</h1>
+                        <p className="text-muted-foreground">We encountered an issue trying to load this order's details.</p>
+                        <div className="mt-4 p-4 bg-muted rounded-md text-left text-sm w-full max-w-2xl">
+                            <p className="font-semibold">Error Details:</p>
+                            <pre className="whitespace-pre-wrap font-mono text-destructive">{error}</pre>
+                        </div>
+                    </div>
+                </main>
+            </>
+        );
+    }
+    
     if (!order) {
         notFound();
     }
