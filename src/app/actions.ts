@@ -29,15 +29,18 @@ export async function cancelOrder(orderId: string): Promise<{ success: boolean, 
 
     try {
         const orderRef = doc(db, 'orders', orderId);
+        // This update is restricted by security rules to only allow changing the status to 'Cancelled'.
+        // Other fields like 'active' or 'cancelledAt' must be handled by a backend process or admin.
         await updateDoc(orderRef, {
             status: 'Cancelled',
-            cancelledAt: serverTimestamp(),
-            // 'active' is now managed by a Cloud Function or manually by staff
-            // to prevent violating security rules.
         });
-        return { success: true, message: 'Order has been cancelled.' };
-    } catch (error) {
+        return { success: true, message: 'Your order has been cancelled.' };
+    } catch (error: any) {
         console.error('Error cancelling order:', error);
-        return { success: false, message: 'Failed to cancel the order. Please check permissions or try again.' };
+        // Provide a more user-friendly message in case of permission errors
+        if (error.code === 'permission-denied') {
+             return { success: false, message: 'You do not have permission to cancel this order, or it is past the cancellation window.' };
+        }
+        return { success: false, message: 'Failed to cancel the order. Please try again.' };
     }
 }
