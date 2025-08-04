@@ -5,11 +5,10 @@ import { Home, LayoutGrid, Truck, Sparkles, ShoppingCart, User } from 'lucide-re
 
 import { CartSheet } from '@/components/sheets/CartSheet';
 import { TrackingSheet } from '@/components/sheets/TrackingSheet';
-import { CategorySheet } from '@/components/sheets/CategorySheet';
 
 export const navItems = [
   { href: '/', label: 'Home', icon: Home, isLink: true },
-  { href: '/categories', label: 'Categories', icon: LayoutGrid, isLink: true, component: CategorySheet },
+  { href: '/categories', label: 'Categories', icon: LayoutGrid, isLink: true },
   { label: 'Tracking', icon: Truck, component: TrackingSheet },
   { href: '/ai-chat', label: 'AI Chat', icon: Sparkles, isLink: true },
   { label: 'Cart', icon: ShoppingCart, component: CartSheet },
