@@ -12,27 +12,11 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 
 const PopoverPortal = PopoverPrimitive.Portal
 
-const PopoverOverlay = React.forwardRef<
-  React.ElementRef<typeof PopoverPrimitive.Overlay>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Overlay>
->(({ className, ...props }, ref) => (
-  <PopoverPrimitive.Overlay
-    ref={ref}
-    className={cn(
-      "fixed inset-0 z-50 bg-black/30 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
-      className
-    )}
-    {...props}
-  />
-));
-PopoverOverlay.displayName = PopoverPrimitive.Overlay.displayName
-
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
 >(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
   <PopoverPortal>
-    <PopoverOverlay />
     <PopoverPrimitive.Content
       ref={ref}
       align={align}
