@@ -22,7 +22,7 @@ export function CategoryPreviewCard({ category }: { category: BestsellerCategory
           </div>
         ))}
       </div>
-      <Link href={`/category/${category.name.toLowerCase()}`} className="text-sm font-medium text-accent-foreground hover:underline text-right block">
+      <Link href={`/category/${category.name.toLowerCase().replace(/ & /g, '-and-')}`} className="text-sm font-medium text-accent-foreground hover:underline text-right block">
         + {Math.max(0, category.totalProducts - 4)} more &gt;
       </Link>
     </div>

@@ -30,7 +30,7 @@ const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProd
         minMatchCharLength: 2,
     }), [allProducts]);
 
-    useEffect(() => {
+    React.useEffect(() => {
         if (debouncedQuery.trim() === '') {
             setSearchResults([]);
             return;
@@ -85,51 +85,60 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const showSearchResults = isSearchFocused && query.trim().length > 1;
+
   return (
     <header className="sticky top-0 z-50">
-        <div className={cn(
-            "bg-[#faf368] container mx-auto px-4 pt-3 transition-all duration-300 overflow-hidden",
-            isScrolled ? 'h-0 py-0' : 'h-[68px]'
-        )}>
-            <Link href="/" className="flex items-center gap-3">
-                <Image
-                    src="/logo.png"
-                    alt="Sangma Megha Mart Logo"
-                    width={60}
-                    height={60}
-                    priority
-                />
-                <div className="flex flex-col justify-center gap-1 flex-shrink-0 pt-1">
-                    <span className="font-headline text-lg font-bold leading-none">
-                        Sangma Megha Mart
-                    </span>
-                    <DynamicDeliveryTime className="text-muted-foreground" />
-                </div>
-            </Link>
+      {/* Top section with logo and title */}
+      <div
+        className={cn(
+          'bg-[#faf368] transition-all duration-300',
+          isScrolled ? 'h-0 overflow-hidden' : 'h-auto'
+        )}
+      >
+        <div className="container mx-auto px-4 py-3">
+          <Link href="/" className="flex items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt="Sangma Megha Mart Logo"
+              width={60}
+              height={60}
+              priority
+            />
+            <div className="flex flex-col justify-center gap-1 flex-shrink-0 pt-1">
+              <span className="font-headline text-lg font-bold leading-none">
+                Sangma Megha Mart
+              </span>
+              <DynamicDeliveryTime className="text-muted-foreground" />
+            </div>
+          </Link>
         </div>
+      </div>
+
+      {/* Search and Nav section */}
       <div className="bg-[#faf368] relative">
         <div className="container mx-auto px-4 py-3">
           {/* Search section */}
           <div ref={searchRef}>
-              <SearchDialog>
-                  {/* This child is the trigger for the mobile drawer */}
-                  <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
-                      <Search className="h-5 w-5 mr-3" />
-                      <span>Search for products...</span>
-                  </button>
-              </SearchDialog>
+            <SearchDialog>
+              {/* This child is the trigger for the mobile drawer */}
+              <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
+                <Search className="h-5 w-5 mr-3" />
+                <span>Search for products...</span>
+              </button>
+            </SearchDialog>
 
-              {/* Desktop-only direct input */}
-              <div className="relative hidden md:block">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
-                  <Input
-                    placeholder="Search for products..."
-                    className="pl-10 h-11 text-base w-full"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onFocus={() => setIsSearchFocused(true)}
-                  />
-              </div>
+            {/* Desktop-only direct input */}
+            <div className="relative hidden md:block">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+              <Input
+                placeholder="Search for products..."
+                className="pl-10 h-11 text-base w-full"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => setIsSearchFocused(true)}
+              />
+            </div>
           </div>
         </div>
         
@@ -148,12 +157,12 @@ export default function Header() {
           </div>
         )}
       </div>
-        {/* Desktop Navigation */}
-        <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
-            <div className="container mx-auto px-4">
-                <DesktopNav />
-            </div>
+      {/* Desktop Navigation */}
+      <div className="hidden md:block bg-[#faf368]">
+        <div className="container mx-auto px-4">
+            <DesktopNav />
         </div>
+      </div>
     </header>
   );
 }
