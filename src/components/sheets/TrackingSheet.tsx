@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import Link from 'next/link';
 import { db, auth } from '@/lib/firebase';
 import {
   collection,
@@ -47,36 +48,38 @@ import { DynamicDeliveryTime } from '../DynamicDeliveryTime';
 import { cancelOrder } from '@/app/actions';
 import { useMediaQuery } from '@/hooks/use-media-query';
 
-const OrderSummaryCard = ({ items }: { items: OrderItem[] }) => {
+const OrderSummaryCard = ({ items, orderId }: { items: OrderItem[], orderId: string }) => {
   const firstItem = items[0];
   const remainingItemsCount = items.length - 1;
 
   if (!firstItem) return null;
 
   return (
-    <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm">
-      <h3 className="font-semibold mb-2">Your Order</h3>
-      <div className="flex items-center gap-4">
-        <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted/40">
-          <Image
-            src={firstItem.imageUrl}
-            alt={firstItem.name}
-            fill
-            className="object-contain"
-            sizes="20vw"
-          />
-        </div>
-        <div className="flex-1">
-          <p className="font-medium">{firstItem.name}</p>
-          {remainingItemsCount > 0 && (
-            <p className="text-sm text-muted-foreground">
-              and {remainingItemsCount} other item
-              {remainingItemsCount > 1 ? 's' : ''}
-            </p>
-          )}
+    <Link href={`/my-orders/${orderId}`}>
+      <div className="p-4 rounded-lg border bg-card text-card-foreground shadow-sm hover:bg-muted/50 transition-colors">
+        <h3 className="font-semibold mb-2">Your Order</h3>
+        <div className="flex items-center gap-4">
+          <div className="relative w-16 h-16 rounded-md overflow-hidden bg-muted/40">
+            <Image
+              src={firstItem.imageUrl}
+              alt={firstItem.name}
+              fill
+              className="object-contain"
+              sizes="20vw"
+            />
+          </div>
+          <div className="flex-1">
+            <p className="font-medium">{firstItem.name}</p>
+            {remainingItemsCount > 0 && (
+              <p className="text-sm text-muted-foreground">
+                and {remainingItemsCount} other item
+                {remainingItemsCount > 1 ? 's' : ''}
+              </p>
+            )}
+          </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
@@ -389,7 +392,7 @@ const TrackingContent = () => {
               <>
                 <OrderStatusCard order={activeOrder} />
                 <TrackingTimeline status={activeOrder.status} />
-                <OrderSummaryCard items={activeOrder.items} />
+                <OrderSummaryCard items={activeOrder.items} orderId={activeOrder.id} />
               </>
             ) : (
               <NoActiveOrderCard />
