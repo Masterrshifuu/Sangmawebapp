@@ -22,14 +22,12 @@ import { calculateDeliveryCharge } from '@/lib/delivery';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
 import { useMediaQuery } from '@/hooks/use-media-query';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ChevronUp, ChevronDown } from 'lucide-react';
 
 const FreeDeliveryProgress = ({ totalPrice, region }: { totalPrice: number, region: 'North Tura' | 'South Tura' | 'Tura NEHU' | null }) => {
     const freeDeliveryThreshold = region === 'Tura NEHU' ? 3000 : 1000;
     const amountNeeded = freeDeliveryThreshold - totalPrice;
 
-    if (amountNeeded > 0 && amountNeeded < 500) { // Only show if they are close
+    if (amountNeeded > 0 && totalPrice >= 150) { 
         return (
             <div className="p-2 my-2 text-center text-xs bg-green-50 border-l-4 border-green-500 text-green-800 rounded-r-lg">
                 <p>
@@ -42,19 +40,21 @@ const FreeDeliveryProgress = ({ totalPrice, region }: { totalPrice: number, regi
     return null;
 }
 
-
-const CartContent = ({ onCheckout, scrollContainerRef }: { onCheckout: () => void; scrollContainerRef?: RefObject<HTMLDivElement> }) => {
+const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { address } = useLocation();
+  const MINIMUM_ORDER_VALUE = 150;
 
   const deliveryCharge = useMemo(() => {
     return calculateDeliveryCharge(totalPrice, address);
   }, [totalPrice, address]);
-
-  const finalTotal = totalPrice + deliveryCharge;
   
+  const finalTotal = totalPrice + (deliveryCharge ?? 0);
+  const isBelowMinimum = totalPrice < MINIMUM_ORDER_VALUE;
+  const amountNeededForMinimum = MINIMUM_ORDER_VALUE - totalPrice;
+
   const cartItemsList = (
-    <div ref={scrollContainerRef} className="p-4 space-y-4">
+    <div className="p-4 space-y-4">
       {cart.map((item) => (
         <CartItemCard key={item.product.id} item={item} />
       ))}
@@ -83,6 +83,11 @@ const CartContent = ({ onCheckout, scrollContainerRef }: { onCheckout: () => voi
       <SheetFooter className="p-4 border-t bg-background mt-auto">
         <div className="w-full space-y-2">
             <FreeDeliveryProgress totalPrice={totalPrice} region={address?.region || null} />
+            {isBelowMinimum && (
+                <div className="p-2 my-2 text-center text-xs bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-r-lg">
+                    <p>Minimum order is ₹{MINIMUM_ORDER_VALUE}. Add ₹{amountNeededForMinimum.toFixed(2)} more.</p>
+                </div>
+            )}
           <div className="flex justify-between text-muted-foreground">
             <span>Subtotal</span>
             <span>₹{totalPrice.toFixed(2)}</span>
@@ -90,7 +95,11 @@ const CartContent = ({ onCheckout, scrollContainerRef }: { onCheckout: () => voi
           <div className="flex justify-between text-muted-foreground">
             <span>Delivery Fee</span>
             <span>
-                {deliveryCharge === 0 ? 'FREE' : `₹${deliveryCharge.toFixed(2)}`}
+                {deliveryCharge === null
+                    ? 'Select Address'
+                    : deliveryCharge === 0
+                    ? 'FREE'
+                    : `₹${deliveryCharge.toFixed(2)}`}
             </span>
           </div>
           
@@ -105,6 +114,7 @@ const CartContent = ({ onCheckout, scrollContainerRef }: { onCheckout: () => voi
               className="w-full" 
               size="lg"
               onClick={onCheckout}
+              disabled={isBelowMinimum}
           >
               Proceed to Checkout
           </Button>
@@ -123,17 +133,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { totalItems } = useCart();
-
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const handleScroll = (direction: 'up' | 'down') => {
-    const { current } = scrollContainerRef;
-    if (current) {
-      const scrollAmount = direction === 'up' ? -150 : 150;
-      current.scrollBy({ top: scrollAmount, behavior: 'smooth' });
-    }
-  };
-
+  
   const handleProceedToCheckout = () => {
     setIsOpen(false);
     router.push('/checkout');
@@ -141,27 +141,17 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
 
   if (isDesktop) {
     return (
-        <Popover open={isOpen} onOpenChange={setIsOpen}>
-          <PopoverTrigger asChild>{children}</PopoverTrigger>
-          <PopoverContent className="w-80 p-0" align="end">
-            <div className="p-4 border-b">
-                <h3 className="text-lg font-semibold">Your Cart ({totalItems})</h3>
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>{children}</SheetTrigger>
+          <SheetContent size="sm" className="p-0 flex flex-col">
+             <SheetHeader className="p-4 border-b">
+                <SheetTitle>Your Cart ({totalItems})</SheetTitle>
+            </SheetHeader>
+            <div className="flex-1 flex flex-col min-h-0">
+                <CartContent onCheckout={handleProceedToCheckout} />
             </div>
-            <ScrollArea className="max-h-[400px]">
-                <CartContent onCheckout={handleProceedToCheckout} scrollContainerRef={scrollContainerRef} />
-            </ScrollArea>
-             {totalItems > 3 && (
-                <div className="p-2 border-t flex justify-end gap-2">
-                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScroll('up')}>
-                        <ChevronUp className="h-4 w-4" />
-                    </Button>
-                     <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScroll('down')}>
-                        <ChevronDown className="h-4 w-4" />
-                    </Button>
-                </div>
-            )}
-          </PopoverContent>
-        </Popover>
+          </SheetContent>
+        </Sheet>
       );
   }
 
@@ -175,9 +165,7 @@ export function CartSheet({ children }: { children: React.ReactNode }) {
           <DrawerTitle className="flex-1 text-center">Your Cart ({totalItems})</DrawerTitle>
         </DrawerHeader>
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="flex-1 flex flex-col min-h-0">
             <CartContent onCheckout={handleProceedToCheckout} />
-          </div>
         </div>
       </DrawerContent>
     </Drawer>

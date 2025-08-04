@@ -66,13 +66,15 @@ export default function CheckoutPage() {
     }, 1000 * 30);
     return () => clearInterval(statusInterval);
   }, []);
+  
+  const MINIMUM_ORDER_VALUE = 150;
 
   useEffect(() => {
     // Only redirect if cart is empty after initial load sequence
-    if (isClient && !authLoading && cart.length === 0) {
+    if (isClient && !authLoading && (cart.length === 0 || totalPrice < MINIMUM_ORDER_VALUE)) {
         router.replace('/');
     }
-  }, [isClient, cart.length, authLoading, router]);
+  }, [isClient, cart.length, totalPrice, authLoading, router]);
 
   const deliveryCharge = useMemo(() => calculateDeliveryCharge(totalPrice, address), [totalPrice, address]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
@@ -99,6 +101,11 @@ export default function CheckoutPage() {
     if (!storeStatus.isOpen && !scheduleForNextDay) {
       setPaymentError('Store is currently closed and order not scheduled.');
       return;
+    }
+    
+    if (totalPrice < MINIMUM_ORDER_VALUE) {
+        setPaymentError(`Minimum order value is ₹${MINIMUM_ORDER_VALUE}.`);
+        return;
     }
 
     setIsPlacingOrder(true);
@@ -190,7 +197,7 @@ export default function CheckoutPage() {
   };
 
   const renderContent = () => {
-    if (!isClient || authLoading || (cart.length === 0 && !authLoading)) {
+    if (!isClient || authLoading || (cart.length === 0 && !authLoading) || totalPrice < MINIMUM_ORDER_VALUE) {
       return <CheckoutPageSkeleton />;
     }
     
