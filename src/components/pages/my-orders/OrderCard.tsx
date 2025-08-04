@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState } from 'react';
@@ -11,6 +12,7 @@ import type { Order } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { cancelOrder } from '@/app/actions';
 import { Button } from '@/components/ui/button';
+import { useAuth } from '@/hooks/use-auth';
 
 const statusStyles: { [key: string]: string } = {
     placed: 'bg-blue-100 text-blue-800',
@@ -26,11 +28,14 @@ const statusStyles: { [key: string]: string } = {
 
 export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCancel: (orderId: string) => void; }) => {
   const [isCancelling, setIsCancelling] = useState(false);
-  const createdAt = (order.createdAt as any).toDate();
+  const { user } = useAuth();
+  
+  const createdAt = order.createdAt ? (order.createdAt as any).toDate() : new Date();
   const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
   const status = order.status || 'Pending';
 
   const isCancellable = () => {
+    if (!user) return false; // Guests cannot cancel
     const now = new Date();
     const minutesSinceOrder = (now.getTime() - createdAt.getTime()) / (1000 * 60);
     const cancellableStatuses = ['pending', 'confirmed', 'packed', 'scheduled'];

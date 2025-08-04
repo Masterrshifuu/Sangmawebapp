@@ -1,4 +1,5 @@
 
+
 import { FieldValue, Timestamp } from "firebase/firestore";
 
 export interface Product {
@@ -105,7 +106,7 @@ export interface ExtraReason {
 }
   
 export interface Order {
-    id?: string;
+    id: string;
     userId: string;
     userName: string;
     userEmail: string;
@@ -142,3 +143,4 @@ export interface Review {
     comment: string;
     createdAt: string; // Stored as ISO string
 }
+

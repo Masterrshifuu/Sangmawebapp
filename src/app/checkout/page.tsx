@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -8,7 +9,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useLocation } from '@/hooks/use-location';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, doc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, runTransaction, serverTimestamp, addDoc } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import type { Order, Address } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -105,18 +106,6 @@ export default function CheckoutPage() {
     const deliveryAddressString = `${address.area}${address.landmark ? ', ' + address.landmark : ''}, ${address.region}`;
 
     try {
-      await runTransaction(db, async (transaction) => {
-        const counterRef = doc(db, 'counters', 'orders');
-        const counterDoc = await transaction.get(counterRef);
-
-        let newOrderCount = 1;
-        if (counterDoc.exists() && typeof counterDoc.data().current_count === 'number') {
-          newOrderCount = counterDoc.data().current_count + 1;
-        } else {
-          console.error("Order counter document does not exist or is malformed!");
-        }
-
-        const newOrderId = `SMM${String(newOrderCount).padStart(6, '0')}`;
         const isScheduled = !storeStatus.isOpen;
 
         const orderData: Omit<Order, 'id'> = {
@@ -142,17 +131,15 @@ export default function CheckoutPage() {
           extraReasons: []
         };
         
-        const newOrderRef = doc(db, 'orders', newOrderId);
-        transaction.set(newOrderRef, orderData);
-        transaction.update(counterRef, { current_count: newOrderCount });
-      });
+        const ordersCollection = collection(db, 'orders');
+        await addDoc(ordersCollection, orderData);
 
-      if (user) {
-        await incrementUserStat(user.uid, 'totalOrders');
-      }
+        if (user) {
+            await incrementUserStat(user.uid, 'totalOrders');
+        }
 
-      clearCart();
-      router.push('/my-orders');
+        clearCart();
+        router.push('/my-orders');
 
     } catch (error) {
       console.error("Error placing order: ", error);

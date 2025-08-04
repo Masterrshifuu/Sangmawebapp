@@ -1,4 +1,5 @@
 
+
 import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order } from '@/lib/types';
@@ -40,19 +41,13 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
         notFound();
     }
 
-    const handleOrderCancellation = (cancelledOrderId: string) => {
-        // This function is passed to satisfy the component prop,
-        // but on the details page, a reload would show the updated status.
-        console.log(`Order ${cancelledOrderId} cancellation handled.`);
-    };
-
     return (
         <>
             <Header />
             <main className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold font-headline mb-6">Order Details</h1>
                 <div className="max-w-2xl mx-auto">
-                    <OrderCard order={order} onOrderCancel={handleOrderCancellation} />
+                    <OrderCard order={order} onOrderCancel={() => {}} />
                 </div>
             </main>
         </>
