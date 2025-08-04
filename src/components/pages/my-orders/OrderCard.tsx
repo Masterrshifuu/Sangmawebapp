@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { cancelOrder } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/use-auth';
+import { getStoreStatus } from '@/lib/datetime';
 
 const statusStyles: { [key: string]: string } = {
     placed: 'bg-blue-100 text-blue-800',
@@ -45,11 +46,18 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
   const status = order.status || 'Pending';
 
   const isCancellable = () => {
-    if (!user) return false; // Guests cannot cancel
+    if (!user) return false;
     const now = new Date();
     const orderTime = getSafeDate(order.createdAt);
+
+    if (order.status === 'Scheduled') {
+        const storeStatus = getStoreStatus();
+        // Allow cancellation if the order is scheduled and the store is not yet open
+        return storeStatus.nextOpenTime ? now < storeStatus.nextOpenTime : false;
+    }
+
     const minutesSinceOrder = (now.getTime() - orderTime.getTime()) / (1000 * 60);
-    const cancellableStatuses = ['pending', 'confirmed', 'packed', 'scheduled'];
+    const cancellableStatuses = ['pending', 'confirmed', 'packed'];
     return minutesSinceOrder < 5 && cancellableStatuses.includes(status.toLowerCase().replace(/ /g, '_'));
   };
 

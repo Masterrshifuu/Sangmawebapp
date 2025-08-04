@@ -31,6 +31,8 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { DeliveryAddressForm } from '@/components/pages/checkout/DeliveryAddressForm';
+import { getStoreStatus } from '@/lib/datetime';
+import { StoreClosedWarning } from '@/components/pages/checkout/StoreClosedWarning';
 
 
 export default function CheckoutPage() {
@@ -46,11 +48,13 @@ export default function CheckoutPage() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<{ title: string; message: string; } | null>(null);
+  const [scheduleForNextDay, setScheduleForNextDay] = useState(true);
   
   useEffect(() => {
     setIsClient(true);
   }, []);
   
+  const storeStatus = getStoreStatus();
   const MINIMUM_ORDER_VALUE = 150;
 
   useEffect(() => {
@@ -104,6 +108,8 @@ export default function CheckoutPage() {
     const deliveryAddressString = `${address.area}${address.landmark ? ', ' + address.landmark : ''}, ${address.region}`;
 
     try {
+        const orderStatus = storeStatus.isOpen ? 'Pending' : 'Scheduled';
+
         const baseOrderData = {
           userId: user?.uid || 'guest',
           userName: user?.displayName || 'Guest Customer',
@@ -119,7 +125,7 @@ export default function CheckoutPage() {
             imageUrl: item.product.imageUrl
           })),
           paymentMethod: paymentDetails.method,
-          status: 'Pending',
+          status: orderStatus,
           totalAmount: finalTotal,
           active: true,
           extraTimeInMinutes: 0,
@@ -154,10 +160,10 @@ export default function CheckoutPage() {
   
   const proceedToPlaceOrder = async () => {
     setErrorDetails(null);
-    if (!user) {
+    if (!storeStatus.isOpen && !scheduleForNextDay) {
         setErrorDetails({
-            title: "Login Required",
-            message: "You need to be logged in to place an order. Please log in or create an account."
+            title: "Store is Closed",
+            message: "Please agree to schedule your order for the next opening time to proceed."
         });
         return;
     }
@@ -214,6 +220,13 @@ export default function CheckoutPage() {
 
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
+        {!storeStatus.isOpen && (
+            <StoreClosedWarning
+                message={storeStatus.message}
+                scheduleForNextDay={scheduleForNextDay}
+                setScheduleForNextDay={setScheduleForNextDay}
+            />
+        )}
         <OrderSummary
           cart={cart}
           totalPrice={totalPrice}
@@ -267,7 +280,7 @@ export default function CheckoutPage() {
           {isLoading ? (
             <Loader2 className="animate-spin" />
           ) : (
-            `Place Order (${paymentMethod.toUpperCase()})`
+            storeStatus.isOpen ? `Place Order (${paymentMethod.toUpperCase()})` : `Schedule Order (${paymentMethod.toUpperCase()})`
           )}
         </Button>
       </form>
@@ -322,5 +335,3 @@ export default function CheckoutPage() {
     </>
   );
 }
-
-    
