@@ -125,6 +125,10 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
 
   return (
     <div className="space-y-4">
+        {addresses.length === 0 && !editingAddress && (
+            <p className="text-sm text-muted-foreground text-center py-4">You have no saved addresses. Add one below!</p>
+        )}
+
       {addresses.map((address) => (
         <div key={address.id} className="p-3 border rounded-md flex justify-between items-start">
           <div className="flex-1">

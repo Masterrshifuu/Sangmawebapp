@@ -11,7 +11,8 @@ import {
   serverTimestamp,
   FieldValue,
 } from 'firebase/firestore';
-import type { UserData, CartItem } from './types';
+import type { UserData, CartItem, Address } from './types';
+import { v4 as uuidv4 } from 'uuid';
 
 /**
  * Retrieves a user's data from the 'users' collection.
@@ -113,5 +114,46 @@ export async function updateUserPhoneNumber(uid: string, phoneNumber: string): P
         if (!userDocSnap.exists()) {
             await setDoc(doc(db, 'users', uid), { phoneNumber }, { merge: true });
         }
+    }
+}
+
+/**
+ * Saves or updates a user's address in their Firestore profile.
+ * If the address ID exists, it updates it. If not, it adds it as a new address and sets it as default.
+ * @param uid The user's unique ID.
+ * @param newAddress The address object from the checkout form.
+ */
+export async function saveOrUpdateUserAddress(uid: string, newAddress: Address): Promise<void> {
+    if (!uid) return;
+
+    try {
+        const userDocRef = doc(db, 'users', uid);
+        const userData = await getUserData(uid);
+        const existingAddresses = userData.addresses || [];
+
+        let addressToSave = { ...newAddress };
+        if (!addressToSave.id || addressToSave.id === 'checkout-address') {
+            addressToSave.id = uuidv4();
+        }
+        
+        let addressAlreadyExists = false;
+        const updatedAddresses = existingAddresses.map(addr => {
+            if (addr.id === addressToSave.id) {
+                addressAlreadyExists = true;
+                return { ...addr, ...addressToSave, isDefault: true };
+            }
+            return { ...addr, isDefault: false };
+        });
+
+        if (!addressAlreadyExists) {
+            addressToSave.isDefault = true;
+            updatedAddresses.push(addressToSave);
+        }
+
+        await updateDoc(userDocRef, { addresses: updatedAddresses });
+
+    } catch (error) {
+        console.error("Error saving user address:", error);
+        // Don't throw, as the order itself was successful.
     }
 }

@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Loader2, ChevronLeft, X } from 'lucide-react';
-import { incrementUserStat } from '@/lib/user';
+import { incrementUserStat, saveOrUpdateUserAddress } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
 import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
@@ -152,6 +152,8 @@ export default function CheckoutPage() {
 
         if (user) {
             await incrementUserStat(user.uid, 'totalOrders');
+            // Save address to user's profile
+            await saveOrUpdateUserAddress(user.uid, address);
         }
 
         clearCart();
