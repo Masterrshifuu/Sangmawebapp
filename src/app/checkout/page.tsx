@@ -47,8 +47,7 @@ export default function CheckoutPage() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
-  const [showGuestAlert, setShowGuestAlert] = useState(false);
-
+  
   useEffect(() => {
     setIsClient(true);
   }, []);
@@ -86,11 +85,6 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async (paymentDetails: { method: 'cod' | 'upi', transactionId?: string }) => {
-    if (!user) {
-        setShowGuestAlert(true);
-        return;
-    }
-
     if (deliveryCharge === null || !address || !address.phone) {
       setPaymentError('Please provide a valid delivery address and phone number.');
       return;
@@ -106,9 +100,9 @@ export default function CheckoutPage() {
 
     try {
         const orderData: Omit<Order, 'id'> = {
-          userId: user.uid,
-          userName: user.displayName || 'Valued Customer',
-          userEmail: user.email || '',
+          userId: user?.uid || 'guest',
+          userName: user?.displayName || 'Guest Customer',
+          userEmail: user?.email || 'guest@sangmamart.com',
           userPhone: address.phone,
           createdAt: serverTimestamp(),
           deliveryAddress: deliveryAddressString,
@@ -180,11 +174,7 @@ export default function CheckoutPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!user) {
-        setShowGuestAlert(true);
-    } else {
-        await proceedToPlaceOrder();
-    }
+    await proceedToPlaceOrder();
   };
 
   const renderContent = () => {
@@ -263,26 +253,6 @@ export default function CheckoutPage() {
 
   return (
     <>
-      <AlertDialog open={showGuestAlert} onOpenChange={setShowGuestAlert}>
-        <AlertDialogContent>
-            <AlertDialogCancel className="absolute right-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground p-2 h-auto">
-                <X className="h-4 w-4" />
-                <span className="sr-only">Close</span>
-            </AlertDialogCancel>
-            <AlertDialogHeader>
-                <AlertDialogTitle className="flex items-center gap-2">
-                    <LogIn /> Please Log In
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                    You need to be logged in to an account to place an order. It's quick and helps you track your orders!
-                </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-                <AlertDialogAction onClick={() => router.push('/login')}>Login / Sign Up</AlertDialogAction>
-            </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
       <div className="flex flex-col h-screen bg-background">
         <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
           <Button variant="ghost" size="icon" asChild>
