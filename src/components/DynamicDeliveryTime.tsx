@@ -23,19 +23,19 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
                      if (nextDayStatus.nextOpenTime) {
                          const firstDelivery = new Date(nextDayStatus.nextOpenTime);
                          firstDelivery.setMinutes(firstDelivery.getMinutes() + 35);
-                         setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm:ss a')}`, isEstimate: true });
+                         setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm a')}`, isEstimate: true });
                      } else {
                          setDeliveryInfo({ text: '', isEstimate: false });
                      }
                 } else {
                     now.setMinutes(now.getMinutes() + 35);
-                    setDeliveryInfo({ text: `Delivery by ${format(now, 'h:mm:ss a')}`, isEstimate: false });
+                    setDeliveryInfo({ text: `Delivery by ${format(now, 'h:mm a')}`, isEstimate: false });
                 }
             } else {
                 if (storeStatus.nextOpenTime) {
                     const firstDelivery = new Date(storeStatus.nextOpenTime);
                     firstDelivery.setMinutes(firstDelivery.getMinutes() + 35);
-                    setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm:ss a')}`, isEstimate: true });
+                    setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm a')}`, isEstimate: true });
                 } else {
                     setDeliveryInfo({ text: '', isEstimate: false });
                 }
@@ -43,7 +43,7 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
         };
 
         calculateDeliveryTime();
-        const intervalId = setInterval(calculateDeliveryTime, 1000); // Update every second
+        const intervalId = setInterval(calculateDeliveryTime, 1000 * 60); // Update every minute
 
         return () => clearInterval(intervalId);
     }, []);
@@ -53,7 +53,7 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
     }
 
     return (
-        <div className={cn("flex items-center gap-2 text-sm", deliveryInfo.isEstimate ? "text-muted-foreground" : "text-red-600 font-medium", className)}>
+        <div className={cn("flex items-center gap-2 text-sm text-muted-foreground", className)}>
             <Clock className="w-4 h-4" />
             <span>{deliveryInfo.text}</span>
         </div>
