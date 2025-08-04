@@ -75,8 +75,8 @@ export default function SearchHeader() {
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
   return (
-    <header className="sticky top-0 z-50 bg-[#faf368]">
-      <div className="relative">
+    <header className="sticky top-0 z-50">
+      <div className="bg-[#faf368] relative">
         <div className="container mx-auto px-4 py-3">
           {/* Search section */}
           <div ref={searchRef}>
@@ -117,6 +117,12 @@ export default function SearchHeader() {
           </div>
         )}
       </div>
+      {/* Desktop Navigation */}
+      <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
+            <div className="container mx-auto px-4">
+                <DesktopNav />
+            </div>
+        </div>
     </header>
   );
 }

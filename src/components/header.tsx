@@ -77,8 +77,6 @@ export default function Header() {
 
   useOnClickOutside(searchRef, () => setIsSearchFocused(false));
 
-  const showSearchResults = isSearchFocused && query.trim().length > 1;
-
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
@@ -88,9 +86,9 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-[#faf368]">
+    <header className="sticky top-0 z-50">
         <div className={cn(
-            "container mx-auto px-4 pt-3 transition-all duration-300 overflow-hidden",
+            "bg-[#faf368] container mx-auto px-4 pt-3 transition-all duration-300 overflow-hidden",
             isScrolled ? 'h-0 py-0' : 'h-[68px]'
         )}>
             <Link href="/" className="flex items-center gap-3">
@@ -101,7 +99,7 @@ export default function Header() {
                     height={60}
                     priority
                 />
-                <div className="flex flex-col justify-center gap-1 flex-grow pt-1">
+                <div className="flex flex-col justify-center gap-1 flex-shrink-0 pt-1">
                     <span className="font-headline text-lg font-bold leading-none">
                         Sangma Megha Mart
                     </span>
@@ -151,7 +149,7 @@ export default function Header() {
         )}
       </div>
         {/* Desktop Navigation */}
-        <div className={cn("hidden md:block bg-background/20 backdrop-blur-sm", isScrolled && "border-b")}>
+        <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
             <div className="container mx-auto px-4">
                 <DesktopNav />
             </div>

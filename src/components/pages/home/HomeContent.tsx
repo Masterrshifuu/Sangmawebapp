@@ -14,6 +14,7 @@ import { useProducts } from '@/hooks/use-products';
 import { useAds } from '@/hooks/use-ads';
 import { getHomePageData } from '@/lib/home';
 import { HomePageSkeleton } from './HomePageSkeleton';
+import { CategorySheet } from '@/components/sheets/CategorySheet';
 
 type FeedItem = Product | Ad;
 
@@ -97,9 +98,11 @@ export default function HomeContent() {
          <section className="py-6">
             <div className="container mx-auto px-4 mb-4 flex justify-between items-center">
                 <h2 className="text-2xl font-bold font-headline">Shop by Category</h2>
-                <Link href="/categories" className="text-sm font-medium text-accent-foreground hover:underline">
-                    View All &gt;
-                </Link>
+                <CategorySheet>
+                    <span className="text-sm font-medium text-accent-foreground hover:underline cursor-pointer">
+                        View All &gt;
+                    </span>
+                </CategorySheet>
             </div>
             {showcaseCategories.length > 0 && (
                 <CategoryShowcase 
