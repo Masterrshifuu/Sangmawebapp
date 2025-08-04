@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { ComponentType, ReactNode } from 'react';
@@ -34,7 +33,7 @@ export const AccordionListItem = ({
             </div>
         </AccordionTrigger>
         <AccordionContent className="p-4 text-muted-foreground bg-card rounded-b-lg -mt-2">
-            {ContentComponent ? <ContentComponent user={user} userData={userData} /> : (content || 'This feature is coming soon!')}
+ {ContentComponent ? <ContentComponent user={user} userData={userData} /> : (content as ReactNode || 'This feature is coming soon!')}
         </AccordionContent>
         </>
     );

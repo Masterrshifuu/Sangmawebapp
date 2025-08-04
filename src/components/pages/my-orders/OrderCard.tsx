@@ -95,7 +95,7 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
                 </Button>
             ) : (
                 <Button size="sm" variant="outline" asChild>
-                    <Link href="#">View Details</Link>
+                    <Link href={`/my-orders/${order.id}`}>View Details</Link>
                 </Button>
             )}
         </div>
