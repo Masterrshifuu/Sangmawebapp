@@ -1,4 +1,6 @@
 
+'use client';
+
 import Image from "next/image";
 import { Label } from "@/components/ui/label";
 import { RadioGroupItem } from "@/components/ui/radio-group";
@@ -24,9 +26,13 @@ export const UpiPayment = ({
     handleScreenshotChange,
     isVerifying
 }: UpiPaymentProps) => {
+    // Replace with your actual UPI ID
+    const upiId = "YOUR_UPI_ID@OKBANK"; 
+    const upiName = "Sangma Megha Mart";
+
     return (
-        <Label htmlFor="upi" className={`flex items-start gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${canPlaceOrder ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
-            <RadioGroupItem value="upi" id="upi" disabled={!canPlaceOrder} />
+        <Label htmlFor="upi" className={`flex items-start gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${canPlaceOrder && !isVerifying ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+            <RadioGroupItem value="upi" id="upi" disabled={!canPlaceOrder || isVerifying} />
             <div className="flex-1">
                 <p className="font-semibold">Pay with UPI</p>
                 <p className="text-sm text-muted-foreground">Scan the QR code and upload a screenshot of your payment.</p>
@@ -34,17 +40,18 @@ export const UpiPayment = ({
                     <div className="mt-4 space-y-4">
                         <div className="bg-white p-2 rounded-md max-w-[200px] mx-auto">
                             <Image
-                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=YOUR_UPI_ID@OKBANK&pn=Sangma%20Megha%20Mart&am=${finalTotal.toFixed(2)}&cu=INR`}
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=upi://pay?pa=${upiId}&pn=${encodeURIComponent(upiName)}&am=${finalTotal.toFixed(2)}&cu=INR`}
                                 alt="UPI QR Code"
                                 width={200}
                                 height={200}
                                 className="w-full h-full"
                                 data-ai-hint="QR code"
+                                unoptimized // Prevents Next.js image optimization which can interfere with QR code services
                             />
                         </div>
                         {screenshotPreview && (
                             <div className="mt-2 text-center">
-                                <Image src={screenshotPreview} alt="Screenshot preview" width={150} height={300} className="rounded-md mx-auto border" />
+                                <Image src={screenshotPreview} alt="Screenshot preview" width={150} height={300} className="rounded-md mx-auto border max-h-[250px] w-auto" />
                             </div>
                         )}
                         <Label htmlFor="screenshot-upload" className="w-full">

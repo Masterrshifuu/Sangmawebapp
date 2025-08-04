@@ -6,6 +6,8 @@ import type { Product } from "@/lib/types";
 import { db } from "@/lib/firebase";
 import Fuse from 'fuse.js';
 import { doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { verifyPayment as verifyPaymentFlow, type VerifyPaymentInput, type VerifyPaymentOutput } from "@/ai/flows/verify-payment-flow";
+
 
 // This is a new type to handle the optional product context in chat history
 type ChatMessage = {
@@ -15,6 +17,10 @@ type ChatMessage = {
     products?: Product[];
     productContext?: { name: string; description: string };
 };
+
+export async function verifyPayment(input: VerifyPaymentInput): Promise<VerifyPaymentOutput> {
+    return await verifyPaymentFlow(input);
+}
 
 export async function cancelOrder(orderId: string): Promise<{ success: boolean, message: string }> {
     if (!orderId) {

@@ -115,7 +115,8 @@ export interface Order {
     items: OrderItem[];
     totalAmount: number;
     deliveryAddress: string;
-    paymentMethod: string;
+    paymentMethod: 'cod' | 'upi';
+    paymentTransactionId?: string;
     
     // Status and Tracking
     status: string; // e.g., 'Pending', 'Confirmed', 'OutForDelivery', 'Delivered', 'Cancelled', 'Scheduled'
