@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Loader2, ChevronLeft, UserCheck, ShieldAlert, X } from 'lucide-react';
+import { Loader2, ChevronLeft, LogIn, ShieldAlert, X } from 'lucide-react';
 import { incrementUserStat } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
@@ -87,6 +87,11 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async (paymentDetails: { method: 'cod' | 'upi', transactionId?: string }) => {
+    if (!user) {
+        setShowGuestAlert(true);
+        return;
+    }
+
     if (deliveryCharge === null || !address || !address.phone) {
       setPaymentError('Please provide a valid delivery address and phone number.');
       return;
@@ -102,9 +107,9 @@ export default function CheckoutPage() {
 
     try {
         const orderData: Omit<Order, 'id'> = {
-          userId: user?.uid || 'guest',
-          userName: user?.displayName || 'Guest User',
-          userEmail: user?.email || '',
+          userId: user.uid,
+          userName: user.displayName || 'Valued Customer',
+          userEmail: user.email || '',
           userPhone: address.phone,
           createdAt: serverTimestamp(),
           deliveryAddress: deliveryAddressString,
@@ -269,23 +274,14 @@ export default function CheckoutPage() {
             </DialogClose>
             <AlertDialogHeader>
                 <AlertDialogTitle className="flex items-center gap-2">
-                    <UserCheck /> Proceed as Guest?
+                    <LogIn /> Please Log In
                 </AlertDialogTitle>
                 <AlertDialogDescription>
-                    You are not logged in. You can continue, but your order history will not be saved to an account.
+                    You need to be logged in to an account to place an order. It's quick and helps you track your orders!
                 </AlertDialogDescription>
             </AlertDialogHeader>
-            <div className="p-4 my-2 text-sm bg-amber-100 border-l-4 border-amber-500 text-amber-800 rounded-r-lg">
-                <div className="flex items-start">
-                    <ShieldAlert className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
-                    <div>
-                        <span className="font-bold">Heads up!</span> Your order details will not be saved to an account. For any future queries, you'll need to contact support with your order ID.
-                    </div>
-                </div>
-            </div>
             <AlertDialogFooter>
-                <AlertDialogCancel onClick={() => router.push('/login')}>Login / Sign Up</AlertDialogCancel>
-                <AlertDialogAction onClick={proceedToPlaceOrder}>Continue as Guest</AlertDialogAction>
+                <AlertDialogAction onClick={() => router.push('/login')}>Login / Sign Up</AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
