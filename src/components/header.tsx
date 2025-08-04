@@ -3,7 +3,7 @@
 'use client';
 
 import * as React from 'react';
-import { Search } from 'lucide-react';
+import { MapPin, Search } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { cn } from '@/lib/utils';
@@ -19,6 +19,28 @@ import { ScrollArea } from './ui/scroll-area';
 import { ProductCard } from './product-card';
 import Link from 'next/link';
 import { DynamicDeliveryTime } from './DynamicDeliveryTime';
+import { useLocation } from '@/hooks/use-location';
+import { Skeleton } from './ui/skeleton';
+
+const LocationDisplay = () => {
+    const { address, loading } = useLocation();
+
+    if (loading) {
+        return <Skeleton className="h-5 w-32" />
+    }
+
+    const displayAddress = address 
+        ? `${address.area}, ${address.region}` 
+        : 'Chandmari, South Tura';
+
+    return (
+        <div className="flex items-center gap-1 text-muted-foreground text-sm font-medium">
+            <MapPin className="w-4 h-4" />
+            <span className="truncate">{displayAddress}</span>
+        </div>
+    )
+}
+
 
 const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProductClick: () => void }) => {
     const { products: allProducts, loading: isLoading } = useProducts();
@@ -107,21 +129,24 @@ export default function Header() {
             )}
           >
             <div className="overflow-hidden">
-                <Link href="/" className="flex items-center gap-3 py-2 w-fit">
-                   <Image
-                      src="/logo.png"
-                      alt="Sangma Megha Mart Logo"
-                      width={60}
-                      height={60}
-                      priority
-                    />
-                    <div className="flex flex-col justify-center pt-2">
+                <div className="flex items-center gap-4 py-2">
+                    <Link href="/" className="flex items-center gap-3">
+                       <Image
+                          src="/logo.png"
+                          alt="Sangma Megha Mart Logo"
+                          width={60}
+                          height={60}
+                          priority
+                        />
+                    </Link>
+                    <div className="flex flex-col justify-center gap-1">
                       <span className="font-headline text-base font-bold leading-none">
                           Sangma Megha Mart
                       </span>
+                      <LocationDisplay />
                       <DynamicDeliveryTime />
                     </div>
-                </Link>
+                </div>
             </div>
           </div>
           

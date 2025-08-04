@@ -54,7 +54,7 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
 
     return (
         <div className={cn(
-            "flex items-center gap-2 text-sm",
+            "flex items-center gap-1 text-sm",
             deliveryInfo.isOpen ? "text-muted-foreground" : "text-destructive",
             className
         )}>

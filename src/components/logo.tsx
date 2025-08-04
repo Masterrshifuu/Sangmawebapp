@@ -4,7 +4,7 @@ import Image from "next/image";
 
 const Logo = ({ className }: { className?: string }) => {
   return (
-    <div className={cn("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-3 flex-shrink-0", className)}>
       <Image
         src="/logo.png"
         alt="Sangma Megha Mart Logo"
