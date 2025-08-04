@@ -91,7 +91,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-[#faf368]">
         <div className={cn(
             "container mx-auto px-4 pt-3 transition-all duration-300 overflow-hidden",
-            isScrolled ? 'h-0 py-0' : 'h-[100px]'
+            isScrolled ? 'h-0 py-0' : 'h-[68px]'
         )}>
             <div className="flex items-center gap-3">
                  <Link href="/" className="flex items-center gap-3">
@@ -102,11 +102,11 @@ export default function Header() {
                         height={60}
                         priority
                     />
-                    <div className="flex flex-col justify-center gap-1 flex-grow">
+                    <div className="flex flex-col justify-center gap-1 flex-grow pt-1">
                         <span className="font-headline text-lg font-bold leading-none">
                             Sangma Megha Mart
                         </span>
-                        <DynamicDeliveryTime />
+                        <DynamicDeliveryTime className="text-muted-foreground" />
                     </div>
                 </Link>
             </div>
@@ -153,7 +153,7 @@ export default function Header() {
         )}
       </div>
         {/* Desktop Navigation */}
-        <div className="hidden md:block bg-background/20 backdrop-blur-sm border-t">
+        <div className="hidden md:block bg-background/20 backdrop-blur-sm">
             <div className="container mx-auto px-4">
                 <DesktopNav />
             </div>
