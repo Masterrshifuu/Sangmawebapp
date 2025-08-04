@@ -72,36 +72,47 @@ const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProd
 export default function Header() {
   const [query, setQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
 
   useOnClickOutside(searchRef, () => setIsSearchFocused(false));
 
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-50">
-      <div className="bg-[#faf368] backdrop-blur-sm relative border-b">
-        <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
-          
-          {/* Top section: Logo, Title, Time */}
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex-shrink-0">
-              <Image
-                src="/logo.png"
-                alt="Sangma Megha Mart Logo"
-                width={60}
-                height={60}
-                priority
-              />
-            </Link>
-            <div className="flex flex-col justify-center gap-1 flex-grow">
-              <span className="font-headline text-lg font-bold leading-none">
-                Sangma Megha Mart
-              </span>
-              <DynamicDeliveryTime />
+    <header className="sticky top-0 z-50 bg-[#faf368]">
+        <div className={cn(
+            "container mx-auto px-4 pt-3 transition-all duration-300 overflow-hidden",
+            isScrolled ? 'h-0 py-0' : 'h-[100px]'
+        )}>
+            <div className="flex items-center gap-3">
+                 <Link href="/" className="flex items-center gap-3">
+                    <Image
+                        src="/logo.png"
+                        alt="Sangma Megha Mart Logo"
+                        width={60}
+                        height={60}
+                        priority
+                    />
+                    <div className="flex flex-col justify-center gap-1 flex-grow">
+                        <span className="font-headline text-lg font-bold leading-none">
+                            Sangma Megha Mart
+                        </span>
+                        <DynamicDeliveryTime />
+                    </div>
+                </Link>
             </div>
-          </div>
-          
+        </div>
+      <div className="bg-background/80 backdrop-blur-sm relative border-b border-t">
+        <div className="container mx-auto px-4 py-3">
           {/* Search section */}
           <div ref={searchRef}>
               <SearchDialog>
@@ -140,14 +151,13 @@ export default function Header() {
             </div>
           </div>
         )}
-
+      </div>
         {/* Desktop Navigation */}
         <div className="hidden md:block bg-background/20 backdrop-blur-sm border-t">
             <div className="container mx-auto px-4">
                 <DesktopNav />
             </div>
         </div>
-      </div>
     </header>
   );
 }
