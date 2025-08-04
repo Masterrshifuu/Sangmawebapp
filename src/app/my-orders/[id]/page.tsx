@@ -1,11 +1,16 @@
 
+'use client';
+
+import { useState, useEffect } from 'react';
 import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order } from '@/lib/types';
 import SearchHeader from '@/components/SearchHeader';
-import { notFound } from 'next/navigation';
+import { notFound, useParams } from 'next/navigation';
 import { OrderCard } from '@/components/pages/my-orders/OrderCard';
 import { AlertTriangle } from 'lucide-react';
+import Loading from './loading';
+import { useAuth } from '@/hooks/use-auth';
 
 function processTimestamps(data: any): any {
     if (data instanceof Timestamp) {
@@ -24,28 +29,69 @@ function processTimestamps(data: any): any {
     return data;
 }
 
-async function getOrderById(id: string): Promise<{ order: Order | null; error: string | null }> {
-    try {
-        const orderDocRef = doc(db, 'orders', id);
-        const orderSnap = await getDoc(orderDocRef);
+export default function OrderDetailsPage() {
+    const params = useParams();
+    const { user, loading: authLoading } = useAuth();
+    const id = params.id as string;
 
-        if (!orderSnap.exists()) {
-            return { order: null, error: `Order with ID "${id}" could not be found.` };
+    const [order, setOrder] = useState<Order | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (authLoading) return;
+        if (!user) {
+            setError("You must be logged in to view this page.");
+            setLoading(false);
+            return;
+        }
+        if (!id) {
+            setError("Order ID is missing.");
+            setLoading(false);
+            return;
         }
 
-        const data = orderSnap.data();
-        const processedData = processTimestamps(data);
+        const getOrderById = async () => {
+            setLoading(true);
+            try {
+                const orderDocRef = doc(db, 'orders', id);
+                const orderSnap = await getDoc(orderDocRef);
 
-        return { order: { id: orderSnap.id, ...processedData } as Order, error: null };
+                if (!orderSnap.exists()) {
+                    setError(`Order with ID "${id}" could not be found.`);
+                    setOrder(null);
+                    return;
+                }
 
-    } catch (error: any) {
-        console.error("Error fetching order:", error);
-        return { order: null, error: `Failed to fetch order: ${error.message}` };
+                const data = orderSnap.data();
+                
+                // Security check: ensure the fetched order belongs to the current user
+                if (data.userId !== user.uid) {
+                    setError("You do not have permission to view this order.");
+                    setOrder(null);
+                    return;
+                }
+
+                const processedData = processTimestamps(data);
+                setOrder({ id: orderSnap.id, ...processedData } as Order);
+                setError(null);
+
+            } catch (err: any) {
+                console.error("Error fetching order:", err);
+                setError(`Failed to fetch order: ${err.message}`);
+                setOrder(null);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        getOrderById();
+
+    }, [id, user, authLoading]);
+
+    if (loading || authLoading) {
+        return <Loading />;
     }
-}
-
-export default async function OrderDetailsPage({ params }: { params: { id: string }}) {
-    const { order, error } = await getOrderById(params.id);
 
     if (error) {
         return (
@@ -76,7 +122,10 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
             <main className="container mx-auto px-4 py-8">
                 <h1 className="text-3xl font-bold font-headline mb-6">Order Details</h1>
                 <div className="max-w-2xl mx-auto">
-                    <OrderCard order={order} onOrderCancel={() => {}} />
+                    <OrderCard order={order} onOrderCancel={() => {
+                        // Refresh or update state after cancellation
+                        setOrder(prev => prev ? { ...prev, status: 'Cancelled' } : null);
+                    }} />
                 </div>
             </main>
         </>
