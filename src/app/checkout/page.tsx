@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Loader2, ChevronLeft } from 'lucide-react';
+import { Loader2, ChevronLeft, UserCheck, ShieldAlert } from 'lucide-react';
 import { getStoreStatus } from '@/lib/datetime';
 import { incrementUserStat } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
@@ -24,6 +24,17 @@ import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
 import { UnserviceableLocation } from '@/components/pages/checkout/UnserviceableLocation';
 import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
 import { verifyPayment } from '@/app/actions';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -40,6 +51,7 @@ export default function CheckoutPage() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [showGuestAlert, setShowGuestAlert] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -56,7 +68,8 @@ export default function CheckoutPage() {
   }, []);
 
   useEffect(() => {
-    if (isClient && cart.length === 0 && !authLoading) {
+    // Only redirect if cart is empty after initial load sequence
+    if (isClient && !authLoading && cart.length === 0) {
         router.replace('/');
     }
   }, [isClient, cart.length, authLoading, router]);
@@ -78,8 +91,8 @@ export default function CheckoutPage() {
   };
 
   const placeOrder = async (paymentDetails: { method: 'cod' | 'upi', transactionId?: string }) => {
-    if (!user || deliveryCharge === null || !address) {
-      setPaymentError('Login Required or unserviceable location.');
+    if (deliveryCharge === null || !address) {
+      setPaymentError('Unserviceable location.');
       return;
     }
 
@@ -107,10 +120,10 @@ export default function CheckoutPage() {
         const isScheduled = !storeStatus.isOpen;
 
         const orderData: Omit<Order, 'id'> = {
-          userId: user.uid,
-          userName: user.displayName || 'Anonymous',
-          userEmail: user.email || '',
-          userPhone: address.phone || user.phoneNumber || '',
+          userId: user?.uid || 'guest',
+          userName: user?.displayName || 'Guest User',
+          userEmail: user?.email || '',
+          userPhone: address.phone || user?.phoneNumber || '',
           createdAt: serverTimestamp(),
           deliveryAddress: deliveryAddressString,
           items: cart.map(item => ({
@@ -134,7 +147,9 @@ export default function CheckoutPage() {
         transaction.update(counterRef, { current_count: newOrderCount });
       });
 
-      await incrementUserStat(user.uid, 'totalOrders');
+      if (user) {
+        await incrementUserStat(user.uid, 'totalOrders');
+      }
 
       clearCart();
       router.push('/my-orders');
@@ -147,14 +162,8 @@ export default function CheckoutPage() {
       setIsVerifying(false);
     }
   };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) {
-      setPaymentError('You must be logged in to place an order.');
-      return;
-    }
-    
+  
+  const proceedToPlaceOrder = async () => {
     setPaymentError(null);
 
     if (paymentMethod === 'cod') {
@@ -182,6 +191,15 @@ export default function CheckoutPage() {
       } finally {
         setIsVerifying(false);
       }
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) {
+        setShowGuestAlert(true);
+    } else {
+        await proceedToPlaceOrder();
     }
   };
 
@@ -270,21 +288,48 @@ export default function CheckoutPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-background">
-      <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/" aria-label="Go back">
-            <ChevronLeft />
-          </Link>
-        </Button>
-        <h1 className="flex-1 text-center text-lg font-semibold font-headline">Checkout</h1>
-        <div className="w-10" />
-      </header>
-      <main className="flex-1 overflow-y-auto">
-        <div className="container mx-auto max-w-2xl p-4">
-          {renderContent()}
-        </div>
-      </main>
-    </div>
+    <>
+      <AlertDialog open={showGuestAlert} onOpenChange={setShowGuestAlert}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                    <UserCheck /> Proceed as Guest?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                    You are not logged in. You can continue, but your order history will not be saved to an account.
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <div className="p-4 my-2 text-sm bg-amber-100 border-l-4 border-amber-500 text-amber-800 rounded-r-lg">
+                <div className="flex items-start">
+                    <ShieldAlert className="h-5 w-5 mr-3 mt-0.5 flex-shrink-0" />
+                    <div>
+                        <span className="font-bold">Heads up!</span> Your order details will not be saved to an account. For any future queries, you'll need to contact support with your order ID.
+                    </div>
+                </div>
+            </div>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => router.push('/login')}>Login / Sign Up</AlertDialogCancel>
+                <AlertDialogAction onClick={proceedToPlaceOrder}>Continue as Guest</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="flex flex-col h-screen bg-background">
+        <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
+          <Button variant="ghost" size="icon" asChild>
+            <Link href="/" aria-label="Go back">
+              <ChevronLeft />
+            </Link>
+          </Button>
+          <h1 className="flex-1 text-center text-lg font-semibold font-headline">Checkout</h1>
+          <div className="w-10" />
+        </header>
+        <main className="flex-1 overflow-y-auto">
+          <div className="container mx-auto max-w-2xl p-4">
+            {renderContent()}
+          </div>
+        </main>
+      </div>
+    </>
   );
 }

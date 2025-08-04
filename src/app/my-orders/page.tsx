@@ -37,8 +37,8 @@ export default function MyOrdersPage() {
         const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
         
         const sortedOrders = fetchedOrders.sort((a, b) => {
-            const dateA = (a.createdAt as unknown as Timestamp).toDate();
-            const dateB = (b.createdAt as unknown as Timestamp).toDate();
+            const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date(0);
+            const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date(0);
             return dateB.getTime() - dateA.getTime();
         });
 
@@ -69,6 +69,24 @@ export default function MyOrdersPage() {
 
   if (loading || authLoading) {
     return <Loading />;
+  }
+  
+  if (!user) {
+    return (
+        <>
+            <Header />
+            <main className="container mx-auto px-4 py-8">
+                <div className="text-center text-muted-foreground py-16">
+                    <PackageOpen className="mx-auto h-16 w-16 mb-4" />
+                    <h2 className="text-xl font-semibold text-foreground">Track Your Orders</h2>
+                    <p>Please log in to see your past orders.</p>
+                    <Button asChild className="mt-6">
+                        <Link href="/login">Login / Sign Up</Link>
+                    </Button>
+                </div>
+            </main>
+        </>
+    );
   }
 
   return (
