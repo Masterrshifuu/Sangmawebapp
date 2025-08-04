@@ -143,5 +143,3 @@ export interface Review {
     comment: string;
     createdAt: string; // Stored as ISO string
 }
-
-

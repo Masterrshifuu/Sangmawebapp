@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { useState, useMemo, useEffect } from 'react';
@@ -182,7 +181,7 @@ export default function CheckoutPage() {
       return <CheckoutPageSkeleton />;
     }
     
-    const canPlaceOrder = deliveryCharge !== null;
+    const canPlaceOrder = address !== null;
     const isLoading = isPlacingOrder || isVerifying;
 
     return (
@@ -220,7 +219,7 @@ export default function CheckoutPage() {
               </Label>
               <UpiPayment 
                 paymentMethod={paymentMethod}
-                canPlaceOrder={true}
+                canPlaceOrder={canPlaceOrder}
                 finalTotal={finalTotal}
                 screenshotPreview={screenshotPreview}
                 screenshotFile={screenshotFile}
