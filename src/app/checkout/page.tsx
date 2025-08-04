@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Loader2, ChevronLeft } from 'lucide-react';
+import { Loader2, ChevronLeft, X } from 'lucide-react';
 import { incrementUserStat } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
@@ -23,6 +23,7 @@ import { verifyPayment } from '@/app/actions';
 import {
   AlertDialog,
   AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -103,7 +104,7 @@ export default function CheckoutPage() {
     const deliveryAddressString = `${address.area}${address.landmark ? ', ' + address.landmark : ''}, ${address.region}`;
 
     try {
-        const orderData: Omit<Order, 'id'> = {
+        const baseOrderData = {
           userId: user?.uid || 'guest',
           userName: user?.displayName || 'Guest Customer',
           userEmail: user?.email || 'guest@sangmamart.com',
@@ -118,7 +119,6 @@ export default function CheckoutPage() {
             imageUrl: item.product.imageUrl
           })),
           paymentMethod: paymentDetails.method,
-          paymentTransactionId: paymentDetails.transactionId,
           status: 'Pending',
           totalAmount: finalTotal,
           active: true,
@@ -126,6 +126,10 @@ export default function CheckoutPage() {
           extraReasons: []
         };
         
+        const orderData: Omit<Order, 'id'> = paymentDetails.method === 'upi' 
+            ? { ...baseOrderData, paymentTransactionId: paymentDetails.transactionId }
+            : baseOrderData;
+
         const ordersCollection = collection(db, 'orders');
         await addDoc(ordersCollection, orderData);
 
@@ -150,6 +154,13 @@ export default function CheckoutPage() {
   
   const proceedToPlaceOrder = async () => {
     setErrorDetails(null);
+    if (!user) {
+        setErrorDetails({
+            title: "Login Required",
+            message: "You need to be logged in to place an order. Please log in or create an account."
+        });
+        return;
+    }
 
     if (paymentMethod === 'cod') {
       await placeOrder({ method: 'cod' });
@@ -263,10 +274,19 @@ export default function CheckoutPage() {
     );
   };
 
+  const handleLoginRedirect = () => {
+    router.push('/login');
+    setErrorDetails(null);
+  };
+
   return (
     <>
       <AlertDialog open={!!errorDetails} onOpenChange={() => setErrorDetails(null)}>
         <AlertDialogContent>
+             <AlertDialogCancel className="absolute right-2 top-2 p-1 h-auto bg-transparent border-none hover:bg-muted-foreground/20">
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+            </AlertDialogCancel>
           <AlertDialogHeader>
             <AlertDialogTitle>{errorDetails?.title}</AlertDialogTitle>
             <AlertDialogDescription>
@@ -274,7 +294,11 @@ export default function CheckoutPage() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setErrorDetails(null)}>OK</AlertDialogAction>
+             {errorDetails?.title === "Login Required" ? (
+                <AlertDialogAction onClick={handleLoginRedirect}>Login / Sign Up</AlertDialogAction>
+             ) : (
+                <AlertDialogAction onClick={() => setErrorDetails(null)}>OK</AlertDialogAction>
+             )}
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -298,3 +322,5 @@ export default function CheckoutPage() {
     </>
   );
 }
+
+    
