@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Loader2, ChevronLeft, LogIn, ShieldAlert, X } from 'lucide-react';
+import { Loader2, ChevronLeft } from 'lucide-react';
 import { incrementUserStat } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
@@ -23,7 +23,6 @@ import { verifyPayment } from '@/app/actions';
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -45,7 +44,7 @@ export default function CheckoutPage() {
   const [isClient, setIsClient] = useState(false);
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
-  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<{ title: string; message: string; } | null>(null);
   
   useEffect(() => {
     setIsClient(true);
@@ -73,7 +72,7 @@ export default function CheckoutPage() {
   const handleScreenshotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setPaymentError(null);
+      setErrorDetails(null);
       setScreenshotFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -85,12 +84,18 @@ export default function CheckoutPage() {
 
   const placeOrder = async (paymentDetails: { method: 'cod' | 'upi', transactionId?: string }) => {
     if (deliveryCharge === null || !address || !address.phone) {
-      setPaymentError('Please provide a valid delivery address and phone number.');
+      setErrorDetails({
+        title: 'Invalid Address',
+        message: 'Please provide a valid delivery address and phone number.'
+      });
       return;
     }
     
     if (totalPrice < MINIMUM_ORDER_VALUE) {
-        setPaymentError(`Minimum order value is ₹${MINIMUM_ORDER_VALUE}.`);
+        setErrorDetails({
+            title: 'Minimum Order Value',
+            message: `The minimum order value is ₹${MINIMUM_ORDER_VALUE}.`
+        });
         return;
     }
 
@@ -131,9 +136,12 @@ export default function CheckoutPage() {
         clearCart();
         router.push('/my-orders');
 
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error placing order: ", error);
-      setPaymentError('There was an error placing your order. Please try again.');
+      setErrorDetails({
+          title: "Order Placement Failed",
+          message: `An error occurred while communicating with the server. Please check the details and try again. Error: ${error.message}`
+      });
     } finally {
       setIsPlacingOrder(false);
       setIsVerifying(false);
@@ -141,13 +149,16 @@ export default function CheckoutPage() {
   };
   
   const proceedToPlaceOrder = async () => {
-    setPaymentError(null);
+    setErrorDetails(null);
 
     if (paymentMethod === 'cod') {
       await placeOrder({ method: 'cod' });
     } else if (paymentMethod === 'upi') {
       if (!screenshotFile || !screenshotPreview) {
-        setPaymentError("Please upload a payment screenshot.");
+        setErrorDetails({
+            title: "Screenshot Missing",
+            message: "Please upload a payment screenshot to proceed with a UPI order."
+        });
         return;
       }
       setIsVerifying(true);
@@ -160,11 +171,17 @@ export default function CheckoutPage() {
         if (result.isPaymentVerified) {
           await placeOrder({ method: 'upi', transactionId: result.transactionId });
         } else {
-          setPaymentError(`Payment Verification Failed: ${result.reason}`);
+          setErrorDetails({
+              title: "Payment Verification Failed",
+              message: `Reason: ${result.reason}. Please check your payment and try again.`
+          });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error("Error verifying payment:", error);
-        setPaymentError("An error occurred during payment verification.");
+        setErrorDetails({
+            title: "Verification Service Error",
+            message: `An error occurred during payment verification. Error: ${error.message}`
+        });
       } finally {
         setIsVerifying(false);
       }
@@ -205,7 +222,7 @@ export default function CheckoutPage() {
               value={paymentMethod} 
               onValueChange={(v) => {
                 setPaymentMethod(v as 'cod' | 'upi');
-                setPaymentError(null);
+                setErrorDetails(null);
               }} 
               className="space-y-4"
               disabled={isLoading}
@@ -230,10 +247,6 @@ export default function CheckoutPage() {
           </CardContent>
         </Card>
         
-        {paymentError && (
-            <p className="text-sm text-center font-medium text-destructive p-3 bg-destructive/10 rounded-lg">{paymentError}</p>
-        )}
-
         <Button 
           type="submit" 
           className="w-full" 
@@ -252,6 +265,20 @@ export default function CheckoutPage() {
 
   return (
     <>
+      <AlertDialog open={!!errorDetails} onOpenChange={() => setErrorDetails(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{errorDetails?.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {errorDetails?.message}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setErrorDetails(null)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="flex flex-col h-screen bg-background">
         <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
           <Button variant="ghost" size="icon" asChild>
