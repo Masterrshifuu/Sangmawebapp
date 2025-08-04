@@ -370,7 +370,7 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent className="h-full md:h-[80vh] flex flex-col p-0">
+      <DrawerContent className="h-[85vh] flex flex-col p-0">
         <DrawerHeader className="p-4 pt-4 text-center flex items-center justify-between border-b">
           <DrawerClose asChild>
             <Button variant="ghost" size="icon" className="md:flex hidden">
