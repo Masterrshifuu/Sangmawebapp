@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { getStoreStatus } from '@/lib/datetime';
 
 export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
-    const [deliveryInfo, setDeliveryInfo] = useState({ text: '', isEstimate: false });
+    const [deliveryInfo, setDeliveryInfo] = useState({ text: '', isEstimate: false, isOpen: true });
     
     useEffect(() => {
         const calculateDeliveryTime = () => {
@@ -23,21 +23,21 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
                      if (nextDayStatus.nextOpenTime) {
                          const firstDelivery = new Date(nextDayStatus.nextOpenTime);
                          firstDelivery.setMinutes(firstDelivery.getMinutes() + 35);
-                         setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm a')}`, isEstimate: true });
+                         setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm a')}`, isEstimate: true, isOpen: false });
                      } else {
-                         setDeliveryInfo({ text: '', isEstimate: false });
+                         setDeliveryInfo({ text: '', isEstimate: false, isOpen: false });
                      }
                 } else {
                     now.setMinutes(now.getMinutes() + 35);
-                    setDeliveryInfo({ text: `Delivery by ${format(now, 'h:mm a')}`, isEstimate: false });
+                    setDeliveryInfo({ text: `Delivery by ${format(now, 'h:mm a')}`, isEstimate: false, isOpen: true });
                 }
             } else {
                 if (storeStatus.nextOpenTime) {
                     const firstDelivery = new Date(storeStatus.nextOpenTime);
                     firstDelivery.setMinutes(firstDelivery.getMinutes() + 35);
-                    setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm a')}`, isEstimate: true });
+                    setDeliveryInfo({ text: `Delivery from ${format(firstDelivery, 'h:mm a')}`, isEstimate: true, isOpen: false });
                 } else {
-                    setDeliveryInfo({ text: '', isEstimate: false });
+                    setDeliveryInfo({ text: '', isEstimate: false, isOpen: false });
                 }
             }
         };
@@ -53,7 +53,11 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
     }
 
     return (
-        <div className={cn("flex items-center gap-2 text-sm text-muted-foreground", className)}>
+        <div className={cn(
+            "flex items-center gap-2 text-sm",
+            deliveryInfo.isOpen ? "text-muted-foreground" : "text-destructive",
+            className
+        )}>
             <Clock className="w-4 h-4" />
             <span>{deliveryInfo.text}</span>
         </div>
