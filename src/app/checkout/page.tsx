@@ -48,7 +48,7 @@ export default function CheckoutPage() {
   const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
   const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<{ title: string; message: string; } | null>(null);
-  const [scheduleForNextDay, setScheduleForNextDay] = useState(true);
+  const [scheduleForNextDay, setScheduleForNextDay] = useState(false);
   
   useEffect(() => {
     setIsClient(true);
@@ -217,6 +217,8 @@ export default function CheckoutPage() {
     
     const canPlaceOrder = address !== null;
     const isLoading = isPlacingOrder || isVerifying;
+    const isScheduleRequired = !storeStatus.isOpen && !scheduleForNextDay;
+
 
     return (
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -275,7 +277,7 @@ export default function CheckoutPage() {
           type="submit" 
           className="w-full" 
           size="lg"
-          disabled={isLoading || !canPlaceOrder || (paymentMethod === 'upi' && !screenshotFile)}
+          disabled={isLoading || !canPlaceOrder || (paymentMethod === 'upi' && !screenshotFile) || isScheduleRequired}
         >
           {isLoading ? (
             <Loader2 className="animate-spin" />
