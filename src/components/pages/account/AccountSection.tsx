@@ -55,7 +55,7 @@ export const LegalSection = ({ title, items }: AccountSectionProps) => (
         <h2 className="text-sm font-semibold text-muted-foreground px-2 mb-2">{title}</h2>
         <div className="space-y-2">
             {items.map(item => (
-                <LinkListItem key={item.label} {...item} />
+                <LinkListItem key={item.label} icon={item.icon} label={item.label} href={item.href} content={item.content as React.ReactNode} />
             ))}
         </div>
     </section>

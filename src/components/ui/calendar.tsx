@@ -3,8 +3,8 @@
 
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
-import { DayPicker, useDayPicker, useNavigation, DayPickerContextValue } from "react-day-picker"
-import { format, addMonths } from "date-fns"
+import { DayPicker, useDayPicker, useNavigation } from "react-day-picker"
+import { format } from "date-fns"
 
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
@@ -69,7 +69,7 @@ Calendar.displayName = "Calendar"
 
 function CustomCaption() {
   const { goToMonth, nextMonth, previousMonth } = useNavigation();
-  const { currentMonth } = useDayPicker() as DayPickerContextValue;
+  const { currentMonth } = useDayPicker();
   
   const handleMonthChange = (value: string) => {
     const month = new Date(value);
