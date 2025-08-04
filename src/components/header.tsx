@@ -129,15 +129,17 @@ export default function Header() {
             </SearchDialog>
 
             {/* Desktop-only direct input */}
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
-              <Input
-                placeholder="Search for products..."
-                className="pl-10 h-11 text-base w-full"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onFocus={() => setIsSearchFocused(true)}
-              />
+            <div className="hidden md:flex justify-center">
+              <div className="relative w-full md:w-[45%]">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                  <Input
+                    placeholder="Search for products..."
+                    className="pl-10 h-11 text-base w-full"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setIsSearchFocused(true)}
+                  />
+              </div>
             </div>
           </div>
         </div>
@@ -145,9 +147,9 @@ export default function Header() {
         {/* Desktop search results popover */}
         {showSearchResults && (
           <div className="absolute top-full left-0 right-0 z-40">
-             <div className="container mx-auto px-4">
+             <div className="container mx-auto px-4 flex justify-center">
                 <div 
-                    className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b"
+                    className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b w-full md:w-[45%]"
                 >
                   <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
                     <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
