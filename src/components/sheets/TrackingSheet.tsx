@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -214,15 +215,22 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     const [eta, setEta] = useState('');
     const [isCancelling, setIsCancelling] = useState(false);
 
+    const getSafeDate = (dateValue: any): Date => {
+      if (!dateValue) return new Date();
+      if (typeof dateValue.toDate === 'function') {
+        return dateValue.toDate();
+      }
+      return new Date(dateValue);
+    };
+
     const calculateTimeLeft = useCallback(() => {
-        const orderTimestamp = order.createdAt as unknown as Timestamp;
-        if (!orderTimestamp) {
+        if (!order.createdAt) {
           setTimeLeft('Calculating...');
           setEta('');
           return;
         };
 
-        const orderTime = orderTimestamp.toDate();
+        const orderTime = getSafeDate(order.createdAt);
         const etaMinutes = 35 + (order.extraTimeInMinutes || 0);
         const etaTime = addMinutes(orderTime, etaMinutes);
         setEta(format(etaTime, 'p'));
@@ -252,7 +260,7 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
 
     const isCancellable = () => {
         if (!order.createdAt) return false;
-        const createdAt = (order.createdAt as unknown as Timestamp).toDate();
+        const createdAt = getSafeDate(order.createdAt);
         const now = new Date();
         const minutesSinceOrder = (now.getTime() - createdAt.getTime()) / (1000 * 60);
         const cancellableStatuses = ['Pending', 'Confirmed', 'Packed', 'Scheduled'];
@@ -272,8 +280,8 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     };
 
     if (order.status === 'Delivered') {
-        const createdAt = (order.createdAt as unknown as Timestamp).toDate();
-        const deliveredAt = (order.cancelledAt as unknown as Timestamp)?.toDate() || new Date(); 
+        const createdAt = getSafeDate(order.createdAt);
+        const deliveredAt = getSafeDate(order.cancelledAt) || new Date(); 
         const deliveryDuration = differenceInMinutes(deliveredAt, createdAt);
 
         return (

@@ -30,14 +30,25 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
   const [isCancelling, setIsCancelling] = useState(false);
   const { user } = useAuth();
   
-  const createdAt = order.createdAt ? (order.createdAt as any).toDate() : new Date();
+  const getSafeDate = (dateValue: any): Date => {
+    if (!dateValue) return new Date();
+    // Check if it's a Firestore Timestamp
+    if (typeof dateValue.toDate === 'function') {
+      return dateValue.toDate();
+    }
+    // Assume it's an ISO string or already a Date object
+    return new Date(dateValue);
+  };
+
+  const createdAt = getSafeDate(order.createdAt);
   const totalAmount = typeof order.totalAmount === 'number' ? order.totalAmount : 0;
   const status = order.status || 'Pending';
 
   const isCancellable = () => {
     if (!user) return false; // Guests cannot cancel
     const now = new Date();
-    const minutesSinceOrder = (now.getTime() - createdAt.getTime()) / (1000 * 60);
+    const orderTime = getSafeDate(order.createdAt);
+    const minutesSinceOrder = (now.getTime() - orderTime.getTime()) / (1000 * 60);
     const cancellableStatuses = ['pending', 'confirmed', 'packed', 'scheduled'];
     return minutesSinceOrder < 5 && cancellableStatuses.includes(status.toLowerCase().replace(/ /g, '_'));
   };
