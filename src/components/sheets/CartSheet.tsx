@@ -12,10 +12,10 @@ import {
   DrawerFooter,
 } from '@/components/ui/drawer';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, ArrowUp, ArrowDown } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { CartItemCard } from '@/components/cart/CartItemCard';
 import { useLocation } from '@/hooks/use-location';
 import { calculateDeliveryCharge } from '@/lib/delivery';
@@ -27,6 +27,7 @@ const CartContent = ({ onCheckout, isPopover = false }: { onCheckout: () => void
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { address } = useLocation();
   const router = useRouter();
+  const scrollViewportRef = useRef<HTMLDivElement>(null);
 
   const deliveryCharge = useMemo(() => {
     if (cart.length === 0) return 0;
@@ -35,6 +36,13 @@ const CartContent = ({ onCheckout, isPopover = false }: { onCheckout: () => void
 
   const isServiceable = deliveryCharge !== null;
   const finalTotal = isServiceable ? totalPrice + (deliveryCharge ?? 0) : totalPrice;
+  
+  const handleScroll = (direction: 'up' | 'down') => {
+    if (scrollViewportRef.current) {
+        const scrollAmount = direction === 'up' ? -150 : 150;
+        scrollViewportRef.current.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+    }
+  }
 
   const cartItemsList = (
     <div className="p-4 space-y-4">
@@ -60,15 +68,21 @@ const CartContent = ({ onCheckout, isPopover = false }: { onCheckout: () => void
 
   return (
     <>
-      {isPopover ? (
-          <ScrollArea className="flex-1 max-h-[40vh]">
+      <div className="relative flex-1">
+        <ScrollArea className="h-full" viewportRef={scrollViewportRef}>
             {cartItemsList}
-          </ScrollArea>
-      ) : (
-        <ScrollArea className="flex-1">
-          {cartItemsList}
         </ScrollArea>
-      )}
+        {isPopover && cart.length > 3 && (
+            <div className="absolute top-0 right-0 p-2 space-y-1 bg-gradient-to-b from-card to-transparent">
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScroll('up')}>
+                    <ArrowUp className="h-4 w-4" />
+                </Button>
+                <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleScroll('down')}>
+                    <ArrowDown className="h-4 w-4" />
+                </Button>
+            </div>
+        )}
+      </div>
 
       <div className="p-4 border-t bg-background mt-auto">
         <div className="w-full space-y-2">
