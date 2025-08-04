@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { MapPin, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useRef, Suspense } from 'react';
 import { cn } from '@/lib/utils';
@@ -18,28 +18,6 @@ import { ScrollArea } from './ui/scroll-area';
 import { ProductCard } from './product-card';
 import Link from 'next/link';
 import { DynamicDeliveryTime } from './DynamicDeliveryTime';
-import { useLocation } from '@/hooks/use-location';
-import { Skeleton } from './ui/skeleton';
-
-const LocationDisplay = () => {
-    const { address, loading } = useLocation();
-
-    if (loading) {
-        return <Skeleton className="h-5 w-32" />
-    }
-
-    const displayAddress = address 
-        ? `${address.area}, ${address.region}` 
-        : 'Chandmari, South Tura';
-
-    return (
-        <div className="flex items-center gap-1 text-muted-foreground text-sm font-medium">
-            <MapPin className="w-4 h-4" />
-            <span className="truncate">{displayAddress}</span>
-        </div>
-    )
-}
-
 
 const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProductClick: () => void }) => {
     const { products: allProducts, loading: isLoading } = useProducts();
@@ -105,7 +83,7 @@ export default function Header() {
       <div className="bg-[#faf368] backdrop-blur-sm relative border-b">
         <div className="container mx-auto px-4 py-3 flex flex-col gap-3">
           
-          {/* Top section: Logo, Title, Location, Time */}
+          {/* Top section: Logo, Title, Time */}
           <div className="flex items-center gap-3">
             <Link href="/" className="flex-shrink-0">
               <Image
@@ -120,7 +98,6 @@ export default function Header() {
               <span className="font-headline text-lg font-bold leading-none">
                 Sangma Megha Mart
               </span>
-              <LocationDisplay />
               <DynamicDeliveryTime />
             </div>
           </div>
