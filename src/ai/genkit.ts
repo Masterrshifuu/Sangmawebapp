@@ -1,9 +1,10 @@
-import { defineConfig } from 'genkit';
-import { googleAI } from '@genkit-ai/google-cloud';
+import { ai } from 'genkit';
+import { googleAI } from '@genkit-ai/googleai';
 
-export default defineConfig({
+ai.configure({
   plugins: [googleAI()],
-  flows: ['./flows/*.ts'],
-  tools: ['./tools/*.ts'],
-  runtime: 'nodejs',
+  logLevel: 'debug',
+  enableTracing: true,
 });
+
+export { ai };
