@@ -10,12 +10,12 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth } from '@/hooks/use-auth';
 import type { Address } from '@/lib/types';
 import { useLocation } from '@/hooks/use-location';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { v4 as uuidv4 } from 'uuid';
+import { useAuth } from '@/hooks/use-auth';
 
 const addressSchema = z.object({
   area: z.string().min(3, 'Area is required'),
@@ -28,25 +28,35 @@ const addressSchema = z.object({
 
 type AddressFormValues = z.infer<typeof addressSchema>;
 
-const AddressForm = ({ initialData, onFormChange }: { initialData: Partial<AddressFormValues>, onFormChange: (data: AddressFormValues) => void }) => {
+const AddressForm = ({ initialData, onFormChange, isUserLoggedIn }: { initialData: Partial<AddressFormValues>, onFormChange: (data: Address | null) => void, isUserLoggedIn: boolean }) => {
     const form = useForm<AddressFormValues>({
         resolver: zodResolver(addressSchema),
-        defaultValues: {
-            area: initialData.area || '',
-            landmark: initialData.landmark || '',
-            region: initialData.region || undefined,
-            phone: initialData.phone || ''
-        },
+        defaultValues: initialData,
         mode: 'onChange'
     });
+
+    useEffect(() => {
+        // This ensures the form resets if the initialData (e.g., from useLocation) changes
+        form.reset(initialData);
+    }, [initialData, form]);
 
     const watchedValues = form.watch();
 
     useEffect(() => {
-        if (form.formState.isValid) {
-            onFormChange(watchedValues);
-        }
-    }, [watchedValues, form.formState.isValid, onFormChange]);
+        const subscription = form.watch((value, { name, type }) => {
+            if (form.formState.isValid) {
+                const newAddress: Address = {
+                    id: (initialData as Address)?.id || uuidv4(),
+                    isDefault: (initialData as Address)?.isDefault ?? !isUserLoggedIn, // Guests' address is always a "default" for their session
+                    ...form.getValues(),
+                };
+                onFormChange(newAddress);
+            } else {
+                 onFormChange(null);
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [form, onFormChange, initialData, isUserLoggedIn]);
 
     return (
         <Form {...form}>
@@ -79,40 +89,18 @@ const AddressForm = ({ initialData, onFormChange }: { initialData: Partial<Addre
     );
 };
 
-
 export function DeliveryAddressForm({ onAddressChange }: { onAddressChange: (address: Address | null) => void; }) {
-  const { user } = useAuth();
-  const { address: defaultAddress, loading } = useLocation();
-  const [isEditing, setIsEditing] = useState(false);
-  
-  // This state will hold the address for the current order
-  const [currentOrderAddress, setCurrentOrderAddress] = useState<Address | null>(null);
+  const { user, loading: authLoading } = useAuth();
+  const { address: savedAddress, setAddress, loading: locationLoading } = useLocation();
 
-  useEffect(() => {
-    if (!loading) {
-        if (defaultAddress) {
-            setCurrentOrderAddress(defaultAddress);
-            onAddressChange(defaultAddress);
-            setIsEditing(false);
-        } else {
-            // No default address, or user is a guest. Start with an empty form.
-            setIsEditing(true);
-            onAddressChange(null);
-        }
-    }
-  }, [defaultAddress, loading, onAddressChange]);
-
-  const handleFormChange = useCallback((data: AddressFormValues) => {
-    const newAddress: Address = {
-      id: currentOrderAddress?.id || uuidv4(),
-      isDefault: currentOrderAddress?.isDefault ?? false, // Preserve default status
-      ...data,
-    };
-    setCurrentOrderAddress(newAddress);
+  const handleFormChange = useCallback((newAddress: Address | null) => {
+    // This updates the address in the location hook (which saves to localStorage for guests)
+    setAddress(newAddress);
+    // This passes the valid (or null) address up to the checkout page
     onAddressChange(newAddress);
-  }, [currentOrderAddress, onAddressChange]);
+  }, [setAddress, onAddressChange]);
   
-  if (loading) {
+  if (authLoading || locationLoading) {
       return (
           <Card>
               <CardHeader>
@@ -135,28 +123,14 @@ export function DeliveryAddressForm({ onAddressChange }: { onAddressChange: (add
                 <CardTitle>Delivery Address</CardTitle>
                 <CardDescription>Where should we send your order?</CardDescription>
             </div>
-            {currentOrderAddress && !isEditing && user && (
-                <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>Change</Button>
-            )}
         </div>
       </CardHeader>
       <CardContent>
-        {isEditing ? (
-            <AddressForm 
-                initialData={currentOrderAddress || { phone: user?.phoneNumber || '' }} 
-                onFormChange={handleFormChange}
-            />
-        ) : currentOrderAddress ? (
-            <div className="text-sm text-muted-foreground">
-                <p className="font-semibold text-foreground">{currentOrderAddress.area}</p>
-                <p>{currentOrderAddress.landmark ? `${currentOrderAddress.landmark}, ` : ''}{currentOrderAddress.region}</p>
-                <p>{currentOrderAddress.phone}</p>
-            </div>
-        ) : (
-            <div className="text-center text-sm text-muted-foreground py-4">
-                <p>Please provide a delivery address.</p>
-            </div>
-        )}
+          <AddressForm 
+              initialData={savedAddress || { phone: user?.phoneNumber || '' }} 
+              onFormChange={handleFormChange}
+              isUserLoggedIn={!!user}
+          />
       </CardContent>
     </Card>
   );

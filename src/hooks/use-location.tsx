@@ -6,6 +6,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useCa
 import type { Address } from '@/lib/types';
 import { useAuth } from './use-auth';
 import { getUserData } from '@/lib/user';
+import { v4 as uuidv4 } from 'uuid';
 
 type LocationContextType = {
   address: Address | null;
@@ -15,23 +16,36 @@ type LocationContextType = {
 
 const LocationContext = createContext<LocationContextType | undefined>(undefined);
 
+const GUEST_ADDRESS_KEY = 'sangma-megha-mart-guest-address';
+
 export function LocationProvider({ children }: { children: ReactNode }) {
   const [address, setAddressState] = useState<Address | null>(null);
   const { user, loading: authLoading } = useAuth();
   const [loading, setLoading] = useState(true);
 
-  // This hook now primarily loads the default address for logged-in users.
-  // Guest address is handled locally on the checkout page.
+  // Effect to load address from Firestore for logged-in users or localStorage for guests
   useEffect(() => {
     const loadAddress = async () => {
         setLoading(true);
         if (user) {
+            // Logged-in user: load from Firestore
+            localStorage.removeItem(GUEST_ADDRESS_KEY); // Clear any guest address
             const userData = await getUserData(user.uid);
             const defaultUserAddress = userData.addresses?.find(a => a.isDefault) || userData.addresses?.[0];
             setAddressState(defaultUserAddress || null);
         } else {
-            // For guests, we start with no address. It will be collected at checkout.
-            setAddressState(null);
+            // Guest user: load from localStorage
+            try {
+                const storedAddress = localStorage.getItem(GUEST_ADDRESS_KEY);
+                if (storedAddress) {
+                    setAddressState(JSON.parse(storedAddress));
+                } else {
+                    setAddressState(null);
+                }
+            } catch (error) {
+                console.error("Failed to parse guest address from localStorage", error);
+                setAddressState(null);
+            }
         }
         setLoading(false);
     };
@@ -44,9 +58,18 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
   const setAddress = useCallback((newAddress: Address | null) => {
     setAddressState(newAddress);
-    // Saving logic is handled by the component that calls this.
-    // e.g., Checkout page for guests, AddressBook for logged-in users.
-  }, []);
+    // For guests, we save directly to localStorage.
+    // For logged-in users, the address is saved to Firestore upon placing an order.
+    if (!user && newAddress) {
+        try {
+            localStorage.setItem(GUEST_ADDRESS_KEY, JSON.stringify(newAddress));
+        } catch (error) {
+            console.error("Failed to save guest address to localStorage", error);
+        }
+    } else if (!user && !newAddress) {
+        localStorage.removeItem(GUEST_ADDRESS_KEY);
+    }
+  }, [user]);
 
   const value = {
       address,
