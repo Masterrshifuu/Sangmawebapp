@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Product, Review } from '@/lib/types';
 import { useCart } from '@/hooks/use-cart';
 
@@ -38,6 +38,10 @@ export function ProductClientPage({
 
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
   const [currentProduct, setProduct] = useState<Product>(product);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentProduct.id]);
 
   const handleReviewAdded = (newReview: Review) => {
     setReviews(prev => [newReview, ...prev]);
