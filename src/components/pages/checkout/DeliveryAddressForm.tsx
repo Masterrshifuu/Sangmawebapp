@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { v4 as uuidv4 } from 'uuid';
 import { useAuth } from '@/hooks/use-auth';
+import { useDebounce } from '@/hooks/use-debounce';
 
 const addressSchema = z.object({
   area: z.string().min(3, 'Area is required'),
@@ -36,27 +37,31 @@ const AddressForm = ({ initialData, onFormChange, isUserLoggedIn }: { initialDat
     });
 
     useEffect(() => {
-        // This ensures the form resets if the initialData (e.g., from useLocation) changes
         form.reset(initialData);
     }, [initialData, form]);
 
-    const watchedValues = form.watch();
+    const formValues = form.watch();
+    const debouncedFormValues = useDebounce(formValues, 500);
 
     useEffect(() => {
-        const subscription = form.watch((value, { name, type }) => {
-            if (form.formState.isValid) {
+        const checkValidityAndSaveChanges = async () => {
+            const isValid = await form.trigger(); // Manually trigger validation
+            if (isValid) {
                 const newAddress: Address = {
                     id: (initialData as Address)?.id || uuidv4(),
-                    isDefault: (initialData as Address)?.isDefault ?? !isUserLoggedIn, // Guests' address is always a "default" for their session
+                    isDefault: (initialData as Address)?.isDefault ?? !isUserLoggedIn,
                     ...form.getValues(),
                 };
                 onFormChange(newAddress);
             } else {
                  onFormChange(null);
             }
-        });
-        return () => subscription.unsubscribe();
-    }, [form, onFormChange, initialData, isUserLoggedIn]);
+        };
+
+        checkValidityAndSaveChanges();
+        
+    }, [debouncedFormValues, form, onFormChange, initialData, isUserLoggedIn]);
+
 
     return (
         <Form {...form}>
@@ -94,9 +99,7 @@ export function DeliveryAddressForm({ onAddressChange }: { onAddressChange: (add
   const { address: savedAddress, setAddress, loading: locationLoading } = useLocation();
 
   const handleFormChange = useCallback((newAddress: Address | null) => {
-    // This updates the address in the location hook (which saves to localStorage for guests)
     setAddress(newAddress);
-    // This passes the valid (or null) address up to the checkout page
     onAddressChange(newAddress);
   }, [setAddress, onAddressChange]);
   
