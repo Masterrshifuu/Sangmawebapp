@@ -42,7 +42,7 @@ export default function CheckoutPage() {
   const { cart, totalPrice, clearCart } = useCart();
   
   const [address, setAddress] = useState<Address | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi' | 'upi_on_delivery'>('cod');
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -88,7 +88,7 @@ export default function CheckoutPage() {
     }
   };
 
-  const placeOrder = async (paymentDetails: { method: 'cod' | 'upi', transactionId?: string }) => {
+  const placeOrder = async (paymentDetails: { method: 'cod' | 'upi' | 'upi_on_delivery', transactionId?: string }) => {
     if (deliveryCharge === null || !address || !address.phone) {
       setErrorDetails({
         title: 'Invalid Address',
@@ -143,9 +143,9 @@ export default function CheckoutPage() {
             paymentTransactionId: paymentDetails.transactionId 
           };
         } else {
-          // Destructure to remove paymentTransactionId for COD
-          const { paymentTransactionId, ...codOrderData } = { ...baseOrderData, paymentTransactionId: undefined };
-          orderData = codOrderData;
+          // Destructure to remove paymentTransactionId for COD or UPI on Delivery
+          const { paymentTransactionId, ...otherOrderData } = { ...baseOrderData, paymentTransactionId: undefined };
+          orderData = otherOrderData;
         }
 
         const ordersCollection = collection(db, 'orders');
@@ -188,6 +188,8 @@ export default function CheckoutPage() {
 
     if (paymentMethod === 'cod') {
       await placeOrder({ method: 'cod' });
+    } else if (paymentMethod === 'upi_on_delivery') {
+      await placeOrder({ method: 'upi_on_delivery' });
     } else if (paymentMethod === 'upi') {
       if (!screenshotFile || !screenshotPreview) {
         setErrorDetails({
@@ -249,7 +251,7 @@ export default function CheckoutPage() {
             <RadioGroup 
               value={paymentMethod} 
               onValueChange={(v) => {
-                setPaymentMethod(v as 'cod' | 'upi');
+                setPaymentMethod(v as 'cod' | 'upi' | 'upi_on_delivery');
                 setErrorDetails(null);
               }} 
               className="space-y-4"
@@ -260,6 +262,13 @@ export default function CheckoutPage() {
                 <div>
                   <p className="font-semibold">Cash on Delivery</p>
                   <p className="text-sm text-muted-foreground">Pay with cash when your order arrives.</p>
+                </div>
+              </Label>
+              <Label htmlFor="upi_on_delivery" className={`flex items-center gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-secondary ${!isLoading ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+                <RadioGroupItem value="upi_on_delivery" id="upi_on_delivery" disabled={isLoading} />
+                <div>
+                  <p className="font-semibold">UPI on Delivery</p>
+                  <p className="text-sm text-muted-foreground">Pay with UPI when your order arrives.</p>
                 </div>
               </Label>
               <UpiPayment 
@@ -285,7 +294,7 @@ export default function CheckoutPage() {
           {isLoading ? (
             <Loader2 className="animate-spin" />
           ) : (
-            storeStatus.isOpen ? `Place Order (${paymentMethod.toUpperCase()})` : `Schedule Order (${paymentMethod.toUpperCase()})`
+            storeStatus.isOpen ? `Place Order (${paymentMethod.replace(/_/g, ' ').toUpperCase()})` : `Schedule Order (${paymentMethod.replace(/_/g, ' ').toUpperCase()})`
           )}
         </Button>
       </form>

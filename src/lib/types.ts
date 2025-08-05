@@ -118,7 +118,7 @@ export interface Order {
     subtotal?: number;
     deliveryCharge?: number;
     deliveryAddress: string;
-    paymentMethod: 'cod' | 'upi';
+    paymentMethod: 'cod' | 'upi' | 'upi_on_delivery';
     paymentTransactionId?: string;
     
     // Status and Tracking
@@ -145,4 +145,3 @@ export interface Review {
     comment: string;
     createdAt: string; // Stored as ISO string
 }
-
