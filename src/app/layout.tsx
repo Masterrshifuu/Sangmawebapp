@@ -13,7 +13,7 @@ const noto = Noto_Sans({
   variable: '--font-noto-sans',
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sangma-megha-mart.com';
+const siteUrl = 'https://sangmameghamart.com';
 
 export const metadata: Metadata = {
   title: 'Sangma Megha Mart | Instant Grocery Delivery in Tura, Meghalaya',
