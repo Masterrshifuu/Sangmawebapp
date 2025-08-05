@@ -18,8 +18,8 @@ const config: Config = {
     },
     extend: {
       fontFamily: {
-        sans: ["var(--font-pt-sans)"],
-        headline: ["var(--font-poppins)"],
+        sans: ["var(--font-noto-sans)"],
+        headline: ["var(--font-noto-sans)"],
       },
       colors: {
         border: "hsl(var(--border))",

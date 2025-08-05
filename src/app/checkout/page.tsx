@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
@@ -206,6 +206,10 @@ export default function CheckoutPage() {
     e.preventDefault();
     await proceedToPlaceOrder();
   };
+  
+  const onAddressChange = useCallback((newAddress: Address | null) => {
+    setAddress(newAddress);
+  }, []);
 
   const renderContent = () => {
     if (!isClient || authLoading || (cart.length === 0 && !authLoading) || totalPrice < MINIMUM_ORDER_VALUE) {
@@ -233,7 +237,7 @@ export default function CheckoutPage() {
           finalTotal={finalTotal}
         />
         
-        <DeliveryAddressForm onAddressChange={setAddress} />
+        <DeliveryAddressForm onAddressChange={onAddressChange} />
 
         <Card>
           <CardHeader>

@@ -1,22 +1,16 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { Poppins, PT_Sans } from 'next/font/google';
+import { Noto_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
 import { BottomNavbar } from '@/components/BottomNavbar';
 
-const poppins = Poppins({
-  subsets: ['latin'],
+const noto = Noto_Sans({
+  subsets: ['latin', 'latin-ext'],
   weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-poppins',
-});
-
-const ptSans = PT_Sans({
-  subsets: ['latin'],
-  weight: ['400', '700'],
-  variable: '--font-pt-sans',
+  variable: '--font-noto-sans',
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sangma-megha-mart.com';
@@ -58,13 +52,13 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(poppins.variable, ptSans.variable)}
+      className={cn(noto.variable)}
     >
       <head />
       <body className="antialiased">
         <AuthWrapper>
             <div className="flex flex-col min-h-screen">
-                <div className="flex-grow">
+                <div className="flex-grow pb-16 md:pb-0">
                     {children}
                 </div>
                 <Toaster />
