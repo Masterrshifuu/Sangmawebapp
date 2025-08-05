@@ -16,8 +16,10 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@/hooks/use-auth';
 import { useDebounce } from '@/hooks/use-debounce';
+import { getUserData } from '@/lib/user';
 
 const addressSchema = z.object({
+  name: z.string().min(2, 'Please enter your full name.'),
   area: z.string().min(3, 'Area is required'),
   landmark: z.string().optional(),
   region: z.enum(['North Tura', 'South Tura', 'Tura NEHU'], {
@@ -31,7 +33,8 @@ type AddressFormValues = z.infer<typeof addressSchema>;
 const AddressDisplay = ({ address, onEdit }: { address: Address; onEdit: () => void }) => (
     <div className="flex justify-between items-start p-4 border rounded-lg">
         <div>
-            <p className="font-semibold">{address.area}</p>
+            <p className="font-semibold">{address.name}</p>
+            <p className="text-sm text-muted-foreground">{address.area}</p>
             <p className="text-sm text-muted-foreground">{address.landmark ? `${address.landmark}, ` : ''}{address.region}</p>
             <p className="text-sm text-muted-foreground">{address.phone}</p>
         </div>
@@ -39,8 +42,7 @@ const AddressDisplay = ({ address, onEdit }: { address: Address; onEdit: () => v
     </div>
 );
 
-const AddressForm = ({ initialData, onFormChange }: { initialData: Partial<AddressFormValues>, onFormChange: (data: Address | null) => void }) => {
-    const { user } = useAuth();
+const AddressForm = ({ initialData, showNameField, onFormChange }: { initialData: Partial<AddressFormValues>, showNameField: boolean, onFormChange: (data: Address | null) => void }) => {
     const { address: savedAddress } = useLocation();
 
     const form = useForm<AddressFormValues>({
@@ -80,6 +82,11 @@ const AddressForm = ({ initialData, onFormChange }: { initialData: Partial<Addre
     return (
         <Form {...form}>
             <form className="space-y-4">
+                {showNameField && (
+                     <FormField control={form.control} name="name" render={({ field }) => (
+                        <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="e.g., John Doe" {...field} /></FormControl><FormMessage /></FormItem>
+                    )} />
+                )}
                 <FormField control={form.control} name="area" render={({ field }) => (
                     <FormItem><FormLabel>Area/Locality</FormLabel><FormControl><Input placeholder="e.g., Chandmari" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
@@ -112,6 +119,22 @@ export function DeliveryAddressForm({ onAddressChange }: { onAddressChange: (add
     const { user, loading: authLoading } = useAuth();
     const { address: savedAddress, loading: locationLoading } = useLocation();
     const [isEditing, setIsEditing] = useState(false);
+    const [showNameField, setShowNameField] = useState(false);
+
+    useEffect(() => {
+        const checkUserHistory = async () => {
+            if (!user) {
+                setShowNameField(true); // Always show for guests
+                return;
+            }
+            const userData = await getUserData(user.uid);
+            setShowNameField(userData.totalOrders === 0);
+        };
+
+        if (!authLoading) {
+            checkUserHistory();
+        }
+    }, [user, authLoading]);
 
     useEffect(() => {
         // Automatically enter edit mode if there is no saved address for a logged-in user,
@@ -149,6 +172,12 @@ export function DeliveryAddressForm({ onAddressChange }: { onAddressChange: (add
         )
     }
 
+    const initialData = {
+        ...savedAddress,
+        name: savedAddress?.name || user?.displayName || '',
+        phone: savedAddress?.phone || user?.phoneNumber || '',
+    };
+
     return (
         <Card>
             <CardHeader>
@@ -158,7 +187,8 @@ export function DeliveryAddressForm({ onAddressChange }: { onAddressChange: (add
             <CardContent>
                 {isEditing ? (
                     <AddressForm 
-                        initialData={savedAddress || { phone: user?.phoneNumber || '' }} 
+                        initialData={initialData} 
+                        showNameField={showNameField}
                         onFormChange={onAddressChange}
                     />
                 ) : savedAddress ? (

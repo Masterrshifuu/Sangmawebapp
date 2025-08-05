@@ -35,6 +35,7 @@ export interface CartItem {
 
 export interface Address {
     id: string;
+    name: string;
     area: string;
     landmark?: string;
     region: 'North Tura' | 'South Tura' | 'Tura NEHU';

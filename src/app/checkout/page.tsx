@@ -72,10 +72,10 @@ export default function CheckoutPage() {
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
 
   const placeOrder = async (paymentDetails: { method: 'cod' | 'upi_on_delivery' }) => {
-    if (deliveryCharge === null || !address || !address.phone) {
+    if (deliveryCharge === null || !address || !address.phone || !address.name) {
       setErrorDetails({
         title: 'Invalid Address',
-        message: 'Please provide a valid delivery address and phone number.'
+        message: 'Please provide a valid delivery address including your name and phone number.'
       });
       return;
     }
@@ -96,7 +96,7 @@ export default function CheckoutPage() {
 
         const orderData: Omit<Order, 'id'> = {
           userId: user?.uid || 'guest',
-          userName: user?.displayName || 'Guest Customer',
+          userName: address.name || user?.displayName || 'Guest Customer',
           userEmail: user?.email || 'guest@sangmamart.com',
           userPhone: address.phone,
           createdAt: serverTimestamp(),

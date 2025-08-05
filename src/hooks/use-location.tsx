@@ -59,7 +59,7 @@ export function LocationProvider({ children }: { children: ReactNode }) {
   const setAddress = useCallback((newAddress: Address | null) => {
     setAddressState(newAddress);
     // For guests, we save directly to localStorage.
-    // For logged-in users, the address is saved to Firestore upon placing an order.
+    // For logged-in users, the address is saved to Firestore upon placing an order or in the account page.
     if (!user && newAddress) {
         try {
             localStorage.setItem(GUEST_ADDRESS_KEY, JSON.stringify(newAddress));
