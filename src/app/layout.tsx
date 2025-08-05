@@ -16,29 +16,29 @@ const noto = Noto_Sans({
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sangma-megha-mart.com';
 
 export const metadata: Metadata = {
-  title: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
-  description: 'Your one-stop shop for online grocery in Tura. Order fresh vegetables, snacks, and household essentials from Sangma Megha Mart for fast delivery.',
-  keywords: ['Sangmamart', 'Sangma Megha mart', 'Sangma Mart', 'Tura Mart', 'Tura Grocery', 'Online Grocery Tura'],
+  title: 'Sangma Megha Mart | Instant Grocery Delivery in Tura, Meghalaya',
+  description: 'The fastest grocery delivery service in Tura. Get your items with speed and convenience. Order from Sangma Megha Mart for instant delivery to your doorstep.',
+  keywords: ['Sangma Megha Mart', 'Sangmameghamart', 'Sangmamart', 'Tura Mart', 'Tura Grocery', 'Online Grocery Tura', 'Meghalaya', 'fast delivery', 'instant delivery', 'convenience', 'speed', 'sangma'],
   openGraph: {
     type: 'website',
     locale: 'en_IN',
     url: siteUrl,
     siteName: 'Sangma Megha Mart',
-    title: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
-    description: 'Fast delivery of fresh groceries in Tura, Meghalaya.',
+    title: 'Sangma Megha Mart | Instant Grocery Delivery in Tura',
+    description: 'The fastest and most convenient grocery delivery in Tura, Meghalaya. Your order delivered with speed.',
     images: [
       {
         url: `${siteUrl}/adog.png`,
         width: 1200,
         height: 630,
-        alt: 'Sangma Megha Mart',
+        alt: 'Sangma Megha Mart - Fast Grocery Delivery in Tura',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Sangma Megha Mart | Online Grocery Shopping in Tura',
-    description: 'Fast delivery of fresh groceries in Tura, Meghalaya.',
+    title: 'Sangma Megha Mart | Instant Grocery Delivery in Tura',
+    description: 'The fastest and most convenient grocery delivery in Tura, Meghalaya. Your order delivered with speed.',
     images: [`${siteUrl}/adog.png`],
   },
 };
