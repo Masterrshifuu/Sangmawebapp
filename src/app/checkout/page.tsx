@@ -151,10 +151,10 @@ export default function CheckoutPage() {
         const ordersCollection = collection(db, 'orders');
         const newOrderRef = await addDoc(ordersCollection, orderData);
 
+        // Only save address and increment stats if user is logged in
         if (user) {
-            await incrementUserStat(user.uid, 'totalOrders');
-            // Save address to user's profile
             await saveOrUpdateUserAddress(user.uid, address);
+            await incrementUserStat(user.uid, 'totalOrders');
         }
 
         clearCart();

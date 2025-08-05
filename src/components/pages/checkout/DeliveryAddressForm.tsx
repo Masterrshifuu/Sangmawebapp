@@ -2,19 +2,20 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useState, useEffect, useCallback } from 'react';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useAuth } from '@/hooks/use-auth';
 import type { Address } from '@/lib/types';
 import { useLocation } from '@/hooks/use-location';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useDebounce } from '@/hooks/use-debounce';
+import { v4 as uuidv4 } from 'uuid';
 
 const addressSchema = z.object({
   area: z.string().min(3, 'Area is required'),
@@ -27,12 +28,8 @@ const addressSchema = z.object({
 
 type AddressFormValues = z.infer<typeof addressSchema>;
 
-interface DeliveryAddressFormProps {
-  onAddressChange: (address: Address | null) => void;
-}
-
-const AddressForm = ({ initialData, onSave, onCancel }: { initialData: Partial<AddressFormValues>, onSave: (data: AddressFormValues) => void, onCancel?: () => void }) => {
-    const { register, control, formState: { errors, isValid } } = useForm<AddressFormValues>({
+const AddressForm = ({ initialData, onFormChange }: { initialData: Partial<AddressFormValues>, onFormChange: (data: AddressFormValues) => void }) => {
+    const form = useForm<AddressFormValues>({
         resolver: zodResolver(addressSchema),
         defaultValues: {
             area: initialData.area || '',
@@ -40,84 +37,80 @@ const AddressForm = ({ initialData, onSave, onCancel }: { initialData: Partial<A
             region: initialData.region || undefined,
             phone: initialData.phone || ''
         },
-        mode: 'onChange' // Validate on change to enable autosave
+        mode: 'onChange'
     });
-    
-    const formValues = useWatch({ control });
-    const debouncedFormValues = useDebounce(formValues, 500);
+
+    const watchedValues = form.watch();
 
     useEffect(() => {
-        if (isValid) {
-            onSave(debouncedFormValues as AddressFormValues);
+        if (form.formState.isValid) {
+            onFormChange(watchedValues);
         }
-    }, [debouncedFormValues, isValid, onSave]);
-
+    }, [watchedValues, form.formState.isValid, onFormChange]);
 
     return (
-        <form className="space-y-4">
-             <div className="space-y-1">
-                <label htmlFor="area" className="text-sm font-medium">Area</label>
-                <Input id="area" placeholder="e.g., Chandmari" {...register('area')} />
-                {errors.area && <p className="text-sm text-destructive">{errors.area.message}</p>}
-            </div>
-            <div className="space-y-1">
-                <label htmlFor="landmark" className="text-sm font-medium">Landmark (Optional)</label>
-                <Input id="landmark" placeholder="e.g., Near Traffic Point" {...register('landmark')} />
-            </div>
-            <div className="space-y-1">
-                 <label className="text-sm font-medium">Region</label>
-                 <Select
-                    onValueChange={(value) => register('region').onChange({ target: { name: 'region', value } })}
-                    defaultValue={initialData.region}
-                 >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Select a region" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="North Tura">North Tura</SelectItem>
-                        <SelectItem value="South Tura">South Tura</SelectItem>
-                        <SelectItem value="Tura NEHU">Tura NEHU</SelectItem>
-                    </SelectContent>
-                </Select>
-                {errors.region && <p className="text-sm text-destructive">{errors.region.message}</p>}
-            </div>
-             <div className="space-y-1">
-                <label htmlFor="phone" className="text-sm font-medium">Phone Number</label>
-                <Input id="phone" type="tel" placeholder="+91 123 456 7890" {...register('phone')} />
-                {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
-            </div>
-        </form>
+        <Form {...form}>
+            <form className="space-y-4">
+                <FormField control={form.control} name="area" render={({ field }) => (
+                    <FormItem><FormLabel>Area/Locality</FormLabel><FormControl><Input placeholder="e.g., Chandmari" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="landmark" render={({ field }) => (
+                    <FormItem><FormLabel>Landmark (Optional)</FormLabel><FormControl><Input placeholder="e.g., Near Traffic Point" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="region" render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>Region</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select a region" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                                <SelectItem value="North Tura">North Tura</SelectItem>
+                                <SelectItem value="South Tura">South Tura</SelectItem>
+                                <SelectItem value="Tura NEHU">Tura NEHU</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <FormMessage />
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="phone" render={({ field }) => (
+                    <FormItem><FormLabel>Phone Number</FormLabel><FormControl><Input type="tel" placeholder="+91 123 456 7890" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+            </form>
+        </Form>
     );
 };
 
 
-export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProps) {
+export function DeliveryAddressForm({ onAddressChange }: { onAddressChange: (address: Address | null) => void; }) {
   const { user } = useAuth();
   const { address: defaultAddress, loading } = useLocation();
   const [isEditing, setIsEditing] = useState(false);
-  const [localAddress, setLocalAddress] = useState<Address | null>(defaultAddress);
+  
+  // This state will hold the address for the current order
+  const [currentOrderAddress, setCurrentOrderAddress] = useState<Address | null>(null);
 
   useEffect(() => {
-    // If a default address exists, use it. Otherwise, enter edit mode.
-    if (!loading && !defaultAddress) {
-        setIsEditing(true);
-    }
-     if (!loading && defaultAddress) {
-        setLocalAddress(defaultAddress);
-        onAddressChange(defaultAddress);
-        setIsEditing(false);
+    if (!loading) {
+        if (defaultAddress) {
+            setCurrentOrderAddress(defaultAddress);
+            onAddressChange(defaultAddress);
+            setIsEditing(false);
+        } else {
+            // No default address, or user is a guest. Start with an empty form.
+            setIsEditing(true);
+            onAddressChange(null);
+        }
     }
   }, [defaultAddress, loading, onAddressChange]);
 
-  const handleSave = (data: AddressFormValues) => {
+  const handleFormChange = useCallback((data: AddressFormValues) => {
     const newAddress: Address = {
-        id: defaultAddress?.id || 'new-address',
-        isDefault: defaultAddress?.isDefault ?? true,
-        ...data,
+      id: currentOrderAddress?.id || uuidv4(),
+      isDefault: currentOrderAddress?.isDefault ?? false, // Preserve default status
+      ...data,
     };
-    setLocalAddress(newAddress);
+    setCurrentOrderAddress(newAddress);
     onAddressChange(newAddress);
-  };
+  }, [currentOrderAddress, onAddressChange]);
   
   if (loading) {
       return (
@@ -142,7 +135,7 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
                 <CardTitle>Delivery Address</CardTitle>
                 <CardDescription>Where should we send your order?</CardDescription>
             </div>
-            {localAddress && !isEditing && (
+            {currentOrderAddress && !isEditing && user && (
                 <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>Change</Button>
             )}
         </div>
@@ -150,18 +143,18 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
       <CardContent>
         {isEditing ? (
             <AddressForm 
-                initialData={localAddress || { phone: user?.phoneNumber || '' }} 
-                onSave={handleSave}
+                initialData={currentOrderAddress || { phone: user?.phoneNumber || '' }} 
+                onFormChange={handleFormChange}
             />
-        ) : localAddress ? (
+        ) : currentOrderAddress ? (
             <div className="text-sm text-muted-foreground">
-                <p className="font-semibold text-foreground">{localAddress.area}</p>
-                <p>{localAddress.landmark ? `${localAddress.landmark}, ` : ''}{localAddress.region}</p>
-                <p>{localAddress.phone}</p>
+                <p className="font-semibold text-foreground">{currentOrderAddress.area}</p>
+                <p>{currentOrderAddress.landmark ? `${currentOrderAddress.landmark}, ` : ''}{currentOrderAddress.region}</p>
+                <p>{currentOrderAddress.phone}</p>
             </div>
         ) : (
             <div className="text-center text-sm text-muted-foreground py-4">
-                <p>No address found. Please add one.</p>
+                <p>Please provide a delivery address.</p>
             </div>
         )}
       </CardContent>

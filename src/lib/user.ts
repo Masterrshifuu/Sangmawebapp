@@ -119,7 +119,7 @@ export async function updateUserPhoneNumber(uid: string, phoneNumber: string): P
 
 /**
  * Saves or updates a user's address in their Firestore profile.
- * If the address ID exists, it updates it. If not, it adds it as a new address and sets it as default.
+ * This is called when an order is placed.
  * @param uid The user's unique ID.
  * @param newAddress The address object from the checkout form.
  */
@@ -129,31 +129,31 @@ export async function saveOrUpdateUserAddress(uid: string, newAddress: Address):
     try {
         const userDocRef = doc(db, 'users', uid);
         const userData = await getUserData(uid);
-        const existingAddresses = userData.addresses || [];
+        let existingAddresses = userData.addresses || [];
 
-        let addressToSave = { ...newAddress };
-        if (!addressToSave.id || addressToSave.id === 'checkout-address') {
-            addressToSave.id = uuidv4();
+        // Ensure the new address has an ID.
+        if (!newAddress.id) {
+            newAddress.id = uuidv4();
         }
-        
-        let addressAlreadyExists = false;
-        const updatedAddresses = existingAddresses.map(addr => {
-            if (addr.id === addressToSave.id) {
-                addressAlreadyExists = true;
-                return { ...addr, ...addressToSave, isDefault: true };
+
+        const addressIndex = existingAddresses.findIndex(addr => addr.id === newAddress.id);
+
+        if (addressIndex > -1) {
+            // Address exists, so update it.
+            existingAddresses[addressIndex] = newAddress;
+        } else {
+            // New address, add it to the list.
+            // If it's the first address, make it the default.
+            if (existingAddresses.length === 0) {
+                newAddress.isDefault = true;
             }
-            return { ...addr, isDefault: false };
-        });
-
-        if (!addressAlreadyExists) {
-            addressToSave.isDefault = addressToSave.isDefault === undefined ? false : addressToSave.isDefault; // Ensure isDefault is a boolean
-            updatedAddresses.push(addressToSave);
+            existingAddresses.push(newAddress);
         }
 
-        await updateDoc(userDocRef, { addresses: updatedAddresses });
+        await updateDoc(userDocRef, { addresses: existingAddresses });
 
     } catch (error) {
         console.error("Error saving user address:", error);
-        // Don't throw, as the order itself was successful.
+        // Don't throw, as the order itself might have been successful.
     }
 }
