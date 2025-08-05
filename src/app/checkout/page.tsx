@@ -315,7 +315,7 @@ export default function CheckoutPage() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="flex flex-col h-screen bg-background">
+      <div className="bg-background">
         <header className="sticky top-0 z-10 flex items-center border-b bg-background p-2 md:p-4 h-[65px]">
           <Button variant="ghost" size="icon" asChild>
             <Link href="/" aria-label="Go back">
@@ -325,8 +325,8 @@ export default function CheckoutPage() {
           <h1 className="flex-1 text-center text-lg font-semibold font-headline">Checkout</h1>
           <div className="w-10" />
         </header>
-        <main className="flex-1 overflow-y-auto">
-          <div className="container mx-auto max-w-2xl p-4">
+        <main>
+          <div className="container mx-auto max-w-2xl p-4 pb-24">
             {renderContent()}
           </div>
         </main>
