@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Drawer,
   DrawerContent,
@@ -27,6 +28,7 @@ import {
   Timer,
   XCircle,
   Clock,
+  LogIn,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
@@ -347,50 +349,34 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     )
 };
 
-const TrackingContent = () => {
-    const [user, setUser] = useState<User | null>(null);
+const LoggedInView = ({ user }: { user: User }) => {
     const [activeOrders, setActiveOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-        if (!currentUser) {
-            setLoading(false);
-            setActiveOrders([]);
-        }
-        });
-        return () => unsubscribe();
-    }, []);
-    
-    useEffect(() => {
         if (!user) {
-            if (!user) setLoading(false);
+            setLoading(false);
             return;
         }
-        
+
         setLoading(true);
 
         const ordersRef = collection(db, 'orders');
         const q = query(
-            ordersRef, 
-            where('userId', '==', user.uid), 
+            ordersRef,
+            where('userId', '==', user.uid),
             where('active', '==', true)
         );
-        
+
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            if (querySnapshot.empty) {
-                setActiveOrders([]);
-            } else {
-                const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
-                fetchedOrders.sort((a, b) => {
-                    const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date();
-                    const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date();
-                    return dateB.getTime() - dateA.getTime();
-                });
-                setActiveOrders(fetchedOrders);
-            }
+            const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+            fetchedOrders.sort((a, b) => {
+                const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date();
+                const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date();
+                return dateB.getTime() - dateA.getTime();
+            });
+            setActiveOrders(fetchedOrders);
             setLoading(false);
         }, (err) => {
             console.error('Error with real-time order listener:', err);
@@ -399,32 +385,75 @@ const TrackingContent = () => {
         });
 
         return () => unsubscribe();
-
     }, [user]);
+
+    if (loading) {
+        return (
+            <div className="flex flex-col justify-center items-center p-8 space-y-4">
+                <Logo className="animate-pulse" />
+                <p className="text-muted-foreground text-sm">Finding your orders...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="p-4 text-center text-red-500 bg-red-50 border border-red-200 rounded-lg">
+                <p className="font-bold">Error</p>
+                <p>{error}</p>
+            </div>
+        );
+    }
+
+    return activeOrders.length > 0 ? (
+        activeOrders.map((order, index) => (
+            <div key={order.id} className="space-y-4">
+                {index > 0 && <Separator className="my-6" />}
+                <OrderStatusCard order={order} />
+                <TrackingTimeline status={order.status} />
+                <OrderSummaryCard items={order.items} orderId={order.id} />
+            </div>
+        ))
+    ) : (
+        <NoActiveOrderCard />
+    );
+};
+
+const LoggedOutView = ({ onLoginClick }: { onLoginClick: () => void }) => (
+    <div className="flex flex-col items-center justify-center text-center p-8 space-y-4">
+        <Truck className="w-16 h-16 text-muted-foreground" />
+        <h3 className="text-lg font-semibold">Track Your Order</h3>
+        <p className="text-sm text-muted-foreground">Log in to see the status of your active orders.</p>
+        <Button onClick={onLoginClick}>
+            <LogIn className="mr-2 h-4 w-4" />
+            Login / Sign Up
+        </Button>
+    </div>
+);
+
+
+const TrackingContent = ({ onLoginClick }: { onLoginClick: () => void }) => {
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            setLoading(false);
+        });
+        return () => unsubscribe();
+    }, []);
 
     return (
         <div className="p-4 space-y-6">
             {loading ? (
                 <div className="flex flex-col justify-center items-center p-8 space-y-4">
                     <Logo className="animate-pulse" />
-                    <p className="text-muted-foreground text-sm">Finding your orders...</p>
                 </div>
-            ) : error ? (
-                <div className="p-4 text-center text-red-500 bg-red-50 border border-red-200 rounded-lg">
-                    <p className="font-bold">Error</p>
-                    <p>{error}</p>
-                </div>
-            ) : activeOrders.length > 0 ? (
-                activeOrders.map((order, index) => (
-                    <div key={order.id} className="space-y-4">
-                        {index > 0 && <Separator className="my-6" />}
-                        <OrderStatusCard order={order} />
-                        <TrackingTimeline status={order.status} />
-                        <OrderSummaryCard items={order.items} orderId={order.id} />
-                    </div>
-                ))
+            ) : user ? (
+                <LoggedInView user={user} />
             ) : (
-              <NoActiveOrderCard />
+                <LoggedOutView onLoginClick={onLoginClick} />
             )}
         </div>
     )
@@ -433,44 +462,46 @@ const TrackingContent = () => {
 
 export function TrackingSheet({ children }: { children: React.ReactNode }) {
     const [open, setOpen] = useState(false);
+    const router = useRouter();
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
-    if (isDesktop) {
-        return (
-            <Sheet open={open} onOpenChange={setOpen}>
-                <SheetTrigger asChild>{children}</SheetTrigger>
-                <SheetContent size="sm" className="p-0 flex flex-col">
-                    <SheetHeader className="p-4 border-b">
-                        <SheetTitle>Track Your Order</SheetTitle>
-                    </SheetHeader>
-                    <main className="flex-1 overflow-y-auto">
-                        <TrackingContent />
-                    </main>
-                </SheetContent>
-            </Sheet>
-        );
-    }
-    
+    const handleLoginRedirect = () => {
+        setOpen(false); // Close the sheet before navigating
+        router.push('/login');
+    };
+
+    const SheetComponent = isDesktop ? Sheet : Drawer;
+    const SheetContentComponent = isDesktop ? SheetContent : DrawerContent;
+
     return (
-        <Drawer open={open} onOpenChange={setOpen}>
-            <DrawerTrigger asChild>{children}</DrawerTrigger>
-            <DrawerContent className="h-[85vh] flex flex-col p-0">
-                <DrawerHeader className="p-4 pt-4 text-center flex items-center justify-between border-b">
-                    <DrawerClose asChild>
-                        <Button variant="ghost" size="icon" className="md:flex hidden">
-                        <ChevronLeft />
-                        <span className="sr-only">Back</span>
-                        </Button>
-                    </DrawerClose>
-                    <DrawerTitle className="flex-1 text-center">
-                        Track Your Order
-                    </DrawerTitle>
-                    <div className="w-10 md:block hidden" />
-                </DrawerHeader>
+        <SheetComponent open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>{children}</SheetTrigger>
+            <SheetContentComponent 
+                {...(isDesktop ? 
+                    { size: 'sm', className: "p-0 flex flex-col" } : 
+                    { className: "h-[85vh] flex flex-col p-0" }
+                )}
+            >
+                <SheetHeader className="p-4 border-b">
+                    <SheetTitle>{isDesktop ? 'Track Your Order' : 
+                    <div className="text-center flex items-center justify-between">
+                        <DrawerClose asChild>
+                            <Button variant="ghost" size="icon" className="md:flex hidden">
+                            <ChevronLeft />
+                            <span className="sr-only">Back</span>
+                            </Button>
+                        </DrawerClose>
+                        <span className="flex-1 text-center">
+                            Track Your Order
+                        </span>
+                        <div className="w-10 md:block hidden" />
+                    </div>
+                    }</SheetTitle>
+                </SheetHeader>
                 <main className="flex-1 overflow-y-auto">
-                    <TrackingContent />
+                    <TrackingContent onLoginClick={handleLoginRedirect} />
                 </main>
-            </DrawerContent>
-        </Drawer>
+            </SheetContentComponent>
+        </SheetComponent>
     );
 }
