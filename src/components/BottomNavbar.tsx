@@ -84,7 +84,7 @@ export function BottomNavbar() {
             const SheetComponent = item.component;
             return (
               <SheetComponent key={item.label}>
-                <button className="relative flex flex-col items-center justify-center h-full text-sm font-medium text-muted-foreground hover:text-primary transition-all active:scale-95">
+                <button className="relative flex flex-col items-center justify-center h-full text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-all active:scale-95">
                   <Icon className="w-6 h-6" />
                   <span className="text-xs mt-1">{item.label}</span>
                   {(showCartBadge || showTrackingBadge) && (
@@ -103,7 +103,7 @@ export function BottomNavbar() {
               href={item.href || '#'}
               className={cn(
                 'flex flex-col items-center justify-center h-full text-sm font-medium transition-all active:scale-95',
-                isActive ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                isActive ? 'text-accent-foreground' : 'text-muted-foreground hover:text-accent-foreground'
               )}
             >
               <Icon className="w-6 h-6" />
