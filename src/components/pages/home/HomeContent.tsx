@@ -1,7 +1,6 @@
 
 'use client';
 
-import Link from 'next/link';
 import type { Ad, Product, BestsellerCategory, ShowcaseCategory } from '@/lib/types';
 import Header from '@/components/header';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
@@ -10,10 +9,7 @@ import { BestsellerCard } from '@/components/BestsellerCard';
 import { CarouselItem } from '@/components/ui/carousel';
 import { AdCard } from '@/components/AdCard';
 import { ProductCard } from '@/components/product-card';
-import { useProducts } from '@/hooks/use-products';
-import { useAds } from '@/hooks/use-ads';
 import { getHomePageData } from '@/lib/home';
-import { HomePageSkeleton } from './HomePageSkeleton';
 import { CategorySheet } from '@/components/sheets/CategorySheet';
 
 type FeedItem = Product | Ad;
@@ -50,25 +46,7 @@ function createJustForYouFeed(products: Product[], ads: Ad[]): FeedItem[] {
   return content;
 }
 
-export default function HomeContent() {
-  const { products, loading: productsLoading, error } = useProducts();
-  const { ads, loading: adsLoading } = useAds();
-
-  if (productsLoading || adsLoading) {
-      return <HomePageSkeleton />;
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-background p-4 text-center">
-        <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-md shadow-md max-w-2xl">
-          <h2 className="text-xl font-bold mb-2">Firestore Access Error</h2>
-          <pre className="text-left bg-gray-100 p-3 rounded-md overflow-x-auto whitespace-pre-wrap text-sm">{error}</pre>
-        </div>
-      </div>
-    );
-  }
-
+export default function HomeContent({ products, ads }: { products: Product[], ads: Ad[] }) {
   if (products.length === 0) {
     return (
       <>

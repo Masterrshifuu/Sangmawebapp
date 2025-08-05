@@ -1,6 +1,12 @@
 
 'use client';
 
+// This hook is no longer used for primary data fetching on pages.
+// It can be kept for potential client-side features that need real-time ad updates,
+// or removed if no such features are planned.
+// For now, it remains to avoid breaking any minor components that might still use it,
+// but page-level data is fetched on the server.
+
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
