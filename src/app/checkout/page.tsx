@@ -276,6 +276,7 @@ export default function CheckoutPage() {
         
         <Button 
           type="submit" 
+          variant="secondary"
           className="w-full" 
           size="lg"
           disabled={isLoading || !canPlaceOrder || (paymentMethod === 'upi' && !screenshotFile) || isScheduleRequired}

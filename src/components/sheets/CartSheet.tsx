@@ -110,6 +110,7 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
           </div>
 
           <Button 
+              variant="secondary"
               className="w-full" 
               size="lg"
               onClick={onCheckout}
