@@ -1,16 +1,22 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { Noto_Sans } from 'next/font/google';
+import { Poppins, PT_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
 import { BottomNavbar } from '@/components/BottomNavbar';
 
-const notoSans = Noto_Sans({
+const poppins = Poppins({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-sans',
+  variable: '--font-poppins',
+});
+
+const ptSans = PT_Sans({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-pt-sans',
 });
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://sangma-megha-mart.com';
@@ -52,7 +58,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(notoSans.variable)}
+      className={cn(poppins.variable, ptSans.variable)}
     >
       <head />
       <body className="antialiased">
