@@ -254,7 +254,7 @@ export default function CheckoutPage() {
               className="space-y-4"
               disabled={isLoading}
             >
-              <Label htmlFor="cod" className={`flex items-center gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${!isLoading ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+              <Label htmlFor="cod" className={`flex items-center gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-secondary ${!isLoading ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
                 <RadioGroupItem value="cod" id="cod" disabled={isLoading} />
                 <div>
                   <p className="font-semibold">Cash on Delivery</p>
