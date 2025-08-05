@@ -1,4 +1,3 @@
-
 'use client';
 
 import Image from "next/image";
@@ -55,7 +54,7 @@ export const UpiPayment = ({
                             </div>
                         )}
                         <Label htmlFor="screenshot-upload" className="w-full">
-                            <div className="mt-2 flex justify-center items-center px-6 py-4 border-2 border-dashed rounded-md cursor-pointer hover:border-primary">
+                            <div className="mt-2 flex justify-center items-center px-6 py-4 border-2 border-dashed rounded-md cursor-pointer hover:border-secondary">
                                 <div className="text-center">
                                     <Upload className="mx-auto h-8 w-8 text-muted-foreground" />
                                     <p className="mt-1 text-sm text-muted-foreground">
