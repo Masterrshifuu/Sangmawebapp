@@ -9,6 +9,7 @@
  */
 
 import { ai } from '@/ai/genkit';
+import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
 import { getProductSuggestions } from './chat-tools';
 import { Product } from '@/lib/types';
@@ -35,6 +36,7 @@ export async function chat(input: ChatInput): Promise<ChatOutput> {
 
 const prompt = ai.definePrompt({
   name: 'chatShoppingPrompt',
+  model: googleAI.model('gemini-1.5-flash-latest'),
   input: { schema: ChatInputSchema },
   output: { schema: ChatOutputSchema },
   tools: [getProductSuggestions],
