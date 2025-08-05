@@ -19,7 +19,6 @@ import { incrementUserStat, saveOrUpdateUserAddress } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
 import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
-import { verifyPayment } from '@/app/actions';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -197,30 +196,9 @@ export default function CheckoutPage() {
         });
         return;
       }
-      setIsVerifying(true);
-      try {
-        const result = await verifyPayment({
-            screenshotDataUri: screenshotPreview,
-            expectedAmount: finalTotal,
-        });
-
-        if (result.isPaymentVerified) {
-          await placeOrder({ method: 'upi', transactionId: result.transactionId });
-        } else {
-          setErrorDetails({
-              title: "Payment Verification Failed",
-              message: `Reason: ${result.reason}. Please check your payment and try again.`
-          });
-        }
-      } catch (error: any) {
-        console.error("Error verifying payment:", error);
-        setErrorDetails({
-            title: "Verification Service Error",
-            message: `An error occurred during payment verification. Error: ${error.message}`
-        });
-      } finally {
-        setIsVerifying(false);
-      }
+      // Since AI verification is removed, we'll just proceed with a placeholder transaction ID
+      // In a real app, you would have a different verification method or manual check.
+      await placeOrder({ method: 'upi', transactionId: `manual_review_${Date.now()}` });
     }
   }
 
