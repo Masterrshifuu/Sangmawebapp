@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A shopping assistant AI flow.
@@ -97,7 +98,7 @@ const chatShoppingFlow = ai.defineFlow(
       // and continue the generation.
     }
 
-    const textResponse = ll-response.text();
+    const textResponse = llmResponse.text;
     const productsResponse =
       (llmResponse.part('toolResponse')?.output as Product[]) || [];
 
