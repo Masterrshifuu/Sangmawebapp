@@ -1,108 +1,109 @@
-import { z } from 'zod';
-import { defineFlow, defineTool, invokeTool } from 'genkit';
-import { structuredOutput } from '@genkit-ai/ai';
-import { definePrompt, chat, imageData } from 'ai/prompts';
-import { Firestore } from '@google-cloud/firestore';
+'use server';
+/**
+ * @fileOverview A shopping assistant AI flow.
+ *
+ * - chatShopping - A function that handles the chat interaction.
+ * - ChatShoppingInput - The input type for the chatShopping function.
+ * - ChatShoppingOutput - The return type for the chatShopping function.
+ */
 
-// Initialize Firestore
-const db = new Firestore();
+import {ai} from '@/ai/genkit';
+import {z} from 'zod';
+import {getProducts} from '@/lib/products';
+import type {Product} from '@/lib/types';
+import Fuse from 'fuse.js';
 
-// Define tool schema
-const ShowProductArgs = z.object({
-  category: z.string().describe('Category of the product'),
+// Input and Output Schemas
+const ChatShoppingInputSchema = z.object({
+  message: z.string(),
+  history: z.array(z.any()).optional(),
 });
+export type ChatShoppingInput = z.infer<typeof ChatShoppingInputSchema>;
 
-// Tool: Show product from Firestore by category
-export const showProduct = defineTool({
-  name: 'showProduct',
-  description: 'Fetch products by category from Firestore',
-  inputSchema: ShowProductArgs,
-  handler: async (args) => {
-    const snapshot = await db.collection('products')
-      .where('category', '==', args.category)
-      .limit(3)
-      .get();
-
-    if (snapshot.empty) {
-      return `No products found for category: ${args.category}`;
-    }
-
-    const products = snapshot.docs.map((doc) => doc.data());
-    return products.map((p) => `${p.name} - ₹${p.price}`).join('\n');
-  },
+const ChatShoppingOutputSchema = z.object({
+  response: z.string(),
+  products: z.array(z.any()).optional(),
 });
+export type ChatShoppingOutput = z.infer<typeof ChatShoppingOutputSchema>;
 
-// Define the prompt
-export const prompt = definePrompt({
-  name: 'chatShoppingPrompt',
-  kind: 'chat',
-  config: {
-    model: 'gemini-1.5-pro',
-    tools: [showProduct],
+// Tool: Product Suggestions
+const getProductSuggestions = ai.defineTool(
+  {
+    name: 'getProductSuggestions',
+    description:
+      'Get a list of product suggestions based on a search query. Use this to help users find products.',
+    inputSchema: z.object({
+      query: z.string().describe('The user query to search for products.'),
+    }),
+    outputSchema: z.array(
+      z.object({
+        id: z.string(),
+        name: z.string(),
+        category: z.string(),
+        price: z.number(),
+        description: z.string(),
+      })
+    ),
   },
-  inputSchema: z.object({
-    message: z.string(),
-    photoDataUri: z.string().optional(),
-    history: z.any().optional(),
-  }),
-  generate: async ({ message, photoDataUri, history }) => {
-    const input = [
-      ...(photoDataUri
-        ? [imageData(photoDataUri, 'user uploaded photo')]
-        : []),
-      message,
-    ];
-
-    const response = await chat({
-      model: 'gemini-1.5-pro',
-      messages: [
-        ...(history ?? []),
-        { role: 'user', content: input },
-      ],
-      tools: [showProduct],
+  async input => {
+    console.log(`Searching for products with query: ${input.query}`);
+    const {products} = await getProducts();
+    const fuse = new Fuse(products, {
+      keys: ['name', 'category', 'description', 'tags'],
+      threshold: 0.4,
     });
+    const results = fuse.search(input.query, {limit: 5});
+    return results.map(r => ({
+      id: r.item.id,
+      name: r.item.name,
+      category: r.item.category,
+      price: r.item.mrp ?? r.item.price,
+      description: r.item.description,
+    }));
+  }
+);
 
-    return response;
-  },
-});
+// Main chatShopping function (exported)
+export async function chatShopping(
+  input: ChatShoppingInput
+): Promise<ChatShoppingOutput> {
+  return await chatShoppingFlow(input);
+}
 
-// Define the flow
-export const chatShoppingFlow = defineFlow(
+// Genkit Flow
+const chatShoppingFlow = ai.defineFlow(
   {
     name: 'chatShoppingFlow',
-    inputSchema: z.object({
-      message: z.string(),
-      photoDataUri: z.string().optional(),
-      history: z.any().optional(),
-    }),
-    outputSchema: z.object({
-      message: z.string(),
-      history: z.any(),
-    }),
+    inputSchema: ChatShoppingInputSchema,
+    outputSchema: ChatShoppingOutputSchema,
   },
-  async ({ message, photoDataUri, history }) => {
-    const llmResponse = await prompt({
-      message,
-      photoDataUri,
-      history,
+  async ({message, history}) => {
+    const llmResponse = await ai.generate({
+      model: 'googleai/gemini-1.5-flash-latest',
+      tools: [getProductSuggestions],
+      system: `You are a friendly and helpful shopping assistant for Sangma Megha Mart, an online grocery store.
+      - Your goal is to help users find products and answer their questions.
+      - Use the getProductSuggestions tool to find relevant products when the user asks for them.
+      - If the tool returns products, mention them in your response and you can also return the product data.
+      - If the tool returns no products, inform the user that you couldn't find what they were looking for.
+      - Keep your responses concise and helpful.`,
+      history: history || [],
+      prompt: message,
     });
 
-    // Safely handle tool calls
-    const toolCalls =
-      llmResponse?.toolResponses?.flatMap((r: any) => r.tools || []) || [];
-
-    const toolResponses = [];
-    for (const call of toolCalls) {
-      const result = await invokeTool(call);
-      toolResponses.push(result);
+    const toolResponsePart = llmResponse.part('toolRequest');
+    if (toolResponsePart) {
+      // We are just returning the text for now, but in a real app you might want to call the tool
+      // and continue the generation.
     }
 
+    const textResponse = ll-response.text();
+    const productsResponse =
+      (llmResponse.part('toolResponse')?.output as Product[]) || [];
+
     return {
-      message:
-        toolResponses.length > 0
-          ? toolResponses.join('\n')
-          : structuredOutput(llmResponse),
-      history: llmResponse.history,
+      response: textResponse,
+      products: productsResponse,
     };
   }
 );

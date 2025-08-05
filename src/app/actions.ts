@@ -4,10 +4,8 @@
 import { db } from "@/lib/firebase";
 import { doc, updateDoc } from "firebase/firestore";
 import { verifyPayment as verifyPaymentFlow, type VerifyPaymentInput, type VerifyPaymentOutput } from "@/ai/flows/verify-payment-flow";
-import { chat as chatShoppingFlow, type ChatInput, type ChatOutput } from "@/ai/flows/chat-shopping";
+import { chatShopping, type ChatShoppingInput, type ChatShoppingOutput } from "@/ai/flows/chat-shopping";
 import type { AIState, Product } from '@/lib/types';
-import { getProducts } from "@/lib/products";
-import Fuse from 'fuse.js';
 
 export async function verifyPayment(input: VerifyPaymentInput): Promise<VerifyPaymentOutput> {
     return await verifyPaymentFlow(input);
@@ -37,17 +35,17 @@ export async function cancelOrder(orderId: string): Promise<{ success: boolean, 
 export async function continueConversation(history: AIState): Promise<AIState> {
     const lastMessage = history.slice(-1)[0];
 
-    const chatInput: ChatInput = {
+    const chatInput: ChatShoppingInput = {
         message: lastMessage.content,
-        photoDataUri: lastMessage.attachments?.find(a => a.contentType === 'image')?.url,
+        // photoDataUri: lastMessage.attachments?.find(a => a.contentType === 'image')?.url,
         history: history.slice(0, -1).map(h => ({
             role: h.role,
-            parts: [{ text: h.content }],
+            content: [{ text: h.content }],
         })),
     };
     
     try {
-        const result = await chatShoppingFlow(chatInput);
+        const result: ChatShoppingOutput = await chatShopping(chatInput);
         
         return [
             ...history,
