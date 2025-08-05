@@ -56,8 +56,10 @@ export function ProductClientPage({
     <main className="container mx-auto px-4 py-8 pb-32">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
             
-            <ProductImageGallery images={allImages} productName={currentProduct.name} />
-
+            <div className="md:w-[80%] lg:w-[70%] justify-self-center">
+                <ProductImageGallery images={allImages} productName={currentProduct.name} />
+            </div>
+            
             {/* Product Details */}
             <div className="flex flex-col space-y-4">
                 <Badge variant="outline" className="w-fit">{currentProduct.category}</Badge>
