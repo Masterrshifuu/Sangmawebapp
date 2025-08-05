@@ -1,102 +1,108 @@
-
-'use server';
-/**
- * @fileOverview A shopping assistant AI agent.
- *
- * - chat - A function that handles the shopping chat process.
- * - ChatInput - The input type for the chat function.
- * - ChatOutput - The return type for the chat function.
- */
-
-import { ai } from '@/ai/genkit';
-import { googleAI } from '@genkit-ai/googleai';
 import { z } from 'zod';
-import { getProductSuggestions } from './chat-tools';
-import { Product } from '@/lib/types';
-import { getProducts } from '@/lib/products';
+import { defineFlow, defineTool, invokeTool } from 'genkit';
+import { structuredOutput } from '@genkit-ai/ai';
+import { definePrompt, chat, imageData } from 'ai/prompts';
+import { Firestore } from '@google-cloud/firestore';
 
-const ChatInputSchema = z.object({
-  history: z.array(z.any()).optional(),
-  message: z.string().describe('The user\'s message.'),
-  photoDataUri: z.string().optional().describe(
-      "A photo related to the user's query, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-});
-export type ChatInput = z.infer<typeof ChatInputSchema>;
+// Initialize Firestore
+const db = new Firestore();
 
-const ChatOutputSchema = z.object({
-  response: z.string().describe('The AI\'s response to the user.'),
-  products: z.array(z.any()).optional().describe('A list of relevant product recommendations.'),
-});
-export type ChatOutput = z.infer<typeof ChatOutputSchema>;
-
-export async function chat(input: ChatInput): Promise<ChatOutput> {
-  return chatShoppingFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'chatShoppingPrompt',
-  model: googleAI.model('gemini-1.5-flash-latest'),
-  input: { schema: ChatInputSchema },
-  output: { schema: ChatOutputSchema },
-  tools: [getProductSuggestions],
-  system: `You are a friendly and helpful shopping assistant for Sangma Megha Mart, an online grocery store in Tura.
-- Your goal is to help users find products, provide recommendations, and answer questions about groceries.
-- If a user asks for a recipe, provide one and use the getProductSuggestions tool to recommend the necessary ingredients available in the store.
-- If the user provides a photo, analyze it and provide relevant product suggestions. For example, if they show a picture of a coffee mug, suggest different types of coffee available.
-- Be concise and conversational.
-- When recommending products, clearly state their names and prices.
-- Do not make up products or prices. Only use the information from the getProductSuggestions tool.`,
-  prompt: `User message: {{{message}}}
-{{#if photoDataUri}}
-[User has provided this image: {{media url=photoDataUri}}]
-{{/if}}`,
+// Define tool schema
+const ShowProductArgs = z.object({
+  category: z.string().describe('Category of the product'),
 });
 
-const chatShoppingFlow = ai.defineFlow(
-  {
-    name: 'chatShoppingFlow',
-    inputSchema: ChatInputSchema,
-    outputSchema: ChatOutputSchema,
-  },
-  async (input) => {
-    const { history, message, photoDataUri } = input;
-    const llmResponse = await prompt({
-        message,
-        photoDataUri,
-        history: history || [],
-    });
-    const { output } = llmResponse;
-    if (!output) {
-      return { response: "I'm sorry, I couldn't generate a response." };
+// Tool: Show product from Firestore by category
+export const showProduct = defineTool({
+  name: 'showProduct',
+  description: 'Fetch products by category from Firestore',
+  inputSchema: ShowProductArgs,
+  handler: async (args) => {
+    const snapshot = await db.collection('products')
+      .where('category', '==', args.category)
+      .limit(3)
+      .get();
+
+    if (snapshot.empty) {
+      return `No products found for category: ${args.category}`;
     }
 
-    // Check if the model decided to use the product suggestion tool
-    const toolCalls = llmResponse.requests.flatMap(r => r.tools || []);
-    if (toolCalls.length > 0) {
-        const productNames = toolCalls.flatMap(call =>
-            (call.input as { queries: string[] }).queries
-        );
+    const products = snapshot.docs.map((doc) => doc.data());
+    return products.map((p) => `${p.name} - ₹${p.price}`).join('\n');
+  },
+});
 
-        if (productNames.length > 0) {
-            const { products: allProducts } = await getProducts();
-            const recommendedProducts = allProducts.filter(p =>
-                productNames.some(name =>
-                    p.name.toLowerCase().includes(name.toLowerCase()) ||
-                    p.tags?.some(tag => tag.toLowerCase().includes(name.toLowerCase()))
-                )
-            ).slice(0, 5); // Limit to 5 recommendations
+// Define the prompt
+export const prompt = definePrompt({
+  name: 'chatShoppingPrompt',
+  kind: 'chat',
+  config: {
+    model: 'gemini-1.5-pro',
+    tools: [showProduct],
+  },
+  inputSchema: z.object({
+    message: z.string(),
+    photoDataUri: z.string().optional(),
+    history: z.any().optional(),
+  }),
+  generate: async ({ message, photoDataUri, history }) => {
+    const input = [
+      ...(photoDataUri
+        ? [imageData(photoDataUri, 'user uploaded photo')]
+        : []),
+      message,
+    ];
 
-            return {
-                response: output.response,
-                products: recommendedProducts,
-            };
-        }
+    const response = await chat({
+      model: 'gemini-1.5-pro',
+      messages: [
+        ...(history ?? []),
+        { role: 'user', content: input },
+      ],
+      tools: [showProduct],
+    });
+
+    return response;
+  },
+});
+
+// Define the flow
+export const chatShoppingFlow = defineFlow(
+  {
+    name: 'chatShoppingFlow',
+    inputSchema: z.object({
+      message: z.string(),
+      photoDataUri: z.string().optional(),
+      history: z.any().optional(),
+    }),
+    outputSchema: z.object({
+      message: z.string(),
+      history: z.any(),
+    }),
+  },
+  async ({ message, photoDataUri, history }) => {
+    const llmResponse = await prompt({
+      message,
+      photoDataUri,
+      history,
+    });
+
+    // Safely handle tool calls
+    const toolCalls =
+      llmResponse?.toolResponses?.flatMap((r: any) => r.tools || []) || [];
+
+    const toolResponses = [];
+    for (const call of toolCalls) {
+      const result = await invokeTool(call);
+      toolResponses.push(result);
     }
 
     return {
-        response: output.response,
-        products: output.products || [],
+      message:
+        toolResponses.length > 0
+          ? toolResponses.join('\n')
+          : structuredOutput(llmResponse),
+      history: llmResponse.history,
     };
   }
 );
