@@ -18,7 +18,6 @@ import { Loader2, ChevronLeft, X } from 'lucide-react';
 import { incrementUserStat, saveOrUpdateUserAddress } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
-import { UpiPayment } from '@/components/pages/checkout/UpiPayment';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,12 +41,9 @@ export default function CheckoutPage() {
   const { cart, totalPrice, clearCart } = useCart();
   
   const [address, setAddress] = useState<Address | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi' | 'upi_on_delivery'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'upi_on_delivery'>('cod');
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [screenshotFile, setScreenshotFile] = useState<File | null>(null);
-  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
   const [errorDetails, setErrorDetails] = useState<{ title: string; message: string; } | null>(null);
   const [scheduleForNextDay, setScheduleForNextDay] = useState(true);
   
@@ -75,20 +71,7 @@ export default function CheckoutPage() {
   }, [totalPrice, address]);
   const finalTotal = useMemo(() => totalPrice + (deliveryCharge ?? 0), [totalPrice, deliveryCharge]);
 
-  const handleScreenshotChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setErrorDetails(null);
-      setScreenshotFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setScreenshotPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const placeOrder = async (paymentDetails: { method: 'cod' | 'upi' | 'upi_on_delivery', transactionId?: string }) => {
+  const placeOrder = async (paymentDetails: { method: 'cod' | 'upi_on_delivery' }) => {
     if (deliveryCharge === null || !address || !address.phone) {
       setErrorDetails({
         title: 'Invalid Address',
@@ -111,7 +94,7 @@ export default function CheckoutPage() {
     try {
         const orderStatus = storeStatus.isOpen ? 'Pending' : 'Scheduled';
 
-        const baseOrderData = {
+        const orderData: Omit<Order, 'id'> = {
           userId: user?.uid || 'guest',
           userName: user?.displayName || 'Guest Customer',
           userEmail: user?.email || 'guest@sangmamart.com',
@@ -135,19 +118,6 @@ export default function CheckoutPage() {
           extraReasons: []
         };
         
-        let orderData: Omit<Order, 'id'>;
-
-        if (paymentDetails.method === 'upi') {
-          orderData = { 
-            ...baseOrderData, 
-            paymentTransactionId: paymentDetails.transactionId 
-          };
-        } else {
-          // Destructure to remove paymentTransactionId for COD or UPI on Delivery
-          const { paymentTransactionId, ...otherOrderData } = { ...baseOrderData, paymentTransactionId: undefined };
-          orderData = otherOrderData;
-        }
-
         const ordersCollection = collection(db, 'orders');
         const newOrderRef = await addDoc(ordersCollection, orderData);
 
@@ -172,7 +142,6 @@ export default function CheckoutPage() {
       });
     } finally {
       setIsPlacingOrder(false);
-      setIsVerifying(false);
     }
   };
   
@@ -190,17 +159,6 @@ export default function CheckoutPage() {
       await placeOrder({ method: 'cod' });
     } else if (paymentMethod === 'upi_on_delivery') {
       await placeOrder({ method: 'upi_on_delivery' });
-    } else if (paymentMethod === 'upi') {
-      if (!screenshotFile || !screenshotPreview) {
-        setErrorDetails({
-            title: "Screenshot Missing",
-            message: "Please upload a payment screenshot to proceed with a UPI order."
-        });
-        return;
-      }
-      // Since AI verification is removed, we'll just proceed with a placeholder transaction ID
-      // In a real app, you would have a different verification method or manual check.
-      await placeOrder({ method: 'upi', transactionId: `manual_review_${Date.now()}` });
     }
   }
 
@@ -219,7 +177,7 @@ export default function CheckoutPage() {
     }
     
     const canPlaceOrder = address !== null;
-    const isLoading = isPlacingOrder || isVerifying;
+    const isLoading = isPlacingOrder;
     
     // Order can be placed if store is open, OR if it's closed but user agreed to schedule
     const canProceed = storeStatus.isOpen || (!storeStatus.isOpen && scheduleForNextDay);
@@ -251,7 +209,7 @@ export default function CheckoutPage() {
             <RadioGroup 
               value={paymentMethod} 
               onValueChange={(v) => {
-                setPaymentMethod(v as 'cod' | 'upi' | 'upi_on_delivery');
+                setPaymentMethod(v as 'cod' | 'upi_on_delivery');
                 setErrorDetails(null);
               }} 
               className="space-y-4"
@@ -271,15 +229,6 @@ export default function CheckoutPage() {
                   <p className="text-sm text-muted-foreground">Pay with UPI when your order arrives.</p>
                 </div>
               </Label>
-              <UpiPayment 
-                paymentMethod={paymentMethod}
-                canPlaceOrder={canPlaceOrder}
-                finalTotal={finalTotal}
-                screenshotPreview={screenshotPreview}
-                screenshotFile={screenshotFile}
-                handleScreenshotChange={handleScreenshotChange}
-                isVerifying={isLoading}
-              />
             </RadioGroup>
           </CardContent>
         </Card>
@@ -289,7 +238,7 @@ export default function CheckoutPage() {
           variant="secondary"
           className="w-full" 
           size="lg"
-          disabled={isLoading || !canPlaceOrder || (paymentMethod === 'upi' && !screenshotFile) || !canProceed}
+          disabled={isLoading || !canPlaceOrder || !canProceed}
         >
           {isLoading ? (
             <Loader2 className="animate-spin" />
