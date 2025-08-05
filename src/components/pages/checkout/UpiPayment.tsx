@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Upload } from "lucide-react";
 
 interface UpiPaymentProps {
-    paymentMethod: 'cod' | 'upi';
+    paymentMethod: 'cod' | 'upi' | 'upi_on_delivery';
     canPlaceOrder: boolean;
     finalTotal: number;
     screenshotPreview: string | null;
@@ -31,7 +31,7 @@ export const UpiPayment = ({
     const upiName = "Sangma Megha Mart";
 
     return (
-        <Label htmlFor="upi" className={`flex items-start gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-primary ${canPlaceOrder && !isVerifying ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
+        <Label htmlFor="upi" className={`flex items-start gap-4 p-4 border rounded-lg has-[:checked]:bg-muted/50 has-[:checked]:border-secondary ${canPlaceOrder && !isVerifying ? 'cursor-pointer' : 'cursor-not-allowed opacity-50'}`}>
             <RadioGroupItem value="upi" id="upi" disabled={!canPlaceOrder || isVerifying} />
             <div className="flex-1">
                 <p className="font-semibold">Pay with UPI</p>
