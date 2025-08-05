@@ -146,7 +146,7 @@ export async function saveOrUpdateUserAddress(uid: string, newAddress: Address):
         });
 
         if (!addressAlreadyExists) {
- addressToSave.isDefault = addressToSave.isDefault ?? true; // Ensure isDefault is a boolean
+            addressToSave.isDefault = addressToSave.isDefault === undefined ? false : addressToSave.isDefault; // Ensure isDefault is a boolean
             updatedAddresses.push(addressToSave);
         }
 

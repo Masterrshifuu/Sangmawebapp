@@ -14,6 +14,7 @@ import type { Address } from '@/lib/types';
 import { useLocation } from '@/hooks/use-location';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDebounce } from '@/hooks/use-debounce';
 
 const addressSchema = z.object({
   area: z.string().min(3, 'Area is required'),
@@ -31,20 +32,29 @@ interface DeliveryAddressFormProps {
 }
 
 const AddressForm = ({ initialData, onSave, onCancel }: { initialData: Partial<AddressFormValues>, onSave: (data: AddressFormValues) => void, onCancel?: () => void }) => {
-    const { register, handleSubmit, control, formState: { errors } } = useForm<AddressFormValues>({
+    const { register, control, formState: { errors, isValid } } = useForm<AddressFormValues>({
         resolver: zodResolver(addressSchema),
         defaultValues: {
             area: initialData.area || '',
             landmark: initialData.landmark || '',
             region: initialData.region || undefined,
             phone: initialData.phone || ''
-        }
+        },
+        mode: 'onChange' // Validate on change to enable autosave
     });
+    
+    const formValues = useWatch({ control });
+    const debouncedFormValues = useDebounce(formValues, 500);
 
-    const regionValue = useWatch({ control, name: 'region' });
+    useEffect(() => {
+        if (isValid) {
+            onSave(debouncedFormValues as AddressFormValues);
+        }
+    }, [debouncedFormValues, isValid, onSave]);
+
 
     return (
-        <form onSubmit={handleSubmit(onSave)} className="space-y-4">
+        <form className="space-y-4">
              <div className="space-y-1">
                 <label htmlFor="area" className="text-sm font-medium">Area</label>
                 <Input id="area" placeholder="e.g., Chandmari" {...register('area')} />
@@ -56,8 +66,11 @@ const AddressForm = ({ initialData, onSave, onCancel }: { initialData: Partial<A
             </div>
             <div className="space-y-1">
                  <label className="text-sm font-medium">Region</label>
-                 <Select value={regionValue} onValueChange={(val) => handleSubmit(() => {})}>{/* Hack to trigger re-render on change */}
-                    <SelectTrigger {...register('region')}>
+                 <Select
+                    onValueChange={(value) => register('region').onChange({ target: { name: 'region', value } })}
+                    defaultValue={initialData.region}
+                 >
+                    <SelectTrigger>
                         <SelectValue placeholder="Select a region" />
                     </SelectTrigger>
                     <SelectContent>
@@ -73,10 +86,6 @@ const AddressForm = ({ initialData, onSave, onCancel }: { initialData: Partial<A
                 <Input id="phone" type="tel" placeholder="+91 123 456 7890" {...register('phone')} />
                 {errors.phone && <p className="text-sm text-destructive">{errors.phone.message}</p>}
             </div>
-            <div className="flex justify-end gap-2 pt-2">
-                {onCancel && <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>}
-                <Button type="submit">Save Address</Button>
-            </div>
         </form>
     );
 };
@@ -86,6 +95,7 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
   const { user } = useAuth();
   const { address: defaultAddress, loading } = useLocation();
   const [isEditing, setIsEditing] = useState(false);
+  const [localAddress, setLocalAddress] = useState<Address | null>(defaultAddress);
 
   useEffect(() => {
     // If a default address exists, use it. Otherwise, enter edit mode.
@@ -93,6 +103,7 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
         setIsEditing(true);
     }
      if (!loading && defaultAddress) {
+        setLocalAddress(defaultAddress);
         onAddressChange(defaultAddress);
         setIsEditing(false);
     }
@@ -101,11 +112,11 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
   const handleSave = (data: AddressFormValues) => {
     const newAddress: Address = {
         id: defaultAddress?.id || 'new-address',
-        isDefault: defaultAddress?.isDefault || true,
+        isDefault: defaultAddress?.isDefault ?? true,
         ...data,
     };
+    setLocalAddress(newAddress);
     onAddressChange(newAddress);
-    setIsEditing(false);
   };
   
   if (loading) {
@@ -131,7 +142,7 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
                 <CardTitle>Delivery Address</CardTitle>
                 <CardDescription>Where should we send your order?</CardDescription>
             </div>
-            {defaultAddress && !isEditing && (
+            {localAddress && !isEditing && (
                 <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>Change</Button>
             )}
         </div>
@@ -139,15 +150,14 @@ export function DeliveryAddressForm({ onAddressChange }: DeliveryAddressFormProp
       <CardContent>
         {isEditing ? (
             <AddressForm 
-                initialData={defaultAddress || { phone: user?.phoneNumber || '' }} 
+                initialData={localAddress || { phone: user?.phoneNumber || '' }} 
                 onSave={handleSave}
-                onCancel={defaultAddress ? () => setIsEditing(false) : undefined}
             />
-        ) : defaultAddress ? (
+        ) : localAddress ? (
             <div className="text-sm text-muted-foreground">
-                <p className="font-semibold text-foreground">{defaultAddress.area}</p>
-                <p>{defaultAddress.landmark ? `${defaultAddress.landmark}, ` : ''}{defaultAddress.region}</p>
-                <p>{defaultAddress.phone}</p>
+                <p className="font-semibold text-foreground">{localAddress.area}</p>
+                <p>{localAddress.landmark ? `${localAddress.landmark}, ` : ''}{localAddress.region}</p>
+                <p>{localAddress.phone}</p>
             </div>
         ) : (
             <div className="text-center text-sm text-muted-foreground py-4">

@@ -39,7 +39,7 @@ export interface Address {
     landmark?: string;
     region: 'North Tura' | 'South Tura' | 'Tura NEHU';
     phone: string;
-    isDefault?: boolean;
+    isDefault: boolean;
 }
 
 export interface UserData {
