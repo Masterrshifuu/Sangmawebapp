@@ -94,11 +94,22 @@ export function SearchDialog({ children }: SearchDialogProps) {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const isDesktop = useMediaQuery("(min-width: 768px)");
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
 
     const handleProductClick = () => {
         setOpen(false);
     }
     
+    // Defer rendering of the mobile view until the client has mounted
+    if (!isClient) {
+        return <>{children}</>;
+    }
+
     // This is the mobile view, which uses the Drawer
     if (!isDesktop) {
         return (

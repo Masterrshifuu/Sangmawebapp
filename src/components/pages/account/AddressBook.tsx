@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { User } from 'firebase/auth';
 import type { UserData, Address } from '@/lib/types';
 import { useForm } from 'react-hook-form';
@@ -15,6 +16,7 @@ import { updateAddresses } from '@/lib/account-actions';
 import { v4 as uuidv4 } from 'uuid';
 import { useLocation } from '@/hooks/use-location';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const addressSchema = z.object({
   name: z.string().min(2, 'Please enter your full name.'),
@@ -85,7 +87,12 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
 export function AddressBook({ user, userData }: { user: User; userData: UserData }) {
   const [addresses, setAddresses] = useState(userData.addresses || []);
   const [editingAddress, setEditingAddress] = useState<Address | 'new' | null>(null);
-  const { setAddress: setGlobalAddress } = useLocation();
+  const { setAddress: setGlobalAddress, loading: locationLoading } = useLocation();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleSave = async (address: Address) => {
     let newAddresses;
@@ -128,6 +135,15 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
     }
   }
 
+  if (!isClient || locationLoading) {
+      return (
+          <div className="space-y-4">
+              <Skeleton className="h-20 w-full rounded-md" />
+              <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+      )
+  }
+
   return (
     <div className="space-y-4">
         {addresses.length === 0 && !editingAddress && (
@@ -138,6 +154,7 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
         <div key={address.id} className="p-3 border rounded-md flex justify-between items-start">
           <div className="flex-1">
             <p className="font-semibold">{address.name}</p>
+            <p className="text-sm text-muted-foreground">{address.area}</p>
             <p className="text-sm text-muted-foreground">{address.landmark ? `${address.landmark}, ` : ''}{address.region}</p>
             <p className="text-sm text-muted-foreground">{address.phone}</p>
           </div>
