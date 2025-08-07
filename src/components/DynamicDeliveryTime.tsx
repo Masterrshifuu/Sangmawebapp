@@ -55,23 +55,22 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
         return () => clearInterval(intervalId);
     }, [isClient]);
 
-    if (!deliveryInfo.text) {
-        return null;
+    if (!isClient || !deliveryInfo.text) {
+        return (
+             <div className={cn("flex items-center gap-1 text-sm text-muted-foreground", className)}>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Calculating...</span>
+            </div>
+        );
     }
-
-    const isCalculating = deliveryInfo.text === 'Calculating...';
-
+    
     return (
         <div className={cn(
             "flex items-center gap-1 text-sm",
-            isCalculating ? "text-muted-foreground" : (deliveryInfo.isOpen ? "text-muted-foreground" : "text-destructive"),
+            deliveryInfo.isOpen ? "text-muted-foreground" : "text-destructive",
             className
         )}>
-            {isCalculating ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-                <Clock className="w-4 h-4" />
-            )}
+            <Clock className="w-4 h-4" />
             <span>{deliveryInfo.text}</span>
         </div>
     );
