@@ -10,6 +10,7 @@ import {
   increment,
   serverTimestamp,
   FieldValue,
+  runTransaction,
 } from 'firebase/firestore';
 import type { UserData, CartItem, Address } from './types';
 import { v4 as uuidv4 } from 'uuid';
@@ -156,4 +157,41 @@ export async function saveOrUpdateUserAddress(uid: string, newAddress: Address):
         console.error("Error saving user address:", error);
         // Don't throw, as the order itself might have been successful.
     }
+}
+
+/**
+ * Gets the next available order ID from a Firestore counter.
+ * Atomically increments the counter and returns the formatted ID.
+ * @returns {Promise<string>} The next formatted order ID (e.g., "SMM0006").
+ */
+export async function getNextOrderId(): Promise<string> {
+  const counterRef = doc(db, 'counters', 'orderCounter');
+
+  try {
+    const newOrderNumber = await runTransaction(db, async (transaction) => {
+      const counterDoc = await transaction.get(counterRef);
+      
+      let nextNumber;
+      if (!counterDoc.exists()) {
+        // If the counter doesn't exist, start it at SMM0006.
+        // The value stored will be 6.
+        nextNumber = 6;
+        transaction.set(counterRef, { currentNumber: nextNumber });
+      } else {
+        // The counter exists, increment it.
+        const currentNumber = counterDoc.data().currentNumber || 0;
+        nextNumber = currentNumber + 1;
+        transaction.update(counterRef, { currentNumber: nextNumber });
+      }
+      return nextNumber;
+    });
+
+    // Format the number with leading zeros.
+    return `SMM${String(newOrderNumber).padStart(4, '0')}`;
+  } catch (error) {
+    console.error("Error getting next order ID:", error);
+    // Fallback to a random ID if the transaction fails, to avoid blocking orders.
+    // This should be monitored.
+    return `ERR-${uuidv4().substring(0, 8)}`;
+  }
 }

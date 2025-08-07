@@ -90,7 +90,7 @@ export const OrderCard = ({ order, onOrderCancel }: { order: Order; onOrderCance
       <div className="p-4 border-b">
         <div className="flex justify-between items-center">
           <div>
-            <p className="font-bold text-sm">Order #{order.id?.substring(0, 8)}</p>
+            <p className="font-bold text-sm">Order #{order.id}</p>
             <p className="text-xs text-muted-foreground">{format(createdAt, 'PPP, p')}</p>
           </div>
           <span className={cn('text-xs font-semibold px-2 py-1 rounded-full', statusStyles[status.toLowerCase().replace(/ /g, '_')] || 'bg-gray-100 text-gray-800')}>

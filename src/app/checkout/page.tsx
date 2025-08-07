@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { useCart } from '@/hooks/use-cart';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import type { Order, Address } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Loader2, ChevronLeft, X, CheckCircle2, ShoppingBag } from 'lucide-react';
-import { incrementUserStat, saveOrUpdateUserAddress } from '@/lib/user';
+import { getNextOrderId, incrementUserStat, saveOrUpdateUserAddress } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
 import {
@@ -93,6 +93,9 @@ export default function CheckoutPage() {
     try {
         const orderStatus = storeStatus.isOpen ? 'Pending' : 'Scheduled';
 
+        // Get the next custom order ID
+        const customOrderId = await getNextOrderId();
+
         const orderData: Omit<Order, 'id'> = {
           userId: user?.uid || 'guest',
           userName: address.name || user?.displayName || 'Guest Customer',
@@ -117,8 +120,9 @@ export default function CheckoutPage() {
           extraReasons: []
         };
         
-        const ordersCollection = collection(db, 'orders');
-        const newOrderRef = await addDoc(ordersCollection, orderData);
+        // Use the custom order ID to create the document reference
+        const newOrderRef = doc(db, 'orders', customOrderId);
+        await setDoc(newOrderRef, orderData);
 
         // Only save address and increment stats if user is logged in
         if (user) {
