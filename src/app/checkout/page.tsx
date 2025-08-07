@@ -14,7 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { Loader2, ChevronLeft, X } from 'lucide-react';
+import { Loader2, ChevronLeft, X, CheckCircle2, ShoppingBag } from 'lucide-react';
 import { incrementUserStat, saveOrUpdateUserAddress } from '@/lib/user';
 import { CheckoutPageSkeleton } from '@/components/pages/checkout/CheckoutPageSkeleton';
 import { OrderSummary } from '@/components/pages/checkout/OrderSummary';
@@ -31,12 +31,10 @@ import {
 import { DeliveryAddressForm } from '@/components/pages/checkout/DeliveryAddressForm';
 import { getStoreStatus } from '@/lib/datetime';
 import { StoreClosedWarning } from '@/components/pages/checkout/StoreClosedWarning';
-import { useToast } from '@/hooks/use-toast';
 
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const { cart, totalPrice, clearCart } = useCart();
   
@@ -46,6 +44,7 @@ export default function CheckoutPage() {
   const [isClient, setIsClient] = useState(false);
   const [errorDetails, setErrorDetails] = useState<{ title: string; message: string; } | null>(null);
   const [scheduleForNextDay, setScheduleForNextDay] = useState(true);
+  const [successfulOrder, setSuccessfulOrder] = useState<string | null>(null);
   
   useEffect(() => {
     setIsClient(true);
@@ -128,12 +127,8 @@ export default function CheckoutPage() {
         }
 
         clearCart();
-        toast({
-            title: "Order Placed Successfully!",
-            description: "You can track your order in the 'My Orders' section.",
-        });
-        router.push(`/my-orders/${newOrderRef.id}`);
-
+        setSuccessfulOrder(newOrderRef.id);
+        
     } catch (error: any) {
       console.error("Error placing order: ", error);
       setErrorDetails({
@@ -255,8 +250,47 @@ export default function CheckoutPage() {
     setErrorDetails(null);
   };
 
+  const closeSuccessDialog = () => {
+    setSuccessfulOrder(null);
+    router.push('/');
+  }
+
   return (
     <>
+      {/* Success Dialog */}
+      <AlertDialog open={!!successfulOrder}>
+        <AlertDialogContent className="max-w-sm">
+            <AlertDialogCancel 
+                onClick={closeSuccessDialog}
+                className="absolute right-2 top-2 p-1 h-auto bg-transparent border-none hover:bg-muted-foreground/20"
+            >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+            </AlertDialogCancel>
+             <div className="text-center p-4">
+                <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
+                <AlertDialogHeader>
+                    <AlertDialogTitle className="text-2xl">Thank You!</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Your order has been placed successfully. Your order ID is:
+                        <br />
+                        <strong className="text-foreground">{successfulOrder}</strong>
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter className="mt-6 flex-col sm:flex-col sm:space-x-0 gap-2">
+                    <Button asChild>
+                         <Link href={`/my-orders/${successfulOrder}`}>Track Your Order</Link>
+                    </Button>
+                    <Button variant="outline" onClick={closeSuccessDialog}>
+                        <ShoppingBag className="mr-2 h-4 w-4" />
+                        Continue Shopping
+                    </Button>
+                </AlertDialogFooter>
+            </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Error Dialog */}
       <AlertDialog open={!!errorDetails} onOpenChange={() => setErrorDetails(null)}>
         <AlertDialogContent>
              <AlertDialogCancel className="absolute right-2 top-2 p-1 h-auto bg-transparent border-none hover:bg-muted-foreground/20">
