@@ -4,14 +4,21 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Clock } from 'lucide-react';
+import { Clock, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getStoreStatus } from '@/lib/datetime';
 
 export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
-    const [deliveryInfo, setDeliveryInfo] = useState({ text: '', isEstimate: false, isOpen: true });
+    const [deliveryInfo, setDeliveryInfo] = useState({ text: 'Calculating...', isEstimate: false, isOpen: true });
+    const [isClient, setIsClient] = useState(false);
     
     useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isClient) return;
+
         const calculateDeliveryTime = () => {
             const storeStatus = getStoreStatus();
 
@@ -46,19 +53,25 @@ export const DynamicDeliveryTime = ({ className }: { className?: string }) => {
         const intervalId = setInterval(calculateDeliveryTime, 1000 * 60); // Update every minute
 
         return () => clearInterval(intervalId);
-    }, []);
+    }, [isClient]);
 
     if (!deliveryInfo.text) {
         return null;
     }
 
+    const isCalculating = deliveryInfo.text === 'Calculating...';
+
     return (
         <div className={cn(
             "flex items-center gap-1 text-sm",
-            deliveryInfo.isOpen ? "text-muted-foreground" : "text-destructive",
+            isCalculating ? "text-muted-foreground" : (deliveryInfo.isOpen ? "text-muted-foreground" : "text-destructive"),
             className
         )}>
-            <Clock className="w-4 h-4" />
+            {isCalculating ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+                <Clock className="w-4 h-4" />
+            )}
             <span>{deliveryInfo.text}</span>
         </div>
     );
