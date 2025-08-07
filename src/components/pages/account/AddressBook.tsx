@@ -87,7 +87,7 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
 export function AddressBook({ user, userData }: { user: User; userData: UserData }) {
   const [addresses, setAddresses] = useState(userData.addresses || []);
   const [editingAddress, setEditingAddress] = useState<Address | 'new' | null>(null);
-  const { setAddress: setGlobalAddress, loading: locationLoading } = useLocation();
+  const { address: globalAddress, setAddress: setGlobalAddress, loading: locationLoading } = useLocation();
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -122,9 +122,16 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
   };
   
   const handleDelete = async (addressId: string) => {
+    const addressToDelete = addresses.find(a => a.id === addressId);
     const newAddresses = addresses.filter(a => a.id !== addressId);
+    
     await updateAddresses(user.uid, newAddresses);
     setAddresses(newAddresses);
+
+    // If the deleted address was the default one, clear the global address state.
+    if (addressToDelete && addressToDelete.isDefault) {
+        setGlobalAddress(null);
+    }
   };
 
   const handleSetDefault = async (addressId: string) => {
