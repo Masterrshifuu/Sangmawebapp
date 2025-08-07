@@ -127,6 +127,7 @@ export interface Order {
     
     // Timestamps
     createdAt?: Timestamp | FieldValue;
+    cancelledAt?: Timestamp | FieldValue;
     
     // Delays
     extraTimeInMinutes: number;
