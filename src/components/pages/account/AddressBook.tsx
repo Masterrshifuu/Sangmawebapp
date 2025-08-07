@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState } from 'react';
@@ -18,6 +17,7 @@ import { useLocation } from '@/hooks/use-location';
 import { cn } from '@/lib/utils';
 
 const addressSchema = z.object({
+  name: z.string().min(2, 'Please enter your full name.'),
   area: z.string().min(3, 'Area is required'),
   landmark: z.string().optional(),
   region: z.enum(['North Tura', 'South Tura', 'Tura NEHU']),
@@ -28,6 +28,7 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
   const form = useForm<z.infer<typeof addressSchema>>({
     resolver: zodResolver(addressSchema),
     defaultValues: {
+      name: address?.name || '',
       area: address?.area || '',
       landmark: address?.landmark || '',
       region: address?.region || 'South Tura',
@@ -46,6 +47,10 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address; onSave:
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4 border rounded-lg bg-secondary/30 mt-4">
+        <FormField control={form.control} name="name" render={({ field }) => (
+            <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="Your Name" {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+
         <FormField control={form.control} name="area" render={({ field }) => (
             <FormItem><FormLabel>Area/Locality</FormLabel><FormControl><Input placeholder="e.g., Chandmari" {...field} /></FormControl><FormMessage /></FormItem>
         )} />
@@ -132,7 +137,7 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
       {addresses.map((address) => (
         <div key={address.id} className="p-3 border rounded-md flex justify-between items-start">
           <div className="flex-1">
-            <p className="font-semibold">{address.area}</p>
+            <p className="font-semibold">{address.name}</p>
             <p className="text-sm text-muted-foreground">{address.landmark ? `${address.landmark}, ` : ''}{address.region}</p>
             <p className="text-sm text-muted-foreground">{address.phone}</p>
           </div>

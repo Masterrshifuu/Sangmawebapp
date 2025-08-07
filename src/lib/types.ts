@@ -120,7 +120,6 @@ export interface Order {
     deliveryCharge?: number;
     deliveryAddress: string;
     paymentMethod: 'cod' | 'upi' | 'upi_on_delivery';
-    paymentTransactionId?: string;
     
     // Status and Tracking
     status: string; // e.g., 'Pending', 'Confirmed', 'OutForDelivery', 'Delivered', 'Cancelled', 'Scheduled'
@@ -128,9 +127,6 @@ export interface Order {
     
     // Timestamps
     createdAt?: Timestamp | FieldValue;
-    deliveryStartTime?: Timestamp | FieldValue; // Set when status becomes 'OutForDelivery'
-    expectedDeliveryTime?: Timestamp | FieldValue; // deliveryStartTime + 35 min + extraTime
-    cancelledAt?: Timestamp | FieldValue;
     
     // Delays
     extraTimeInMinutes: number;
