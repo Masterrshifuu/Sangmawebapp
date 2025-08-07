@@ -94,16 +94,21 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
     setIsClient(true);
   }, []);
 
-  const handleSave = async (address: Address) => {
+  const handleSave = async (addressData: Address) => {
+    // Ensure there is always an ID
+    const addressToSave = { ...addressData, id: addressData.id || uuidv4() };
+
     let newAddresses;
-    if (addresses.some(a => a.id === address.id)) {
-      newAddresses = addresses.map(a => a.id === address.id ? address : a);
+    const existingIndex = addresses.findIndex(a => a.id === addressToSave.id);
+
+    if (existingIndex > -1) {
+        newAddresses = addresses.map((a, index) => index === existingIndex ? addressToSave : a);
     } else {
-      // If adding a new address, make it the default if it's the first one
-      if (addresses.length === 0) {
-        address.isDefault = true;
-      }
-      newAddresses = [...addresses, address];
+        // If adding a new address, make it the default if it's the first one
+        if (addresses.length === 0) {
+            addressToSave.isDefault = true;
+        }
+        newAddresses = [...addresses, addressToSave];
     }
     
     await updateAddresses(user.uid, newAddresses);
@@ -111,8 +116,8 @@ export function AddressBook({ user, userData }: { user: User; userData: UserData
     setEditingAddress(null);
     
     // If the saved address is the default, update the global state
-    if (address.isDefault) {
-        setGlobalAddress(address);
+    if (addressToSave.isDefault) {
+        setGlobalAddress(addressToSave);
     }
   };
   
