@@ -51,9 +51,11 @@ const AddressForm = ({ initialData, showNameField, onFormChange }: { initialData
         mode: 'onChange'
     });
     
+    // This effect ensures the form resets only when the initial data fundamentally changes (e.g., user logs in)
+    // not on every re-render.
     useEffect(() => {
         form.reset(initialData);
-    }, [initialData, form]);
+    }, [initialData.name, initialData.phone, initialData.area, initialData.region, form]);
 
     const formValues = form.watch();
     const debouncedFormValues = useDebounce(formValues, 500);
