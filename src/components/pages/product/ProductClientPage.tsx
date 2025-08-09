@@ -60,7 +60,7 @@ export function ProductClientPage({
     <main className="container mx-auto px-4 py-8 pb-32">
         <div className="grid md:grid-cols-2 gap-8 lg:gap-16">
             
-            <div className="md:w-[80%] lg:w-[70%] justify-self-center">
+            <div className="md:w-[80%] lg:w-[70%]">
                 <ProductImageGallery images={allImages} productName={currentProduct.name} />
             </div>
             
