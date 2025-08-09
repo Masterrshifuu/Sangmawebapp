@@ -96,7 +96,7 @@ export default function CheckoutPage() {
         // Get the next custom order ID
         const customOrderId = await getNextOrderId();
 
-        const orderData: Omit<Order, 'id'> = {
+        const orderData: Omit<Order, 'id' | 'cancelledAt'> = {
           userId: user?.uid || 'guest',
           userName: address.name || user?.displayName || 'Guest Customer',
           userEmail: user?.email || 'guest@sangmamart.com',
@@ -256,7 +256,8 @@ export default function CheckoutPage() {
 
   const closeSuccessDialog = () => {
     setSuccessfulOrder(null);
-    router.push('/');
+    // No longer redirects automatically
+    // router.push('/');
   }
 
   return (
@@ -282,7 +283,7 @@ export default function CheckoutPage() {
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter className="mt-6 flex-col sm:flex-col sm:space-x-0 gap-2">
-                    <Button asChild>
+                     <Button asChild onClick={() => setSuccessfulOrder(null)}>
                          <Link href={`/my-orders/${successfulOrder}`}>Track Your Order</Link>
                     </Button>
                     <Button variant="outline" onClick={closeSuccessDialog}>
