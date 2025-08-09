@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
 import { BottomNavbar } from '@/components/BottomNavbar';
+import Script from 'next/script';
 
 const noto = Noto_Sans({
   subsets: ['latin', 'latin-ext'],
@@ -14,6 +15,7 @@ const noto = Noto_Sans({
 });
 
 const siteUrl = 'https://sangmameghamart.com';
+const GTAG_ID = 'AW-17455424479';
 
 export const metadata: Metadata = {
   title: 'Sangma Megha Mart | Instant Grocery Delivery in Tura, Meghalaya',
@@ -55,7 +57,19 @@ export default function RootLayout({
       className={cn(noto.variable)}
     >
       <head />
-      <body className="antialiased">
+      <body>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${GTAG_ID}`}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GTAG_ID}');
+          `}
+        </Script>
         <AuthWrapper>
             <div className="flex flex-col min-h-screen">
                 <div className="flex-grow pb-16 md:pb-0">
