@@ -5,8 +5,9 @@ import { Noto_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
-import { BottomNavbar } from '@/components/BottomNavbar';
 import Script from 'next/script';
+import HomeSheetManager from '@/components/HomeSheetManager';
+
 
 const noto = Noto_Sans({
   subsets: ['latin', 'latin-ext'],
@@ -76,7 +77,7 @@ export default function RootLayout({
                     {children}
                 </div>
                 <Toaster />
-                <BottomNavbar />
+                <HomeSheetManager />
             </div>
         </AuthWrapper>
       </body>

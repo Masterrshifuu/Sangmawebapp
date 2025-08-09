@@ -4,7 +4,11 @@ import { getAds } from '@/lib/ads';
 import { getProducts } from '@/lib/products';
 import { HomePageSkeleton } from '@/components/pages/home/HomePageSkeleton';
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   // Fetch data on the server in parallel
   const [{ products, error: productsError }, { ads, error: adsError }] = await Promise.all([
     getProducts(),
@@ -29,7 +33,13 @@ export default async function HomePage() {
       return <HomePageSkeleton />;
   }
 
+  const openTrackingSheet = searchParams?.from === 'checkout';
+
   return (
-      <HomeContent products={products} ads={ads} />
+      <HomeContent 
+        products={products} 
+        ads={ads} 
+        openTrackingSheetOnLoad={openTrackingSheet}
+      />
   );
 }

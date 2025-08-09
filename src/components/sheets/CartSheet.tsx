@@ -154,46 +154,32 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
   )
 }
 
-export function CartSheet({ children }: { children: React.ReactNode }) {
-  const [isOpen, setIsOpen] = useState(false);
+export function CartSheet({ open, onOpenChange, children }: { open: boolean, onOpenChange: (open: boolean) => void, children?: React.ReactNode }) {
   const router = useRouter();
   const isDesktop = useMediaQuery("(min-width: 768px)");
   const { totalItems } = useCart();
   
   const handleProceedToCheckout = () => {
-    setIsOpen(false);
+    onOpenChange(false);
     router.push('/checkout');
   };
+  
+  const SheetComponent = isDesktop ? Sheet : Drawer;
+  const SheetContentComponent = isDesktop ? SheetContent : DrawerContent;
+  const Trigger = children ? (isDesktop ? SheetTrigger : DrawerTrigger) : React.Fragment;
 
-  if (isDesktop) {
-    return (
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>{children}</SheetTrigger>
-          <SheetContent size="sm" className="p-0 flex flex-col">
-             <SheetHeader className="p-4 border-b">
-                <SheetTitle>Your Cart ({totalItems})</SheetTitle>
-            </SheetHeader>
-            <div className="flex-1 flex flex-col min-h-0">
-                <CartContent onCheckout={handleProceedToCheckout} />
-            </div>
-          </SheetContent>
-        </Sheet>
-      );
-  }
 
   return (
-    <Drawer open={isOpen} onOpenChange={setIsOpen}>
-      <DrawerTrigger asChild>{children}</DrawerTrigger>
-      <DrawerContent
-        className="h-[85vh] flex flex-col p-0"
-      >
-        <DrawerHeader className="p-4 pt-4 border-b flex items-center justify-between">
-          <DrawerTitle className="flex-1 text-center">Your Cart ({totalItems})</DrawerTitle>
-        </DrawerHeader>
+    <SheetComponent open={open} onOpenChange={onOpenChange}>
+      {children && <Trigger asChild>{children}</Trigger>}
+      <SheetContentComponent size="sm" className="p-0 flex flex-col">
+          <SheetHeader className="p-4 border-b">
+            <SheetTitle>Your Cart ({totalItems})</SheetTitle>
+        </SheetHeader>
         <div className="flex-1 flex flex-col min-h-0">
             <CartContent onCheckout={handleProceedToCheckout} />
         </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContentComponent>
+    </SheetComponent>
   );
 }

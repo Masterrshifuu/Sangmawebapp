@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import type { Ad, Product, BestsellerCategory, ShowcaseCategory } from '@/lib/types';
 import Header from '@/components/header';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
@@ -11,6 +12,9 @@ import { AdCard } from '@/components/AdCard';
 import { ProductCard } from '@/components/product-card';
 import { getHomePageData } from '@/lib/home';
 import { CategorySheet } from '@/components/sheets/CategorySheet';
+import { TrackingSheet } from '@/components/sheets/TrackingSheet';
+import { CartSheet } from '@/components/sheets/CartSheet';
+import { BottomNavbar } from '@/components/BottomNavbar';
 
 type FeedItem = Product | Ad;
 
@@ -46,7 +50,30 @@ function createJustForYouFeed(products: Product[], ads: Ad[]): FeedItem[] {
   return content;
 }
 
-export default function HomeContent({ products, ads }: { products: Product[], ads: Ad[] }) {
+interface HomeContentProps {
+  products: Product[];
+  ads: Ad[];
+  openTrackingSheetOnLoad?: boolean;
+}
+
+export default function HomeContent({ products, ads, openTrackingSheetOnLoad = false }: HomeContentProps) {
+  const [openSheet, setOpenSheet] = useState<'Tracking' | 'Cart' | null>(null);
+
+  useEffect(() => {
+    if (openTrackingSheetOnLoad) {
+      setOpenSheet('Tracking');
+    }
+  }, [openTrackingSheetOnLoad]);
+
+  const handleOpenSheet = (label: 'Tracking' | 'Cart') => {
+    setOpenSheet(label);
+  };
+
+  const handleSheetClose = () => {
+    setOpenSheet(null);
+  };
+
+
   if (products.length === 0) {
     return (
       <>
@@ -121,6 +148,13 @@ export default function HomeContent({ products, ads }: { products: Product[], ad
             </section>
         )}
       </main>
+
+      {/* Sheet Management */}
+      <TrackingSheet open={openSheet === 'Tracking'} onOpenChange={handleSheetClose} />
+      <CartSheet open={openSheet === 'Cart'} onOpenChange={handleSheetClose} />
+      
+      {/* Pass the sheet-opening function to the navbar */}
+      <BottomNavbar openSheet={handleOpenSheet} />
     </>
   );
 }

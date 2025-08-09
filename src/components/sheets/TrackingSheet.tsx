@@ -40,6 +40,8 @@ import {
   query,
   where,
   onSnapshot,
+  writeBatch,
+  doc,
 } from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
 import { format, addMinutes, differenceInMinutes, formatRelative } from 'date-fns';
@@ -432,7 +434,7 @@ const LoggedOutView = ({ onLoginClick }: { onLoginClick: () => void }) => (
 );
 
 
-const TrackingContent = ({ onLoginClick }: { onLoginClick: () => void }) => {
+const TrackingContent = ({ onLoginClick, isOpen }: { onLoginClick: () => void, isOpen: boolean }) => {
     const [user, setUser] = useState<User | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -443,6 +445,40 @@ const TrackingContent = ({ onLoginClick }: { onLoginClick: () => void }) => {
         });
         return () => unsubscribe();
     }, []);
+
+     // Effect to mark orders as viewed when the sheet is opened
+    useEffect(() => {
+        if (isOpen && user) {
+            const markOrdersAsViewed = async () => {
+                const ordersRef = collection(db, 'orders');
+                const q = query(
+                    ordersRef,
+                    where('userId', '==', user.uid),
+                    where('active', '==', true),
+                    where('viewedByCustomer', '==', false)
+                );
+                
+                try {
+                    const querySnapshot = await onSnapshot(q, (snapshot) => {
+                        if (!snapshot.empty) {
+                            const batch = writeBatch(db);
+                            snapshot.docs.forEach((docSnapshot) => {
+                                const orderDocRef = doc(db, 'orders', docSnapshot.id);
+                                batch.update(orderDocRef, { viewedByCustomer: true });
+                            });
+                            batch.commit().catch(err => console.error("Failed to mark orders as viewed:", err));
+                        }
+                    });
+                     // Detach listener immediately after first execution to avoid infinite loops
+                    return () => query();
+                } catch (err) {
+                    console.error("Error querying unread orders:", err);
+                }
+            };
+
+            markOrdersAsViewed();
+        }
+    }, [isOpen, user]);
 
     return (
         <div className="p-4 space-y-6">
@@ -460,22 +496,25 @@ const TrackingContent = ({ onLoginClick }: { onLoginClick: () => void }) => {
 }
 
 
-export function TrackingSheet({ children }: { children: React.ReactNode }) {
-    const [open, setOpen] = useState(false);
+export function TrackingSheet({ open, onOpenChange, children }: { open: boolean, onOpenChange: (open: boolean) => void, children?: React.ReactNode }) {
     const router = useRouter();
     const isDesktop = useMediaQuery("(min-width: 768px)");
 
     const handleLoginRedirect = () => {
-        setOpen(false); // Close the sheet before navigating
+        onOpenChange(false); // Close the sheet before navigating
         router.push('/login');
     };
+    
+    // The component can now be controlled from the outside.
+    // If `children` are provided, it will render a trigger. Otherwise, it won't.
 
     const SheetComponent = isDesktop ? Sheet : Drawer;
     const SheetContentComponent = isDesktop ? SheetContent : DrawerContent;
+    const Trigger = children ? (isDesktop ? SheetTrigger : DrawerTrigger) : React.Fragment;
 
     return (
-        <SheetComponent open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>{children}</SheetTrigger>
+        <SheetComponent open={open} onOpenChange={onOpenChange}>
+            {children && <Trigger asChild>{children}</Trigger>}
             <SheetContentComponent 
                 {...(isDesktop ? 
                     { size: 'sm', className: "p-0 flex flex-col" } : 
@@ -485,21 +524,21 @@ export function TrackingSheet({ children }: { children: React.ReactNode }) {
                 <SheetHeader className="p-4 border-b">
                     <SheetTitle>{isDesktop ? 'Track Your Order' : 
                     <div className="text-center flex items-center justify-between">
-                        <DrawerClose asChild>
-                            <Button variant="ghost" size="icon" className="md:flex hidden">
-                            <ChevronLeft />
-                            <span className="sr-only">Back</span>
+                         <DrawerClose asChild>
+                            <Button variant="ghost" size="icon">
+                                <ChevronLeft />
+                                <span className="sr-only">Back</span>
                             </Button>
                         </DrawerClose>
                         <span className="flex-1 text-center">
                             Track Your Order
                         </span>
-                        <div className="w-10 md:block hidden" />
+                        <div className="w-10" />
                     </div>
                     }</SheetTitle>
                 </SheetHeader>
                 <main className="flex-1 overflow-y-auto">
-                    <TrackingContent onLoginClick={handleLoginRedirect} />
+                    <TrackingContent onLoginClick={handleLoginRedirect} isOpen={open} />
                 </main>
             </SheetContentComponent>
         </SheetComponent>

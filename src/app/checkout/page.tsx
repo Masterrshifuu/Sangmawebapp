@@ -116,6 +116,7 @@ export default function CheckoutPage() {
           deliveryCharge: deliveryCharge,
           totalAmount: finalTotal,
           active: true,
+          viewedByCustomer: false, // New field for notification tracking
           extraTimeInMinutes: 0,
           extraReasons: []
         };
@@ -256,8 +257,7 @@ export default function CheckoutPage() {
 
   const closeSuccessDialog = () => {
     setSuccessfulOrder(null);
-    // No longer redirects automatically
-    // router.push('/');
+    router.push('/?from=checkout');
   }
 
   return (

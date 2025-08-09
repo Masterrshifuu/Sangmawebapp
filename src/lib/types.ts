@@ -124,6 +124,7 @@ export interface Order {
     // Status and Tracking
     status: string; // e.g., 'Pending', 'Confirmed', 'OutForDelivery', 'Delivered', 'Cancelled', 'Scheduled'
     active: boolean; // true if order is in-progress
+    viewedByCustomer: boolean; // For notification tracking
     
     // Timestamps
     createdAt?: Timestamp | FieldValue;

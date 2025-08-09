@@ -12,13 +12,14 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 
 
-export function BottomNavbar() {
+export function BottomNavbar({ openSheet }: { openSheet?: (label: 'Tracking' | 'Cart') => void }) {
   const pathname = usePathname();
   const { user } = useAuth();
   const { totalItems } = useCart();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [activeOrderCount, setActiveOrderCount] = useState(0);
+  const [unreadOrderCount, setUnreadOrderCount] = useState(0);
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -44,27 +45,47 @@ export function BottomNavbar() {
   useEffect(() => {
     if (!user) {
       setActiveOrderCount(0);
+      setUnreadOrderCount(0);
       return;
     }
 
     const ordersRef = collection(db, 'orders');
-    const q = query(
+    const qActive = query(
         ordersRef, 
         where('userId', '==', user.uid), 
         where('active', '==', true)
     );
+     const qUnread = query(
+        ordersRef, 
+        where('userId', '==', user.uid), 
+        where('active', '==', true),
+        where('viewedByCustomer', '==', false)
+    );
     
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        setActiveOrderCount(querySnapshot.size);
+    const unsubActive = onSnapshot(qActive, (snapshot) => {
+        setActiveOrderCount(snapshot.size);
+    });
+    
+    const unsubUnread = onSnapshot(qUnread, (snapshot) => {
+        setUnreadOrderCount(snapshot.size);
     });
 
-    return () => unsubscribe();
+    return () => {
+      unsubActive();
+      unsubUnread();
+    };
   }, [user]);
 
 
   const hiddenPaths = ['/ai-chat', '/checkout', '/login', '/signup/phone'];
   if (hiddenPaths.some(path => pathname.startsWith(path))) {
     return null;
+  }
+  
+  const handleSheetOpen = (label: 'Tracking' | 'Cart') => {
+      if(openSheet) {
+          openSheet(label)
+      }
   }
 
   return (
@@ -77,23 +98,25 @@ export function BottomNavbar() {
           const isActive = (item.isLink && item.href === '/') ? pathname === '/' : (item.isLink && pathname.startsWith(item.href || '---'));
           const Icon = item.icon;
           const showCartBadge = item.label === 'Cart' && totalItems > 0;
-          const showTrackingBadge = item.label === 'Tracking' && activeOrderCount > 0;
-          const badgeCount = item.label === 'Cart' ? totalItems : activeOrderCount;
+          const showTrackingBadge = item.label === 'Tracking' && unreadOrderCount > 0;
+          const badgeCount = item.label === 'Cart' ? totalItems : unreadOrderCount;
 
           if (item.component) {
-            const SheetComponent = item.component;
+            // The sheet trigger is now a simple button that calls the parent-provided function
             return (
-              <SheetComponent key={item.label}>
-                <button className="relative flex flex-col items-center justify-center h-full text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-all active:scale-95">
-                  <Icon className="w-6 h-6" />
-                  <span className="text-xs mt-1">{item.label}</span>
-                  {(showCartBadge || showTrackingBadge) && (
-                     <span className="absolute top-1 right-4 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center">
-                        {badgeCount}
-                    </span>
-                  )}
-                </button>
-              </SheetComponent>
+              <button 
+                key={item.label}
+                onClick={() => handleSheetOpen(item.label as 'Tracking' | 'Cart')}
+                className="relative flex flex-col items-center justify-center h-full text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-all active:scale-95"
+              >
+                <Icon className="w-6 h-6" />
+                <span className="text-xs mt-1">{item.label}</span>
+                {(showCartBadge || showTrackingBadge) && (
+                   <span className="absolute top-1 right-4 w-5 h-5 bg-destructive text-destructive-foreground text-xs font-bold rounded-full flex items-center justify-center">
+                      {badgeCount}
+                  </span>
+                )}
+              </button>
             );
           }
 
