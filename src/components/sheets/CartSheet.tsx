@@ -10,6 +10,8 @@ import {
   DrawerTrigger,
 } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetTrigger } from '@/components/ui/sheet';
+import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 import { ShoppingCart, Sparkles } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
@@ -42,6 +44,7 @@ const FreeDeliveryProgress = ({ totalPrice, region }: { totalPrice: number, regi
 const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
   const { cart, totalItems, totalPrice, clearCart } = useCart();
   const { address } = useLocation();
+  const [showMinOrderAlert, setShowMinOrderAlert] = useState(false);
   const MINIMUM_ORDER_VALUE = 150;
 
   const deliveryCharge = useMemo(() => {
@@ -51,6 +54,14 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
   const finalTotal = totalPrice + (deliveryCharge ?? 0);
   const isBelowMinimum = totalPrice < MINIMUM_ORDER_VALUE;
   const amountNeededForMinimum = MINIMUM_ORDER_VALUE - totalPrice;
+
+  const handleCheckoutClick = () => {
+    if (isBelowMinimum) {
+        setShowMinOrderAlert(true);
+    } else {
+        onCheckout();
+    }
+  }
 
   const cartItemsList = (
     <div className="p-4 space-y-4">
@@ -75,56 +86,71 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      <ScrollArea className="flex-1">
-          {cartItemsList}
-      </ScrollArea>
-      <SheetFooter className="p-4 border-t bg-background mt-auto">
-        <div className="w-full space-y-2">
-            <FreeDeliveryProgress totalPrice={totalPrice} region={address?.region || null} />
-            {isBelowMinimum && (
-                <div className="p-2 my-2 text-center text-xs bg-yellow-50 border-l-4 border-yellow-500 text-yellow-800 rounded-r-lg">
-                    <p>Minimum order is ₹{MINIMUM_ORDER_VALUE}. Add ₹{amountNeededForMinimum.toFixed(2)} more.</p>
-                </div>
-            )}
-          <div className="flex justify-between text-muted-foreground">
-            <span>Subtotal</span>
-            <span>₹{totalPrice.toFixed(2)}</span>
-          </div>
-          <div className="flex justify-between text-muted-foreground">
-            <span>Delivery Fee</span>
-            <span>
-                {deliveryCharge === null
-                    ? 'Select Address'
-                    : deliveryCharge === 0
-                    ? 'FREE'
-                    : `₹${deliveryCharge.toFixed(2)}`}
-            </span>
-          </div>
-          
-          <Separator className="my-2" />
+    <>
+      <AlertDialog open={showMinOrderAlert} onOpenChange={setShowMinOrderAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Minimum Order Value</AlertDialogTitle>
+            <AlertDialogDescription>
+              The minimum order value is ₹{MINIMUM_ORDER_VALUE}. Please add more items to your cart to proceed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setShowMinOrderAlert(false)}>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
-          <div className="flex justify-between font-bold text-lg">
-            <span>Total Amount</span>
-            <span>₹{finalTotal.toFixed(2)}</span>
-          </div>
+      <div className="flex flex-col h-full bg-background">
+        <ScrollArea className="flex-1">
+            {cartItemsList}
+        </ScrollArea>
+        <SheetFooter className="p-4 border-t bg-background mt-auto">
+          <div className="w-full space-y-2">
+              <FreeDeliveryProgress totalPrice={totalPrice} region={address?.region || null} />
+              {isBelowMinimum && (
+                  <div className="p-2 my-2 text-center text-xs bg-red-50 border-l-4 border-red-500 text-red-800 rounded-r-lg">
+                      <p>Minimum order is ₹{MINIMUM_ORDER_VALUE}. Add ₹{amountNeededForMinimum.toFixed(2)} more.</p>
+                  </div>
+              )}
+            <div className="flex justify-between text-muted-foreground">
+              <span>Subtotal</span>
+              <span>₹{totalPrice.toFixed(2)}</span>
+            </div>
+            <div className="flex justify-between text-muted-foreground">
+              <span>Delivery Fee</span>
+              <span>
+                  {deliveryCharge === null
+                      ? 'Select Address'
+                      : deliveryCharge === 0
+                      ? 'FREE'
+                      : `₹${deliveryCharge.toFixed(2)}`}
+              </span>
+            </div>
+            
+            <Separator className="my-2" />
 
-          <Button 
-              variant="secondary"
-              className="w-full" 
-              size="lg"
-              onClick={onCheckout}
-              disabled={isBelowMinimum}
-          >
-              Proceed to Checkout
-          </Button>
-          
-          <Button variant="outline" className="w-full" onClick={clearCart}>
-            Clear Cart
-          </Button>
-        </div>
-      </SheetFooter>
-    </div>
+            <div className="flex justify-between font-bold text-lg">
+              <span>Total Amount</span>
+              <span>₹{finalTotal.toFixed(2)}</span>
+            </div>
+
+            <Button 
+                variant="secondary"
+                className="w-full" 
+                size="lg"
+                onClick={handleCheckoutClick}
+            >
+                Proceed to Checkout
+            </Button>
+            
+            <Button variant="outline" className="w-full" onClick={clearCart}>
+              Clear Cart
+            </Button>
+          </div>
+        </SheetFooter>
+      </div>
+    </>
   )
 }
 
