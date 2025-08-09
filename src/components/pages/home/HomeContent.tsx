@@ -1,9 +1,9 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import type { Ad, Product, BestsellerCategory, ShowcaseCategory } from '@/lib/types';
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { BestsellerCard } from '@/components/BestsellerCard';
@@ -12,9 +12,9 @@ import { AdCard } from '@/components/AdCard';
 import { ProductCard } from '@/components/product-card';
 import { getHomePageData } from '@/lib/home';
 import { CategorySheet } from '@/components/sheets/CategorySheet';
-import { TrackingSheet } from '@/components/sheets/TrackingSheet';
-import { CartSheet } from '@/components/sheets/CartSheet';
 import { BottomNavbar } from '@/components/BottomNavbar';
+import { useHomeSheet } from '@/hooks/use-home-sheet';
+import { HomePageSkeleton } from './HomePageSkeleton';
 
 type FeedItem = Product | Ad;
 
@@ -57,27 +57,26 @@ interface HomeContentProps {
 }
 
 export default function HomeContent({ products, ads, openTrackingSheetOnLoad = false }: HomeContentProps) {
-  const [openSheet, setOpenSheet] = useState<'Tracking' | 'Cart' | null>(null);
+  const { setOpenSheet } = useHomeSheet();
 
   useEffect(() => {
     if (openTrackingSheetOnLoad) {
       setOpenSheet('Tracking');
     }
-  }, [openTrackingSheetOnLoad]);
+  }, [openTrackingSheetOnLoad, setOpenSheet]);
 
   const handleOpenSheet = (label: 'Tracking' | 'Cart') => {
     setOpenSheet(label);
   };
-
-  const handleSheetClose = () => {
-    setOpenSheet(null);
-  };
-
+  
+  if (!products || !ads) {
+    return <HomePageSkeleton />;
+  }
 
   if (products.length === 0) {
     return (
       <>
-        <Header />
+        <SearchHeader />
         <main className="flex-1 flex flex-col items-center justify-center text-center">
           <div className="p-4 text-center text-muted-foreground">
              <h2 className="text-2xl font-bold text-foreground mb-2">No Products Found</h2>
@@ -98,7 +97,7 @@ export default function HomeContent({ products, ads, openTrackingSheetOnLoad = f
   
   return (
     <>
-      <Header />
+      <SearchHeader />
       <main className="flex-1 pb-16 md:pb-0">
          <section className="py-6">
             <div className="container mx-auto px-4 mb-4 flex justify-between items-center">
@@ -148,10 +147,6 @@ export default function HomeContent({ products, ads, openTrackingSheetOnLoad = f
             </section>
         )}
       </main>
-
-      {/* Sheet Management */}
-      <TrackingSheet open={openSheet === 'Tracking'} onOpenChange={handleSheetClose} />
-      <CartSheet open={openSheet === 'Cart'} onOpenChange={handleSheetClose} />
       
       {/* Pass the sheet-opening function to the navbar */}
       <BottomNavbar openSheet={handleOpenSheet} />

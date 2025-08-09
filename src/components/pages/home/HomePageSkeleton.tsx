@@ -1,10 +1,10 @@
 
-import Header from '@/components/header';
+import SearchHeader from '@/components/SearchHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const HomePageSkeleton = () => (
     <>
-        <Header />
+        <SearchHeader />
         <main className="flex-1 pb-16 md:pb-0 py-6 space-y-8">
             <section>
                 <Skeleton className="h-8 w-48 mb-4 ml-4" />

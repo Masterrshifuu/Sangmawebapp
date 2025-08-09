@@ -1,4 +1,5 @@
 
+import React from 'react';
 import HomeContent from '@/components/pages/home/HomeContent';
 import { getAds } from '@/lib/ads';
 import { getProducts } from '@/lib/products';
