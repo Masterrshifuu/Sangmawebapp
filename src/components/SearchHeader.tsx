@@ -92,25 +92,27 @@ export default function SearchHeader() {
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
   return (
-    <header className="sticky top-0 z-50 bg-accent text-accent-foreground">
+    <header className="sticky top-0 z-50">
         <div className={cn(
             "transition-all duration-300 overflow-hidden",
             isScrolled ? "max-h-0 py-0 opacity-0" : "max-h-40 opacity-100"
         )}>
-            <div className="container mx-auto px-4 py-3">
-                <div className="flex items-center justify-end">
-                    <div className="flex-shrink-0">
-                         <Image
-                            src="/logo.png"
-                            alt="Sangma Megha Mart Logo"
-                            width={50}
-                            height={50}
-                            priority
-                         />
-                    </div>
-                    <div className="ml-3 text-left">
-                        <h1 className="text-lg font-headline font-bold">Sangma Megha Mart</h1>
-                        <DynamicDeliveryTime className="text-sm justify-start" />
+            <div className="bg-accent text-accent-foreground">
+                <div className="container mx-auto px-4 py-3">
+                    <div className="flex items-center justify-start">
+                        <div className="flex-shrink-0">
+                             <Image
+                                src="/logo.png"
+                                alt="Sangma Megha Mart Logo"
+                                width={50}
+                                height={50}
+                                priority
+                             />
+                        </div>
+                        <div className="ml-3 text-left">
+                            <h1 className="text-lg font-headline font-bold">Sangma Megha Mart</h1>
+                            <DynamicDeliveryTime className="text-sm justify-start" />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -123,7 +125,7 @@ export default function SearchHeader() {
                     <div ref={searchRef} className="relative">
                         <SearchDialog>
                             {/* This child is the trigger for the mobile drawer */}
-                            <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
+                            <button className="flex items-center w-full h-11 rounded-lg bg-muted shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-muted/80 transition-colors md:hidden">
                                 <Search className="h-5 w-5 mr-3" />
                                 <span>Search for products...</span>
                             </button>
@@ -134,7 +136,7 @@ export default function SearchHeader() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
                             <Input
                                 placeholder="Search for products..."
-                                className="pl-10 h-11 text-base w-full bg-background"
+                                className="pl-10 h-11 text-base w-full bg-muted"
                                 value={query}
                                 onChange={(e) => setQuery(e.target.value)}
                                 onFocus={() => setIsSearchFocused(true)}
