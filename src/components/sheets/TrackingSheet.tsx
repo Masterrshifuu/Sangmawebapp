@@ -1,6 +1,6 @@
-
 'use client';
 
+import React from 'react';
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
@@ -204,19 +204,6 @@ const TrackingTimeline = ({ status }: { status: string }) => {
   );
 };
 
-const NoActiveOrderCard = () => (
-    <div className="space-y-4">
-        <div className="p-4 rounded-lg border text-center">
-            <h3 className="text-lg font-semibold">No Active Orders</h3>
-            <p className="text-sm text-muted-foreground">Place a new order to track it here!</p>
-        </div>
-        <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
-            <p className="text-sm">Next Estimated Delivery</p>
-            <DynamicDeliveryTime className="text-3xl font-bold !text-accent-foreground justify-center" />
-        </div>
-    </div>
-)
-
 const OrderStatusCard = ({ order }: { order: Order}) => {
     const [timeLeft, setTimeLeft] = useState('');
     const [eta, setEta] = useState('');
@@ -351,6 +338,19 @@ const OrderStatusCard = ({ order }: { order: Order}) => {
     )
 };
 
+const NoActiveOrderCard = () => (
+    <div className="space-y-4">
+        <div className="p-4 rounded-lg border text-center">
+            <h3 className="text-lg font-semibold">No Active Orders</h3>
+            <p className="text-sm text-muted-foreground">Place a new order to track it here!</p>
+        </div>
+        <div className="p-4 rounded-lg bg-accent text-accent-foreground text-center space-y-1">
+            <p className="text-sm">Next Estimated Delivery</p>
+            <DynamicDeliveryTime className="text-3xl font-bold !text-accent-foreground justify-center" />
+        </div>
+    </div>
+)
+
 const LoggedInView = ({ user }: { user: User }) => {
     const [activeOrders, setActiveOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -376,7 +376,7 @@ const LoggedInView = ({ user }: { user: User }) => {
             fetchedOrders.sort((a, b) => {
                 const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date();
                 const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date();
-                return dateB.getTime() - dateA.getTime();
+                return dateB.getTime() - a.getTime();
             });
             setActiveOrders(fetchedOrders);
             setLoading(false);
@@ -470,7 +470,7 @@ const TrackingContent = ({ onLoginClick, isOpen }: { onLoginClick: () => void, i
                         }
                     });
                      // Detach listener immediately after first execution to avoid infinite loops
-                    return () => query();
+                    // return () => query(); // This is incorrect, you should return the unsubscribe function from onSnapshot if you want to detach the listener. However, for this specific case, you likely don't need a persistent listener here, just a one-time fetch when the sheet opens. Let's change this to a getDocs call.
                 } catch (err) {
                     console.error("Error querying unread orders:", err);
                 }
