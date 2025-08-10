@@ -92,13 +92,13 @@ export default function SearchHeader() {
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
   return (
-    <header className="sticky top-0 z-50 bg-background shadow-sm">
+    <header className="sticky top-0 z-50 bg-accent text-accent-foreground">
         <div className={cn(
-            "bg-accent text-accent-foreground transition-all duration-300 overflow-hidden",
+            "transition-all duration-300 overflow-hidden",
             isScrolled ? "max-h-0 py-0 opacity-0" : "max-h-40 opacity-100"
         )}>
             <div className="container mx-auto px-4 py-3">
-                <div className="flex items-center justify-center">
+                <div className="flex items-center justify-end">
                     <div className="flex-shrink-0">
                          <Image
                             src="/logo.png"
@@ -108,15 +108,15 @@ export default function SearchHeader() {
                             priority
                          />
                     </div>
-                    <div className="ml-3 text-center">
+                    <div className="ml-3 text-left">
                         <h1 className="text-lg font-headline font-bold">Sangma Megha Mart</h1>
-                        <DynamicDeliveryTime className="text-sm" />
+                        <DynamicDeliveryTime className="text-sm justify-start" />
                     </div>
                 </div>
             </div>
         </div>
 
-        <div className="bg-accent text-accent-foreground">
+        <div className="bg-background text-accent-foreground">
             <div className="container mx-auto">
                 <div className="px-4 py-3 md:pt-3 md:pb-3">
                     {/* Search section */}
