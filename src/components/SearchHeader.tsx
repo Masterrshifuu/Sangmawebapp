@@ -14,9 +14,7 @@ import type { Product } from '@/lib/types';
 import Fuse from 'fuse.js';
 import { ScrollArea } from './ui/scroll-area';
 import { ProductCard } from './product-card';
-import Logo from './logo';
 import { DynamicDeliveryTime } from './DynamicDeliveryTime';
-import { useLocation } from '@/hooks/use-location';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
@@ -78,7 +76,7 @@ export default function SearchHeader() {
 
   React.useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 10) { // Small threshold
+      if (window.scrollY > 10) { 
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
@@ -94,9 +92,12 @@ export default function SearchHeader() {
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
   return (
-    <header className={cn(`sticky top-0 z-50 bg-background transition-shadow duration-300`, isScrolled ? 'shadow-lg' : '')}>
+    <header className="sticky top-0 z-50 bg-background shadow-sm">
         <div className="container mx-auto">
-            <div className="bg-accent text-accent-foreground px-4 py-3">
+            <div className={cn(
+                "bg-accent text-accent-foreground px-4 py-3 transition-all duration-300 overflow-hidden",
+                isScrolled ? "max-h-0 py-0 opacity-0" : "max-h-40 opacity-100"
+            )}>
                 <div className="flex items-center justify-center">
                     <div className="flex-shrink-0">
                          <Image
@@ -112,9 +113,11 @@ export default function SearchHeader() {
                         <DynamicDeliveryTime className="text-sm" />
                     </div>
                 </div>
+            </div>
 
+            <div className="bg-accent text-accent-foreground px-4 py-3 md:pt-3 md:pb-3">
                 {/* Search section */}
-                <div ref={searchRef} className="mt-3">
+                <div ref={searchRef} className="relative">
                     <SearchDialog>
                         {/* This child is the trigger for the mobile drawer */}
                         <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
@@ -134,21 +137,19 @@ export default function SearchHeader() {
                             onFocus={() => setIsSearchFocused(true)}
                         />
                     </div>
-                </div>
-            </div>
 
-            {/* Desktop search results popover */}
-            {showSearchResults && (
-            <div className="absolute top-full left-0 right-0 z-40">
-                <div className="container mx-auto">
-                    <div className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b">
-                        <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
-                            <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
-                        </Suspense>
-                    </div>
+                    {/* Desktop search results popover */}
+                    {showSearchResults && (
+                        <div className="absolute top-full left-0 right-0 z-40">
+                            <div className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b">
+                                <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+                                    <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
+                                </Suspense>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
-            )}
             
             {/* Desktop Navigation */}
             <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
@@ -160,3 +161,4 @@ export default function SearchHeader() {
     </header>
   );
 }
+
