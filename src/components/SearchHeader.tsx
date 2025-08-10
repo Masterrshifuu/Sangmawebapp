@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { MapPin, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useState, useRef, Suspense } from 'react';
 import { SearchDialog } from './SearchDialog';
 import { DesktopNav } from './DesktopNav';
@@ -17,6 +17,8 @@ import { ProductCard } from './product-card';
 import Logo from './logo';
 import { DynamicDeliveryTime } from './DynamicDeliveryTime';
 import { useLocation } from '@/hooks/use-location';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
 
 const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProductClick: () => void }) => {
     const { products: allProducts, loading: isLoading } = useProducts();
@@ -73,22 +75,17 @@ export default function SearchHeader() {
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  const { address } = useLocation();
 
   React.useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 0) {
+      if (window.scrollY > 10) { // Small threshold
         setIsScrolled(true);
       } else {
         setIsScrolled(false);
       }
     };
-
     window.addEventListener('scroll', handleScroll);
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
 
@@ -97,67 +94,68 @@ export default function SearchHeader() {
   const showSearchResults = isSearchFocused && query.trim().length > 1;
 
   return (
- <header className={`sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-background shadow-sm' : ''}`}>
- <div className="container mx-auto">
-       <div className="bg-background border-b">
- <div className="px-4 py-2 flex justify-between items-center">
- <Logo />
- <div className="text-right">
- <div className="flex items-center justify-end gap-1 text-sm font-medium">
- <MapPin className="w-4 h-4" />
- <span>Deliver to: {address ? `${address.area}, ${address.region}` : 'Tura'}</span>
- </div>
- <DynamicDeliveryTime className="text-xs" />
- </div>
- </div>
-       </div>
-      <div className="bg-[#faf368] relative">
- <div className="px-4 py-3">
- {/* Search section */}
- <div ref={searchRef}>
-              <SearchDialog>
-                  {/* This child is the trigger for the mobile drawer */}
-                  <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
-                      <Search className="h-5 w-5 mr-3" />
- <span>Search for products...</span>
-                  </button>
-              </SearchDialog>
+    <header className={cn(`sticky top-0 z-50 bg-background transition-shadow duration-300`, isScrolled ? 'shadow-lg' : '')}>
+        <div className="container mx-auto">
+            <div className="bg-accent text-accent-foreground px-4 py-3">
+                <div className="flex items-center justify-center">
+                    <div className="flex-shrink-0">
+                         <Image
+                            src="/logo.png"
+                            alt="Sangma Megha Mart Logo"
+                            width={50}
+                            height={50}
+                            priority
+                         />
+                    </div>
+                    <div className="ml-3 text-center">
+                        <h1 className="text-lg font-headline font-bold">Sangma Megha Mart</h1>
+                        <DynamicDeliveryTime className="text-sm" />
+                    </div>
+                </div>
 
-              {/* Desktop-only direct input */}
-              <div className="relative hidden md:block">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
-                  <Input
- placeholder="Search for products..."
- className="pl-10 h-11 text-base w-full"
- value={query}
- onChange={(e) => setQuery(e.target.value)}
- onFocus={() => setIsSearchFocused(true)}
-                  />
-              </div>
- </div>
- </div>
+                {/* Search section */}
+                <div ref={searchRef} className="mt-3">
+                    <SearchDialog>
+                        {/* This child is the trigger for the mobile drawer */}
+                        <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
+                            <Search className="h-5 w-5 mr-3" />
+                            <span>Search for products...</span>
+                        </button>
+                    </SearchDialog>
 
-        {/* Desktop search results popover */}
- {showSearchResults && (
- <div className="absolute top-full left-0 right-0 z-40">
- <div className="px-4">
- <div
- className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b"
-                >
- <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
-                    <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
- </Suspense>
- </div>
+                    {/* Desktop-only direct input */}
+                    <div className="relative hidden md:block">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                        <Input
+                            placeholder="Search for products..."
+                            className="pl-10 h-11 text-base w-full bg-background"
+                            value={query}
+                            onChange={(e) => setQuery(e.target.value)}
+                            onFocus={() => setIsSearchFocused(true)}
+                        />
+                    </div>
+                </div>
             </div>
-         </div>
-        )}
-      </div>
-      {/* Desktop Navigation */}
-      <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
-            <div className="container mx-auto px-4">
-                <DesktopNav />
+
+            {/* Desktop search results popover */}
+            {showSearchResults && (
+            <div className="absolute top-full left-0 right-0 z-40">
+                <div className="container mx-auto">
+                    <div className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b">
+                        <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+                            <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
+                        </Suspense>
+                    </div>
+                </div>
             </div>
-        </div>
+            )}
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
+                <div className="container mx-auto px-4">
+                    <DesktopNav />
+                </div>
+            </div>
         </div>
     </header>
   );
