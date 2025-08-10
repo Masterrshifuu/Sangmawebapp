@@ -93,11 +93,11 @@ export default function SearchHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-background shadow-sm">
-        <div className="container mx-auto">
-            <div className={cn(
-                "bg-accent text-accent-foreground px-4 py-3 transition-all duration-300 overflow-hidden",
-                isScrolled ? "max-h-0 py-0 opacity-0" : "max-h-40 opacity-100"
-            )}>
+        <div className={cn(
+            "bg-accent text-accent-foreground transition-all duration-300 overflow-hidden",
+            isScrolled ? "max-h-0 py-0 opacity-0" : "max-h-40 opacity-100"
+        )}>
+            <div className="container mx-auto px-4 py-3">
                 <div className="flex items-center justify-center">
                     <div className="flex-shrink-0">
                          <Image
@@ -114,7 +114,9 @@ export default function SearchHeader() {
                     </div>
                 </div>
             </div>
+        </div>
 
+        <div className="container mx-auto">
             <div className="bg-accent text-accent-foreground px-4 py-3 md:pt-3 md:pb-3">
                 {/* Search section */}
                 <div ref={searchRef} className="relative">
@@ -161,4 +163,3 @@ export default function SearchHeader() {
     </header>
   );
 }
-
