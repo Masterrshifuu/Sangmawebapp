@@ -9,7 +9,7 @@ import { BottomNavbar } from './BottomNavbar';
 
 // This component centralizes the logic for opening sheets from the BottomNavbar
 export default function HomeSheetManager() {
-  const { openSheet, setOpenSheet, setOpenSheetFor } = useHomeSheet();
+  const { openSheet, setOpenSheet } = useHomeSheet();
 
   const handleSheetOpen = (sheet: 'Tracking' | 'Cart' | null) => {
     setOpenSheet(sheet);

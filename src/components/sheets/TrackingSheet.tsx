@@ -376,7 +376,7 @@ const LoggedInView = ({ user }: { user: User }) => {
             fetchedOrders.sort((a, b) => {
                 const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date();
                 const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date();
-                return dateB.getTime() - a.getTime();
+                return dateB.getTime() - dateA.getTime();
             });
             setActiveOrders(fetchedOrders);
             setLoading(false);

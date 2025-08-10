@@ -16,6 +16,7 @@ export function DesktopNav() {
   const { user } = useAuth();
   const { totalItems } = useCart();
   const [activeOrderCount, setActiveOrderCount] = useState(0);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -66,7 +67,9 @@ export function DesktopNav() {
           if (item.component) {
             const SheetComponent = item.component;
             return (
-              <SheetComponent key={item.label}>
+              <SheetComponent key={item.label} open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                {/* The button is now inside the SheetComponent and controls its open state */}
+                {/* Ensure the SheetComponent expects children */}
                 <button className="relative flex flex-col items-center justify-center text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-all active:scale-95">
                   <Icon className="w-6 h-6" />
                   <span className="sr-only">{item.label}</span>
