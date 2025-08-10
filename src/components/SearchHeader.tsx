@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Search } from 'lucide-react';
+import { MapPin, Search } from 'lucide-react';
 import { useState, useRef, Suspense } from 'react';
 import { SearchDialog } from './SearchDialog';
 import { DesktopNav } from './DesktopNav';
@@ -14,6 +14,9 @@ import type { Product } from '@/lib/types';
 import Fuse from 'fuse.js';
 import { ScrollArea } from './ui/scroll-area';
 import { ProductCard } from './product-card';
+import Logo from './logo';
+import { DynamicDeliveryTime } from './DynamicDeliveryTime';
+import { useLocation } from '@/hooks/use-location';
 
 const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProductClick: () => void }) => {
     const { products: allProducts, loading: isLoading } = useProducts();
@@ -69,6 +72,7 @@ export default function SearchHeader() {
   const [query, setQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  const { address } = useLocation();
 
   useOnClickOutside(searchRef, () => setIsSearchFocused(false));
 
@@ -76,6 +80,18 @@ export default function SearchHeader() {
 
   return (
     <header className="sticky top-0 z-50">
+       <div className="bg-background border-b">
+         <div className="container mx-auto px-4 py-2 flex justify-between items-center">
+             <Logo />
+            <div className="text-right">
+                <div className="flex items-center justify-end gap-1 text-sm font-medium">
+                   <MapPin className="w-4 h-4" />
+                   <span>Deliver to: {address ? `${address.area}, ${address.region}` : 'Tura'}</span>
+                </div>
+                <DynamicDeliveryTime className="text-xs" />
+            </div>
+         </div>
+       </div>
       <div className="bg-[#faf368] relative">
         <div className="container mx-auto px-4 py-3">
           {/* Search section */}
