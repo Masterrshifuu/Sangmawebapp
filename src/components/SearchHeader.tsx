@@ -116,48 +116,50 @@ export default function SearchHeader() {
             </div>
         </div>
 
-        <div className="container mx-auto">
-            <div className="bg-accent text-accent-foreground px-4 py-3 md:pt-3 md:pb-3">
-                {/* Search section */}
-                <div ref={searchRef} className="relative">
-                    <SearchDialog>
-                        {/* This child is the trigger for the mobile drawer */}
-                        <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
-                            <Search className="h-5 w-5 mr-3" />
-                            <span>Search for products...</span>
-                        </button>
-                    </SearchDialog>
+        <div className="bg-accent text-accent-foreground">
+            <div className="container mx-auto">
+                <div className="px-4 py-3 md:pt-3 md:pb-3">
+                    {/* Search section */}
+                    <div ref={searchRef} className="relative">
+                        <SearchDialog>
+                            {/* This child is the trigger for the mobile drawer */}
+                            <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-background/80 transition-colors md:hidden">
+                                <Search className="h-5 w-5 mr-3" />
+                                <span>Search for products...</span>
+                            </button>
+                        </SearchDialog>
 
-                    {/* Desktop-only direct input */}
-                    <div className="relative hidden md:block">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
-                        <Input
-                            placeholder="Search for products..."
-                            className="pl-10 h-11 text-base w-full bg-background"
-                            value={query}
-                            onChange={(e) => setQuery(e.target.value)}
-                            onFocus={() => setIsSearchFocused(true)}
-                        />
-                    </div>
-
-                    {/* Desktop search results popover */}
-                    {showSearchResults && (
-                        <div className="absolute top-full left-0 right-0 z-40">
-                            <div className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b">
-                                <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
-                                    <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
-                                </Suspense>
-                            </div>
+                        {/* Desktop-only direct input */}
+                        <div className="relative hidden md:block">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
+                            <Input
+                                placeholder="Search for products..."
+                                className="pl-10 h-11 text-base w-full bg-background"
+                                value={query}
+                                onChange={(e) => setQuery(e.target.value)}
+                                onFocus={() => setIsSearchFocused(true)}
+                            />
                         </div>
-                    )}
+
+                        {/* Desktop search results popover */}
+                        {showSearchResults && (
+                            <div className="absolute top-full left-0 right-0 z-40">
+                                <div className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b">
+                                    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+                                        <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
+                                    </Suspense>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
+        </div>
             
-            {/* Desktop Navigation */}
-            <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
-                <div className="container mx-auto px-4">
-                    <DesktopNav />
-                </div>
+        {/* Desktop Navigation */}
+        <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
+            <div className="container mx-auto px-4">
+                <DesktopNav />
             </div>
         </div>
     </header>
