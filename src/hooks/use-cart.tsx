@@ -111,8 +111,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
     syncCart([]);
   };
 
-  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = cart.reduce((sum, item) => {
+  const safeCart = Array.isArray(cart) ? cart : [];
+  const totalItems = safeCart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalPrice = safeCart.reduce((sum, item) => {
     const price = item.product.mrp || item.product.price;
     return sum + price * item.quantity;
   }, 0);
