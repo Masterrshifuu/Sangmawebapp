@@ -3,13 +3,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetTrigger } from '@/components/ui/sheet';
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
@@ -23,7 +16,6 @@ import { useLocation } from '@/hooks/use-location';
 import { calculateDeliveryCharge } from '@/lib/delivery';
 import { Separator } from '@/components/ui/separator';
 import { useRouter } from 'next/navigation';
-import { useMediaQuery } from '@/hooks/use-media-query';
 
 const FreeDeliveryProgress = ({ totalPrice, region }: { totalPrice: number, region: 'North Tura' | 'South Tura' | 'Tura NEHU' | null }) => {
     const freeDeliveryThreshold = region === 'Tura NEHU' ? 3000 : 1000;
@@ -88,7 +80,7 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
 
   return (
     <>
-      <AlertDialog open={showMinOrderAlert} onOpenChange={setShowMinOrderAlert}>
+ <AlertDialog open={showMinOrderAlert} onOpenChange={setShowMinOrderAlert}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Minimum Order Value</AlertDialogTitle>
@@ -102,7 +94,7 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="flex flex-col h-full bg-background">
+ <div className="flex flex-col h-full bg-background">
         <ScrollArea className="flex-1">
             {cartItemsList}
         </ScrollArea>
@@ -157,30 +149,24 @@ const CartContent = ({ onCheckout }: { onCheckout: () => void }) => {
 
 export function CartSheet({ open, onOpenChange, children }: { open: boolean, onOpenChange: (open: boolean) => void, children?: React.ReactNode }) {
   const router = useRouter();
-  const isDesktop = useMediaQuery("(min-width: 768px)");
   const { totalItems } = useCart();
   
   const handleProceedToCheckout = () => {
     onOpenChange(false);
     router.push('/checkout');
   };
-  
-  const SheetComponent = isDesktop ? Sheet : Drawer;
-  const SheetContentComponent = isDesktop ? SheetContent : DrawerContent;
-  const Trigger = children ? (isDesktop ? SheetTrigger : DrawerTrigger) : React.Fragment;
-
 
   return (
-    <SheetComponent open={open} onOpenChange={onOpenChange}>
-      {children && <Trigger asChild>{children}</Trigger>}
-      <SheetContentComponent size="sm" className="p-0 flex flex-col">
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      {children && <SheetTrigger asChild>{children}</SheetTrigger>}
+      <SheetContent side="right" className="p-0 flex flex-col w-full max-w-sm sm:max-w-md">
           <SheetHeader className="p-4 border-b">
             <SheetTitle>Your Cart ({totalItems})</SheetTitle>
-        </SheetHeader>
-        <div className="flex-1 flex flex-col min-h-0">
-            <CartContent onCheckout={handleProceedToCheckout} />
-        </div>
-      </SheetContentComponent>
-    </SheetComponent>
+          </SheetHeader>
+          <div className="flex-1 flex flex-col min-h-0">
+              <CartContent onCheckout={handleProceedToCheckout} />
+          </div>
+      </SheetContent>
+    </Sheet>
   );
 }
