@@ -1,169 +1,157 @@
 
 'use client';
 
-import * as React from 'react';
-import { Search } from 'lucide-react';
-import { useState, useRef, Suspense } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useDebounce } from '@/hooks/use-debounce';
+import { useOnClickOutside } from '@/hooks/use-on-click-outside';
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn } from '@/lib/utils';
+import { Search, X, Loader2 } from 'lucide-react';
+import { Button } from './ui/button';
 import { SearchDialog } from './SearchDialog';
 import { DesktopNav } from './DesktopNav';
-import { Input } from './ui/input';
-import { useOnClickOutside } from '@/hooks/use-on-click-outside';
-import { useProducts } from '@/hooks/use-products';
-import { useDebounce } from '@/hooks/use-debounce';
-import type { Product } from '@/lib/types';
-import Fuse from 'fuse.js';
-import { ScrollArea } from './ui/scroll-area';
-import { ProductCard } from './product-card';
+import Logo from './logo';
 import { DynamicDeliveryTime } from './DynamicDeliveryTime';
-import { cn } from '@/lib/utils';
-import Image from 'next/image';
+import { getProducts } from '@/lib/products';
+import type { Product } from '@/lib/types';
+import { ProductCard } from './product-card';
 
-const DesktopSearchResults = ({ query, onProductClick }: { query: string; onProductClick: () => void }) => {
-    const { products: allProducts, loading: isLoading } = useProducts();
-    const [searchResults, setSearchResults] = useState<Product[]>([]);
-    const debouncedQuery = useDebounce(query, 300);
+const DesktopSearchResults = ({ query, onProductClick }: { query: string, onProductClick: () => void }) => {
+    const [results, setResults] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(false);
 
-    const fuse = React.useMemo(() => new Fuse(allProducts, {
-        keys: ['name', 'category', 'description', 'tags'],
-        threshold: 0.3,
-        minMatchCharLength: 2,
-    }), [allProducts]);
+    useEffect(() => {
+        const fetchResults = async () => {
+            if (query.length < 2) {
+                setResults([]);
+                return;
+            }
+            setLoading(true);
+            const { products } = await getProducts();
+            if (products) {
+                const filteredProducts = products.filter((p: Product) => p.name.toLowerCase().includes(query.toLowerCase()));
+                setResults(filteredProducts);
+            }
+            setLoading(false);
+        };
+        fetchResults();
+    }, [query]);
 
-    React.useEffect(() => {
-        if (debouncedQuery.trim() === '') {
-            setSearchResults([]);
-            return;
-        }
-
-        const results = fuse.search(debouncedQuery);
-        setSearchResults(results.map(result => result.item));
-    }, [debouncedQuery, fuse]);
-
-    if (isLoading) {
-        return <div className="p-4 text-center text-muted-foreground">Loading...</div>
+    if (loading) {
+        return <div className="p-4 text-center text-muted-foreground"><Loader2 className="w-6 h-6 animate-spin inline-block mr-2" /> Searching...</div>;
+    }
+    
+    if (results.length === 0 && query.length > 1) {
+        return <div className="p-4 text-center text-muted-foreground">No results for &quot;{query}&quot;</div>;
     }
 
-    if (query.trim() !== '' && searchResults.length === 0) {
+    if (results.length > 0) {
         return (
-            <div className="p-4 text-center text-muted-foreground">
-                <p className="font-semibold">No results for "{query}"</p>
-                <p className="text-sm">Try checking your spelling or using a different term.</p>
+             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4 max-h-[60vh] overflow-y-auto">
+                {results.map(product => (
+                    <div key={product.id} onClick={onProductClick}>
+                        <ProductCard product={product} />
+                    </div>
+                ))}
             </div>
         )
     }
 
+    return null;
+}
+
+
+export function SearchHeader() {
+    const pathname = usePathname();
+    const router = useRouter();
+    const [query, setQuery] = useState('');
+    const debouncedQuery = useDebounce(query, 300);
+    const [isSearchFocused, setIsSearchFocused] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+    useOnClickOutside(searchRef, () => setIsSearchFocused(false));
+
+    const [isScrolled, setIsScrolled] = useState(false);
+    const isHomePage = pathname === '/';
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setIsScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const handleSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (query.trim()) {
+            router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+            setIsSearchFocused(false);
+        }
+    };
+    
+    const showSearchResults = isSearchFocused && debouncedQuery.length > 1;
+    
     return (
-        <ScrollArea className="max-h-[60vh]">
-            {searchResults.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 p-4">
-                    {searchResults.map(product => (
-                        <div key={product.id} onClick={onProductClick}>
-                            <ProductCard product={product} />
+        <header className="sticky top-0 z-40">
+             {isHomePage && (
+                <div className={cn(
+                    'bg-[#FCEE51] transition-all duration-300 ease-in-out', 
+                    isScrolled ? 'max-h-0 opacity-0 invisible' : 'max-h-40 opacity-100 py-3'
+                )}>
+                    <div className="container mx-auto px-4">
+                        <div className="flex flex-col items-start">
+                            <Logo />
+                            <DynamicDeliveryTime className="text-sm justify-start pl-16 -mt-2" />
                         </div>
-                    ))}
+                    </div>
                 </div>
             )}
-        </ScrollArea>
-    );
-};
-
-
-export default function SearchHeader() {
-  const [query, setQuery] = useState('');
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      if (window.scrollY > 10) { 
-        setIsScrolled(true);
-      } else {
-        setIsScrolled(false);
-      }
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-  
-
-  useOnClickOutside(searchRef, () => setIsSearchFocused(false));
-
-  const showSearchResults = isSearchFocused && query.trim().length > 1;
-
-  return (
-    <header className={cn("sticky top-0 z-50 transition-all duration-300", isScrolled ? 'shadow-sm' : '')}>
-        <div className={cn(
-            "transition-all duration-300 overflow-hidden",
-            isScrolled ? "max-h-0" : "max-h-40"
-        )}>
-            <div className="bg-accent text-accent-foreground">
-                <div className="container mx-auto px-4 py-3">
-                    <div className="flex items-center justify-start">
-                        <div className="flex-shrink-0">
-                             <Image
-                                src="/logo.png"
-                                alt="Sangma Megha Mart Logo"
-                                width={50}
-                                height={50}
-                                priority
-                             />
-                        </div>
-                        <div className="ml-3 text-left">
-                            <h1 className="text-lg font-headline font-bold">Sangma Megha Mart</h1>
-                            <DynamicDeliveryTime className="text-sm justify-start" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div className="bg-accent text-accent-foreground">
-            <div className="container mx-auto">
-                <div className="px-4 py-3 md:pt-3 md:pb-3">
-                    {/* Search section */}
-                    <div ref={searchRef} className="relative">
-                        <SearchDialog>
-                            {/* This child is the trigger for the mobile drawer */}
-                            <button className="flex items-center w-full h-11 rounded-lg bg-background shadow-sm px-4 text-left text-sm text-muted-foreground hover:bg-muted/80 transition-colors md:hidden">
-                                <Search className="h-5 w-5 mr-3" />
-                                <span>Search for products...</span>
-                            </button>
-                        </SearchDialog>
-
-                        {/* Desktop-only direct input */}
-                        <div className="relative hidden md:block">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground z-10" />
-                            <Input
-                                placeholder="Search for products..."
-                                className="pl-10 h-11 text-base w-full bg-background text-foreground placeholder:text-muted-foreground"
-                                value={query}
-                                onChange={(e) => setQuery(e.target.value)}
-                                onFocus={() => setIsSearchFocused(true)}
-                            />
-                        </div>
-
-                        {/* Desktop search results popover */}
-                        {showSearchResults && (
-                            <div className="absolute top-full left-0 right-0 z-40">
-                                <div className="bg-background/80 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b">
-                                    <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
-                                        <DesktopSearchResults query={query} onProductClick={() => setIsSearchFocused(false)} />
-                                    </Suspense>
+             <div className="bg-[#FCEE51] border-y border-black/10">
+                <div className="container mx-auto px-4">
+                    <div className="flex items-center gap-4 py-2">
+                        <div ref={searchRef} className="relative flex-1">
+                            <form onSubmit={handleSearchSubmit}>
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search for products..."
+                                        value={query}
+                                        onChange={(e) => setQuery(e.target.value)}
+                                        onFocus={() => setIsSearchFocused(true)}
+                                        className="w-full pl-10 pr-10 py-2 rounded-md border bg-card focus:outline-none focus:ring-2 focus:ring-primary"
+                                    />
+                                    {query && (
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            size="icon"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 h-7 w-7"
+                                            onClick={() => setQuery('')}
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                    )}
                                 </div>
-                            </div>
-                        )}
+                            </form>
+                            {showSearchResults && (
+                                <div className="absolute top-full left-0 right-0 z-50">
+                                    <div className="bg-background/95 backdrop-blur-sm rounded-b-lg shadow-2xl border-x border-b">
+                                        <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
+                                            <DesktopSearchResults query={debouncedQuery} onProductClick={() => setIsSearchFocused(false)} />
+                                        </Suspense>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="hidden md:block">
+                            <DesktopNav />
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-            
-        {/* Desktop Navigation */}
-        <div className="hidden md:block bg-background/80 backdrop-blur-sm border-b">
-            <div className="container mx-auto px-4">
-                <DesktopNav />
-            </div>
-        </div>
-    </header>
-  );
+        </header>
+    );
 }

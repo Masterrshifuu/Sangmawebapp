@@ -3,7 +3,7 @@
 
 import React, { useEffect } from 'react';
 import type { Ad, Product, BestsellerCategory, ShowcaseCategory } from '@/lib/types';
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 import { CategoryShowcase } from '@/components/category/CategoryShowcase';
 import { HorizontalScroller } from '@/components/horizontal-scroller';
 import { BestsellerCard } from '@/components/BestsellerCard';

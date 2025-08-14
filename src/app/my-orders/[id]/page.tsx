@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { doc, getDoc, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Order } from '@/lib/types';
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 import { notFound, useParams } from 'next/navigation';
 import { OrderCard } from '@/components/pages/my-orders/OrderCard';
 import { AlertTriangle } from 'lucide-react';

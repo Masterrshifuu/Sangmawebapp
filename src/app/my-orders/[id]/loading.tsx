@@ -1,5 +1,5 @@
 
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 import { OrdersSkeleton } from '@/components/pages/my-orders/OrdersSkeleton';
 
 export default function Loading() {

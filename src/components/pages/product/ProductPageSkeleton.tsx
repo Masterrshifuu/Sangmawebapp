@@ -1,5 +1,5 @@
 
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export const ProductPageSkeleton = () => (

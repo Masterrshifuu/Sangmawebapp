@@ -1,5 +1,5 @@
 
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 
 export default function RefundPolicyPage() {
   return (

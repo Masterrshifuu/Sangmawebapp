@@ -10,13 +10,14 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { db } from '@/lib/firebase';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { useHomeSheet } from '@/hooks/use-home-sheet'; // Import useHomeSheet
 
 export function DesktopNav() {
   const pathname = usePathname();
   const { user } = useAuth();
   const { totalItems } = useCart();
+  const { openSheet, setOpenSheet } = useHomeSheet(); // Use useHomeSheet
   const [activeOrderCount, setActiveOrderCount] = useState(0);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -66,11 +67,19 @@ export function DesktopNav() {
           
           if (item.component) {
             const SheetComponent = item.component;
+            // Determine if this specific sheet should be open
+            const isThisSheetOpen = openSheet === item.label;
+
             return (
-              <SheetComponent key={item.label} open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                {/* The button is now inside the SheetComponent and controls its open state */}
-                {/* Ensure the SheetComponent expects children */}
-                <button className="relative flex flex-col items-center justify-center text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-all active:scale-95">
+              <SheetComponent 
+                key={item.label} 
+                open={isThisSheetOpen} 
+                onOpenChange={(isOpen) => setOpenSheet(isOpen ? (item.label as 'Cart' | 'Tracking') : null)}
+              >
+                <button 
+                  className="relative flex flex-col items-center justify-center text-sm font-medium text-muted-foreground hover:text-accent-foreground transition-all active:scale-95"
+                  onClick={() => setOpenSheet(item.label as 'Cart' | 'Tracking')} // Set the specific sheet to open
+                >
                   <Icon className="w-6 h-6" />
                   <span className="sr-only">{item.label}</span>
                   {(showCartBadge || showTrackingBadge) && (

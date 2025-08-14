@@ -1,7 +1,7 @@
 
 import { notFound } from 'next/navigation';
 import { getProducts } from '@/lib/products';
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 import { ProductCard } from '@/components/product-card';
 
 function decodeCategoryName(slug: string): string {

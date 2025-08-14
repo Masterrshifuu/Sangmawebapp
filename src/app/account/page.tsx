@@ -10,8 +10,8 @@ import { LogIn, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AccountSection, LegalSection } from '@/components/pages/account/AccountSection';
 import { LinkListItem } from '@/components/pages/account/ListItems';
-import { getLegalItems, getGeneralItems, getSecurityItems, myOrdersItem } from '@/components/pages/account/accountNavItems';
-import SearchHeader from '@/components/SearchHeader';
+import { getLegalItems, getGeneralItems, myOrdersItem } from '@/components/pages/account/accountNavItems';
+import { SearchHeader } from '@/components/SearchHeader';
 
 export default function AccountPage() {
   const { user, loading } = useAuth();
@@ -28,7 +28,10 @@ export default function AccountPage() {
 
   if (loading) return null;
 
-  const legalItems = getLegalItems();
+  // Remove only "Terms & Conditions" and "Refund & Cancellation Policy" using correct property 'label'
+  const legalItems = getLegalItems().filter(
+    item => item.label !== 'Terms & Conditions' && item.label !== 'Refund & Cancellation Policy'
+  );
 
   if (!user) {
     return (
@@ -57,7 +60,6 @@ export default function AccountPage() {
   }
 
   const generalItems = getGeneralItems();
-  const securityItems = getSecurityItems();
 
   return (
     <>
@@ -94,7 +96,6 @@ export default function AccountPage() {
             </div>
           </section>
 
-          <AccountSection title="ACCOUNT & SECURITY" items={securityItems} />
           <LegalSection title="LEGAL & HELP" items={legalItems} />
 
           <div className="pt-4">

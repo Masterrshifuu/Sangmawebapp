@@ -6,7 +6,7 @@ import { db } from '@/lib/firebase';
 import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
 import { useAuth } from '@/hooks/use-auth';
 import type { Order } from '@/lib/types';
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { PackageOpen } from 'lucide-react';

@@ -372,7 +372,10 @@ const LoggedInView = ({ user }: { user: User }) => {
         );
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const fetchedOrders = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Order));
+            const fetchedOrders = querySnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() } as Order))
+                .filter(order => order.status !== 'Delivered' && order.status !== 'Cancelled');
+                
             fetchedOrders.sort((a, b) => {
                 const dateA = (a.createdAt as unknown as Timestamp)?.toDate() || new Date();
                 const dateB = (b.createdAt as unknown as Timestamp)?.toDate() || new Date();

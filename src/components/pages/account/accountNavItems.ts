@@ -1,52 +1,69 @@
 
 import {
+    ShieldCheck,
     FileText,
-    Shield,
-    MapPin,
-    Package,
-    Headphones,
-    RefreshCw,
+    CircleHelp,
+    Map,
+    KeyRound,
     User,
-  } from 'lucide-react';
-import { AddressBook } from './AddressBook';
-import { ProfileDetailsForm } from './ProfileDetailsForm';
-import { ChangePasswordForm } from './ChangePasswordForm';
-import type { User as FirebaseUser } from 'firebase/auth';
-import type { UserData } from '@/lib/types';
-import type { ReactNode, ComponentType } from 'react';
+    ShieldAlert,
+    FileBadge,
+    Package,
+    Headset
+} from 'lucide-react';
 
-export interface NavItem {
-    icon: React.ElementType;
-    label: string;
-    href?: string;
-    onClick?: () => void;
-    content?: ReactNode | ComponentType<{ user: FirebaseUser, userData: UserData }>;
-}
+import { AddressBook } from "/home/user/studio/src/components/pages/account/AddressBook";
+import { ChangePasswordForm } from "/home/user/studio/src/components/pages/account/ChangePasswordForm";
+import { ProfileDetailsForm } from "/home/user/studio/src/components/pages/account/ProfileDetailsForm";
 
-export interface LinkNavItem {
-    icon: React.ElementType;
-    label: string;
-    href?: string;
-    content?: ReactNode;
-}
-  
-export const getLegalItems = (): LinkNavItem[] => [
-    { icon: FileText, label: 'Terms & Conditions', href: '/terms' },
-    { icon: RefreshCw, label: 'Refund & Cancellation Policy', href: '/refund-policy' },
-    { icon: Headphones, label: 'Help Center', content: 'For help, please contact us at support@sangma.com' },
-];
-  
-export const myOrdersItem: LinkNavItem = { 
-    icon: Package, 
-    label: 'My Orders', 
-    href: '/my-orders'
+
+export const myOrdersItem = {
+    icon: Package,
+    label: 'My Orders',
+    href: '/my-orders',
 };
 
-export const getGeneralItems = (): NavItem[] => [
-    { icon: MapPin, label: 'Address Book', content: AddressBook },
+export const getGeneralItems = () => [
+    {
+        icon: Map,
+        label: 'Address Book',
+        content: AddressBook,
+    },
 ];
-  
-export const getSecurityItems = (): NavItem[] => [
-    { icon: User, label: 'Profile Details', content: ProfileDetailsForm },
-    { icon: Shield, label: 'Change Password', content: ChangePasswordForm },
+
+export const getSecurityItems = () => [
+    {
+        icon: User,
+        label: 'Profile Details',
+        content: ProfileDetailsForm,
+    },
+    {
+        icon: KeyRound,
+        label: 'Change Password',
+        content: ChangePasswordForm,
+    },
+];
+
+export const getLegalItems = () => [
+    {
+        icon: FileText,
+        label: 'Terms & Conditions',
+        href: '/terms',
+    },
+    {
+        icon: ShieldCheck,
+        label: 'Refund & Cancellation Policy',
+        href: '/refund-policy',
+    },
+    {
+        icon: FileBadge,
+        label: 'Privacy & Policy',
+        href: '/privacy-policy',
+    },
+    {
+        icon: Headset,
+        label: 'Help Center',
+        isHelp: true,
+        helpText: 'For help, please contact us at support@sangma.com'
+    }
 ];

@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import { getProductById, getProducts } from '@/lib/products';
 import { getReviews } from '@/lib/reviews';
 
-import SearchHeader from '@/components/SearchHeader';
+import { SearchHeader } from '@/components/SearchHeader';
 import { ProductClientPage } from '@/components/pages/product/ProductClientPage';
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
