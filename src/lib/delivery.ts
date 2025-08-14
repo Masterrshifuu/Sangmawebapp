@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import type { Address } from './types';
@@ -13,8 +12,8 @@ import type { Address } from './types';
  * @returns The calculated delivery charge. Returns a default if address is not provided.
  */
 export function calculateDeliveryCharge(subtotal: number, address: Address | null): number {
-  if (!address) {
-    // If no address, assume a standard location for default fee calculation
+  if (!address || !address.region) {
+    // If no address or region, assume a standard location for default fee calculation
     // Free delivery over ₹1000
     if (subtotal > 1000) {
       return 0;

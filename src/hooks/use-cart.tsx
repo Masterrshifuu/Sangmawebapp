@@ -27,7 +27,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const getLocalCart = (): CartItem[] => {
     try {
       const storedCart = localStorage.getItem('sangma-megha-mart-cart');
-      return storedCart ? JSON.parse(storedCart) : [];
+      if (storedCart) {
+        const parsedCart = JSON.parse(storedCart);
+        if (Array.isArray(parsedCart)) {
+          return parsedCart;
+        }
+      }
+      return [];
     } catch (error) {
       console.error("Failed to parse cart from localStorage", error);
       return [];
@@ -44,7 +50,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
         setLoading(true);
         if (user) {
             const userData = await getUserData(user.uid);
-            setCart(userData?.cart || []);
+            const userCart = userData?.cart;
+            setCart(Array.isArray(userCart) ? userCart : []);
         } else {
             setCart(getLocalCart());
         }
