@@ -58,8 +58,8 @@ export function BottomNavbar({ openSheet }: { openSheet?: (label: 'Tracking' | '
      const qUnread = query(
         ordersRef, 
         where('userId', '==', user.uid), 
-        where('active', '==', true),
-        where('viewedByCustomer', '==', false)
+        where('active', '==', true), // Still only count active orders
+        where('viewedByCustomer', 'in', [false, null]) // Count orders where viewedByCustomer is false or not set
     );
     
     const unsubActive = onSnapshot(qActive, (snapshot) => {

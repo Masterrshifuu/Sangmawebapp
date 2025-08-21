@@ -17,11 +17,10 @@ export function DesktopNav() {
   const { user } = useAuth();
   const { totalItems } = useCart();
   const { openSheet, setOpenSheet } = useHomeSheet(); // Use useHomeSheet
-  const [activeOrderCount, setActiveOrderCount] = useState(0);
+  const [unreadOrderCount, setUnreadOrderCount] = useState(0);
 
   useEffect(() => {
     if (!user) {
-      setActiveOrderCount(0);
       return;
     }
 
@@ -32,10 +31,16 @@ export function DesktopNav() {
         where('active', '==', true)
     );
     
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        setActiveOrderCount(querySnapshot.size);
-    });
+    const qUnread = query(
+        ordersRef,
+        where('userId', '==', user.uid),
+        where('active', '==', true),
+        where('viewedByCustomer', 'in', [false, null])
+    );
 
+    const unsubscribe = onSnapshot(qUnread, (snapshot) => {
+        setUnreadOrderCount(snapshot.size);
+    });
     return () => unsubscribe();
   }, [user]);
 
@@ -46,8 +51,8 @@ export function DesktopNav() {
           const isActive = (item.isLink && item.href === '/') ? pathname === '/' : (item.isLink && pathname.startsWith(item.href || '---'));
           const Icon = item.icon;
           const showCartBadge = item.label === 'Cart' && totalItems > 0;
-          const showTrackingBadge = item.label === 'Tracking' && activeOrderCount > 0;
-          const badgeCount = item.label === 'Cart' ? totalItems : activeOrderCount;
+          const showTrackingBadge = item.label === 'Tracking' && unreadOrderCount > 0;
+          const badgeCount = item.label === 'Cart' ? totalItems : unreadOrderCount;
 
           if (item.isLink && item.href) {
             return (

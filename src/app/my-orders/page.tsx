@@ -110,7 +110,7 @@ export default function MyOrdersPage() {
           <div className="text-center text-muted-foreground py-16">
             <PackageOpen className="mx-auto h-16 w-16 mb-4" />
             <h2 className="text-xl font-semibold text-foreground">No Orders Yet</h2>
-            <p>You haven't placed any orders with us. Start shopping!</p>
+            <p>You haven&apos;t placed any orders with us. Start shopping!</p>
             <Button asChild className="mt-6">
                 <Link href="/">Shop Now</Link>
             </Button>

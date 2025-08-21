@@ -1,8 +1,7 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
+import { useState, useEffect, useCallback } from 'react';
+import { doc, getDoc, Timestamp, onSnapshot, type DocumentSnapshot } from 'firebase/firestore'; // Added onSnapshot and DocumentSnapshot
 import { db } from '@/lib/firebase';
 import type { Order } from '@/lib/types';
 import { SearchHeader } from '@/components/SearchHeader';
@@ -51,31 +50,31 @@ export default function OrderDetailsPage() {
             return;
         }
 
-        const getOrderById = async () => {
+        const orderDocRef = doc(db, 'orders', id);
+
+        const unsubscribe = onSnapshot(orderDocRef, (orderSnap: DocumentSnapshot) => { // Typed orderSnap
             setLoading(true);
             try {
-                const orderDocRef = doc(db, 'orders', id);
-                const orderSnap = await getDoc(orderDocRef);
-
                 if (!orderSnap.exists()) {
                     setError(`Order with ID "${id}" could not be found.`);
                     setOrder(null);
+                    setLoading(false);
                     return;
                 }
 
                 const data = orderSnap.data();
-                
+
                 // Security check: ensure the fetched order belongs to the current user
                 if (data.userId !== user.uid) {
                     setError("You do not have permission to view this order.");
                     setOrder(null);
+                    setLoading(false);
                     return;
                 }
 
                 const processedData = processTimestamps(data);
                 setOrder({ id: orderSnap.id, ...processedData } as Order);
                 setError(null);
-
             } catch (err: any) {
                 console.error("Error fetching order:", err);
                 setError(`Failed to fetch order: ${err.message}`);
@@ -83,10 +82,10 @@ export default function OrderDetailsPage() {
             } finally {
                 setLoading(false);
             }
-        };
+        });
 
-        getOrderById();
-
+        // Unsubscribe from the listener when the component unmounts
+        return () => unsubscribe();
     }, [id, user, authLoading]);
 
     if (loading || authLoading) {
@@ -101,7 +100,7 @@ export default function OrderDetailsPage() {
                     <div className="flex flex-col items-center justify-center min-h-[50vh] text-center">
                         <AlertTriangle className="w-16 h-16 text-destructive mb-4" />
                         <h1 className="text-2xl font-bold mb-2">Error Loading Order</h1>
-                        <p className="text-muted-foreground">We encountered an issue trying to load this order's details.</p>
+                        <p className="text-muted-foreground">We encountered an issue trying to load this order&apos;s details.</p>
                         <div className="mt-4 p-4 bg-muted rounded-md text-left text-sm w-full max-w-2xl">
                             <p className="font-semibold">Error Details:</p>
                             <pre className="whitespace-pre-wrap font-mono text-destructive">{error}</pre>

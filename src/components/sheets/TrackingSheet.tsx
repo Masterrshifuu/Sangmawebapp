@@ -42,6 +42,7 @@ import {
   onSnapshot,
   writeBatch,
   doc,
+  getDocs,
 } from 'firebase/firestore';
 import type { Order, OrderItem } from '@/lib/types';
 import { format, addMinutes, differenceInMinutes, formatRelative } from 'date-fns';
@@ -462,18 +463,16 @@ const TrackingContent = ({ onLoginClick, isOpen }: { onLoginClick: () => void, i
                 );
                 
                 try {
-                    const querySnapshot = await onSnapshot(q, (snapshot) => {
-                        if (!snapshot.empty) {
-                            const batch = writeBatch(db);
-                            snapshot.docs.forEach((docSnapshot) => {
-                                const orderDocRef = doc(db, 'orders', docSnapshot.id);
-                                batch.update(orderDocRef, { viewedByCustomer: true });
-                            });
-                            batch.commit().catch(err => console.error("Failed to mark orders as viewed:", err));
-                        }
-                    });
-                     // Detach listener immediately after first execution to avoid infinite loops
-                    // return () => query(); // This is incorrect, you should return the unsubscribe function from onSnapshot if you want to detach the listener. However, for this specific case, you likely don't need a persistent listener here, just a one-time fetch when the sheet opens. Let's change this to a getDocs call.
+                    const querySnapshot = await getDocs(q);
+
+ if (!querySnapshot.empty) {
+ const batch = writeBatch(db);
+ querySnapshot.docs.forEach((docSnapshot) => {
+ const orderDocRef = doc(db, 'orders', docSnapshot.id);
+ batch.update(orderDocRef, { viewedByCustomer: true });
+ });
+ batch.commit().catch(err => console.error("Failed to mark orders as viewed:", err));
+ }
                 } catch (err) {
                     console.error("Error querying unread orders:", err);
                 }

@@ -1,0 +1,3 @@
+Failed to fetch Firebase Project from current Studio Workspace: Unable to refresh auth: not yet authenticated.
+
+Error: Not in a Firebase app directory (could not locate firebase.json)

@@ -12,9 +12,24 @@ import {
     Headset
 } from 'lucide-react';
 
-import { AddressBook } from "/home/user/studio/src/components/pages/account/AddressBook";
-import { ChangePasswordForm } from "/home/user/studio/src/components/pages/account/ChangePasswordForm";
-import { ProfileDetailsForm } from "/home/user/studio/src/components/pages/account/ProfileDetailsForm";
+import { AddressBook } from "@/components/pages/account/AddressBook";
+import { ChangePasswordForm } from "@/components/pages/account/ChangePasswordForm";
+import { ProfileDetailsForm } from "@/components/pages/account/ProfileDetailsForm";
+import { LucideIcon } from "lucide-react";
+
+export type LinkNavItem = {
+    icon: LucideIcon;
+    label: string;
+    href?: string;
+    isHelp?: boolean;
+    helpText?: string;
+};
+
+export type NavItem = {
+    icon: LucideIcon;
+    label: string;
+    content: React.ComponentType<any>;
+};
 
 
 export const myOrdersItem = {

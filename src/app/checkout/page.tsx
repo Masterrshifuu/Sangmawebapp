@@ -48,11 +48,15 @@ export default function CheckoutPage() {
   
   useEffect(() => {
     setIsClient(true);
+    // Scroll to the top of the page when the component mounts
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }, []);
   
   const storeStatus = getStoreStatus();
   const MINIMUM_ORDER_VALUE = 150;
-
+  
   useEffect(() => {
     // Only redirect if cart is empty after initial load sequence
     if (isClient && !authLoading && (cart.length === 0 || totalPrice < MINIMUM_ORDER_VALUE)) {
@@ -63,8 +67,8 @@ export default function CheckoutPage() {
   const deliveryCharge = useMemo(() => {
       // Ensure we have an address to calculate charge, otherwise it's a default fee.
       // This is mainly for UI display before an address is entered.
-      if (!address || !address.region) {
-          return 50; 
+      if (!address?.region) {
+ return null; // Return null when address region is not available
       }
       return calculateDeliveryCharge(totalPrice, address);
   }, [totalPrice, address]);
@@ -191,6 +195,7 @@ export default function CheckoutPage() {
                 setScheduleForNextDay={setScheduleForNextDay}
             />
         )}
+        {/* Pass deliveryCharge to OrderSummary */}
         <OrderSummary
           cart={cart}
           totalPrice={totalPrice}
@@ -198,6 +203,7 @@ export default function CheckoutPage() {
           finalTotal={finalTotal}
         />
         
+        {/* Delivery Address Form */}
         <DeliveryAddressForm onAddressChange={onAddressChange} />
 
         <Card>
@@ -205,8 +211,8 @@ export default function CheckoutPage() {
             <CardTitle>Payment Method</CardTitle>
             <CardDescription>Select how you want to pay for your order.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <RadioGroup 
+ <CardContent>
+             <RadioGroup 
               value={paymentMethod} 
               onValueChange={(v) => {
                 setPaymentMethod(v as 'cod' | 'upi_on_delivery');
@@ -232,7 +238,8 @@ export default function CheckoutPage() {
             </RadioGroup>
           </CardContent>
         </Card>
-        
+
+        {/* Place Order Button */}
         <Button 
           type="submit" 
           variant="secondary"

@@ -78,10 +78,10 @@ export default function HomeContent({ products, ads, openTrackingSheetOnLoad = f
       <>
         <SearchHeader />
         <main className="flex-1 flex flex-col items-center justify-center text-center">
-          <div className="p-4 text-center text-muted-foreground">
+          <div className="p-4 text-center text-muted-foreground/70">
              <h2 className="text-2xl font-bold text-foreground mb-2">No Products Found</h2>
              <p>It looks like there are no products in the database yet.</p>
-             <p className="mt-4 text-xs">If you have already configured your Firebase project, please add some products to the 'products' collection in Firestore.</p>
+             <p className="mt-4 text-xs">If you have already configured your Firebase project, please add some products to the &apos;products&apos; collection in Firestore.</p>
           </div>
         </main>
       </>
@@ -105,7 +105,7 @@ export default function HomeContent({ products, ads, openTrackingSheetOnLoad = f
                 <CategorySheet>
                     <span className="text-sm font-medium text-accent-foreground hover:underline cursor-pointer">
                         View All &gt;
-                    </span>
+ </span>
                 </CategorySheet>
             </div>
             {showcaseCategories.length > 0 && (
