@@ -39,6 +39,12 @@ export async function getProducts(): Promise<{ products: Product[], error: strin
     return { products: productsList, error: null };
   } catch (error: any) {
     console.error("Error fetching products from Firestore:", error);
+    
+    // During build time, Firebase operations will fail - return empty data
+    if (error.message && error.message.includes('Firebase') && error.message.includes('not available')) {
+      return { products: [], error: null };
+    }
+    
     // Provide a more developer-friendly error message
     let errorMessage = `Firestore error: ${error.message}.`;
     if (error.code === 'permission-denied') {
@@ -99,6 +105,12 @@ export async function getProductById(id: string): Promise<{ product: Product | n
         return { product, error: null };
     } catch (error: any) {
         console.error(`Error fetching product with ID ${id}:`, error);
+        
+        // During build time, return null product
+        if (error.message && error.message.includes('Firebase') && error.message.includes('not available')) {
+            return { product: null, error: null };
+        }
+        
         return { product: null, error: `Failed to fetch product: ${error.message}` };
     }
 }

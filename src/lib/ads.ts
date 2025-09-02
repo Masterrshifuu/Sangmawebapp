@@ -35,6 +35,12 @@ export async function getAds(): Promise<{ ads: Ad[], error: string | null }> {
     return { ads: adsList, error: null };
   } catch (error: any) {
     console.error("Error fetching ads from Firestore:", error);
+    
+    // During build time, return empty array
+    if (error.message && error.message.includes('Firebase') && error.message.includes('not available')) {
+      return { ads: [], error: null };
+    }
+    
     let errorMessage = `Firestore error: ${error.message}.`;
     if (error.code === 'permission-denied') {
         errorMessage += ' Please check your Firestore security rules for the "ads" collection.';
