@@ -1,7 +1,7 @@
 
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { collection, onSnapshot, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Product } from '@/lib/types';
@@ -15,6 +15,8 @@ type ProductsContextType = {
 const ProductsContext = createContext<ProductsContextType | undefined>(undefined);
 
 function isTimestamp(value: any): value is Timestamp {
+  // Check for null or undefined explicitly
+  if (value === null || value === undefined) return false;
     return value && typeof value.toDate === 'function';
 }
 
@@ -23,7 +25,17 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Use a ref to cache the products data
+  const cachedProducts = useRef<Product[] | null>(null);
+
   useEffect(() => {
+    // Check if products are already cached
+    if (cachedProducts.current) {
+      setProducts(cachedProducts.current);
+      setLoading(false);
+      return; // Exit early if cached data exists
+    }
+
     const productsCollection = collection(db, 'products');
     
     const unsubscribe = onSnapshot(
@@ -32,7 +44,7 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
         if (snapshot.empty) {
             setProducts([]);
         } else {
-            const productsList = snapshot.docs
+            const products = snapshot.docs
                 .map(doc => {
                     const data = doc.data();
                     // Convert Firestore Timestamps to serializable ISO strings
@@ -46,10 +58,10 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
                         ...data
                     } as Product;
                 })
-                .filter(product => product.stock > 0); // Filter out products with stock <= 0
-            
-            setProducts(productsList);
+                .filter(product => product.stock > 0); // Filter out products with stock <= 0            
+ setProducts(products);
         }
+        cachedProducts.current = products; // Cache the fetched data
         setLoading(false);
       },
       (err) => {
