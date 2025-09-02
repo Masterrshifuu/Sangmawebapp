@@ -1,19 +1,14 @@
 
 import type { Metadata } from 'next';
 import './globals.css';
-import { Noto_Sans } from 'next/font/google';
 import { cn } from '@/lib/utils';
 import { AuthWrapper } from '@/components/AuthWrapper';
 import { Toaster } from '@/components/ui/toaster';
 import Script from 'next/script';
 import HomeSheetManager from '@/components/HomeSheetManager';
 
-
-const noto = Noto_Sans({
-  subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '600', '700', '800', '900'],
-  variable: '--font-noto-sans',
-});
+// Use system fonts as fallback for build issues
+const fontClass = 'font-sans';
 
 const siteUrl = 'https://sangmameghamart.com';
 const GTAG_ID = 'AW-17455424479';
@@ -55,7 +50,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(noto.variable)}
+      className={cn(fontClass)}
     >
       <head />
       <body>

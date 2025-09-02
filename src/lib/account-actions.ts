@@ -13,11 +13,12 @@ import type { User } from 'firebase/auth';
 import type { Address } from './types';
 
 export async function updateName(newName: string) {
-    const user = auth.currentUser;
-    if (!user) {
-        return { success: false, error: 'User not authenticated.' };
-    }
     try {
+        const user = auth.currentUser;
+        if (!user) {
+            return { success: false, error: 'User not authenticated.' };
+        }
+        
         await updateProfile(user, { displayName: newName });
         const userDocRef = doc(db, 'users', user.uid);
         await updateDoc(userDocRef, { displayName: newName });
@@ -28,17 +29,17 @@ export async function updateName(newName: string) {
 }
 
 export async function changePassword(currentPassword: string, newPassword: string) {
-    const user = auth.currentUser;
-    if (!user || !user.email) {
-      return { success: false, error: 'User not logged in or email not available.' };
-    }
-  
-    const credential = EmailAuthProvider.credential(user.email, currentPassword);
-  
     try {
-      await reauthenticateWithCredential(user, credential);
-      await updatePassword(user, newPassword);
-      return { success: true };
+        const user = auth.currentUser;
+        if (!user || !user.email) {
+          return { success: false, error: 'User not logged in or email not available.' };
+        }
+      
+        const credential = EmailAuthProvider.credential(user.email, currentPassword);
+      
+        await reauthenticateWithCredential(user, credential);
+        await updatePassword(user, newPassword);
+        return { success: true };
     } catch (error: any) {
       console.error(error);
       let errorMessage = 'Failed to update password. ';

@@ -30,8 +30,9 @@ export function AdsProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const adsCollection = collection(db, 'ads');
-    const q = query(adsCollection, where('isActive', '==', true));
+    try {
+      const adsCollection = collection(db, 'ads');
+      const q = query(adsCollection, where('isActive', '==', true));
     
     const unsubscribe = onSnapshot(
       q,
@@ -67,6 +68,11 @@ export function AdsProvider({ children }: { children: ReactNode }) {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
+    } catch (error: any) {
+      console.warn('Failed to initialize ads listener:', error);
+      setError(error.message);
+      setLoading(false);
+    }
   }, []);
 
   return (

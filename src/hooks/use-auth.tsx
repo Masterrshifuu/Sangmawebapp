@@ -17,12 +17,19 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
+    try {
+      const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        setLoading(false);
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    } catch (error: any) {
+      console.warn('Auth state change listener failed:', error);
+      // Firebase not available, set as not loading but no user
+      setUser(null);
+      setLoading(false);
+    }
   }, []);
 
   return (

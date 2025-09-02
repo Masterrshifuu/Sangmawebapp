@@ -36,7 +36,8 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
       return; // Exit early if cached data exists
     }
 
-    const productsCollection = collection(db, 'products');
+    try {
+      const productsCollection = collection(db, 'products');
     
     const unsubscribe = onSnapshot(
       productsCollection,
@@ -77,6 +78,11 @@ export function ProductsProvider({ children }: { children: ReactNode }) {
 
     // Cleanup subscription on unmount
     return () => unsubscribe();
+    } catch (error: any) {
+      console.warn('Failed to initialize products listener:', error);
+      setError(error.message);
+      setLoading(false);
+    }
   }, []);
 
   return (
